@@ -55,8 +55,12 @@ public:
 	//Sets pitch, in degrees
 	void	SetPitch(float p) { pitch = p; }
 
+	const float GetSpeed() const { return speed; }
+	void SetSpeed(const float val) { speed = val; }
+
 protected:
 	float	yaw;
 	float	pitch;
 	Vector3 position;
+	float speed = 4.0f;	//4.0m per second
 };

@@ -34,8 +34,7 @@ void Camera::HandleMouse(float dt)
 
 void Camera::HandleKeyboard(float dt)
 {
-	float speed = 3.5f * dt;	//3.5m per second
-
+	float dtSpeed = speed * dt;
 
 								//Bounds check the pitch, to be between straight up and straight down ;)
 	if (yaw <0) {
@@ -47,24 +46,34 @@ void Camera::HandleKeyboard(float dt)
 
 
 	if (Window::GetKeyboard()->KeyDown(KEYBOARD_W)) {
-		position += Matrix4::Rotation(yaw, Vector3(0, 1, 0)) * Vector3(0, 0, -1) * speed;
+		position += Matrix4::Rotation(yaw, Vector3(0, 1, 0)) * Vector3(0, 0, -1) * dtSpeed;
 	}
 	if (Window::GetKeyboard()->KeyDown(KEYBOARD_S)) {
-		position -= Matrix4::Rotation(yaw, Vector3(0, 1, 0)) * Vector3(0, 0, -1) * speed;
+		position -= Matrix4::Rotation(yaw, Vector3(0, 1, 0)) * Vector3(0, 0, -1) * dtSpeed;
 	}
 
 	if (Window::GetKeyboard()->KeyDown(KEYBOARD_A)) {
-		position += Matrix4::Rotation(yaw, Vector3(0, 1, 0)) * Vector3(-1, 0, 0) * speed;
+		position += Matrix4::Rotation(yaw, Vector3(0, 1, 0)) * Vector3(-1, 0, 0) * dtSpeed;
 	}
 	if (Window::GetKeyboard()->KeyDown(KEYBOARD_D)) {
-		position -= Matrix4::Rotation(yaw, Vector3(0, 1, 0)) * Vector3(-1, 0, 0) * speed;
+		position -= Matrix4::Rotation(yaw, Vector3(0, 1, 0)) * Vector3(-1, 0, 0) * dtSpeed;
 	}
 
 	if (Window::GetKeyboard()->KeyDown(KEYBOARD_SPACE)) {
-		position.y += speed;
+		position.y += dtSpeed;
 	}
 	if (Window::GetKeyboard()->KeyDown(KEYBOARD_SHIFT)) {
-		position.y -= speed;
+		position.y -= dtSpeed;
+	}
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_MINUS) && speed > 0.5f)
+	{
+		speed /= 2.0f;
+	}
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_PLUS) && speed < 64.0f)
+	{
+		speed *= 2.0f;
 	}
 }
 
