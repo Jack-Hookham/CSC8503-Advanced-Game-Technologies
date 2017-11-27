@@ -98,6 +98,8 @@ void PrintStatusEntries()
 
 	//Print Engine Options
 	NCLDebug::AddStatusEntry(Vector4(0.8f, 1.0f, 0.8f, 1.0f), "    Physics: %s [P]", PhysicsEngine::Instance()->IsPaused() ? "Paused  " : "Enabled ");
+	NCLDebug::AddStatusEntry(Vector4(0.8f, 1.0f, 0.8f, 1.0f), "    Camera Speed: %f [- +]", GraphicsPipeline::Instance()->GetCamera()->GetSpeed());
+	//NCLDebug::AddStatusEntry(Vector4(0.8f, 1.0f, 0.8f, 1.0f), "    Camera Position: %s", GraphicsPipeline::Instance()->GetCamera()->GetPosition());
 
 	//Physics Debug Drawing options
 	uint drawFlags = PhysicsEngine::Instance()->GetDebugDrawFlags();

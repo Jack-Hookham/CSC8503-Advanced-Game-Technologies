@@ -1,62 +1,61 @@
-[14:24:20] Loading Shader:
-[14:24:20]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexBasic.glsl
-[14:24:20]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragSuperSample.glsl
-[14:24:20]     -> Linking Shader: Success!
-[14:24:20] 
-[14:24:20] Loading Shader:
-[14:24:20]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexShadow.glsl
-[14:24:20]     -> Compiling Shader: ../../Data/Shaders/Common/EmptyFragment.glsl
-[14:24:20]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechGeomShadow.glsl
-[14:24:20]     -> Linking Shader: Success!
-[14:24:20] 
-[14:24:20] Loading Shader:
-[14:24:20]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexFull.glsl
-[14:24:20]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragForwardRender.glsl
-[14:24:20]     -> Linking Shader: Success!
-[14:24:20] 
-[14:24:20] Loading Shader:
-[14:24:20]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointVertex.glsl
-[14:24:20]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointFragment.glsl
-[14:24:20]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointGeometry.glsl
-[14:24:20]     -> Linking Shader: Success!
-[14:24:20] 
-[14:24:20] Loading Shader:
-[14:24:20]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Vertex.glsl
-[14:24:20]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Fragment.glsl
-[14:24:20]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/LineGeometry.glsl
-[14:24:20]     -> Linking Shader: Success!
-[14:24:20] 
-[14:24:20] Loading Shader:
-[14:24:20]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/VertexColOnly.glsl
-[14:24:20]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Fragment.glsl
-[14:24:20]     -> Linking Shader: Success!
-[14:24:20] 
-[14:24:20] Loading Shader:
-[14:24:20]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextVertex.glsl
-[14:24:20]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextFragment.glsl
-[14:24:20]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextGeometry.glsl
-[14:24:20]     -> Linking Shader: Success!
-[14:24:20] 
-[14:24:20] Loading Shader:
-[14:24:20]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexPicker.glsl
-[14:24:20]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragScreenPicker_nsightfix.glsl
-[14:24:20]     -> Linking Shader: Success!
-[14:24:20] 
-[14:24:20] Loading Mesh: ../../Data/Meshes/cube.obj
-[14:24:20] 
-[14:24:20] Loading Mesh: ../../Data/Meshes/sphere.obj
-[14:24:21] 
-[14:24:21] [SceneManager] - Enqueued scene: "Physics Tut #2 - Integration"
-[14:24:21] 
-[14:24:21] [SceneManager] - Scene switched to: "Physics Tut #2 - Integration"
-[14:24:21] [SceneManager] - Enqueued scene: "Physics Tut #3 - Distance Constraints"
-[14:24:21] [SceneManager] - Enqueued scene: "Physics Tut #4 - Collision Detection"
-[14:24:21] Loading Mesh: ../../Data/Meshes/raptor.obj
-[14:24:21]     -> Loading Texture: ../../Data/Textures/raptor.jpg
-[14:24:21] 
-[14:24:21] [SceneManager] - Enqueued scene: "Physics Tut #4 - Collision Detection [Bonus]"
-[14:24:21] [SceneManager] - Enqueued scene: "Physics Tut #5 - Collision Manifolds"
-[14:24:21] [SceneManager] - Enqueued scene: "Physics Tut #6 - Collision Response [Elasticity]"
-[14:24:21] [SceneManager] - Enqueued scene: "Physics Tut #6 - Collision Response [Friction]"
-[14:24:21] [SceneManager] - Enqueued scene: "Physics Tut #7 - Global Solver"
-[14:24:36] [SceneManager] Closing scene manager
+[14:42:02] Loading Shader:
+[14:42:02]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexBasic.glsl
+[14:42:02]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragSuperSample.glsl
+[14:42:02]     -> Linking Shader: Success!
+[14:42:02] 
+[14:42:02] Loading Shader:
+[14:42:02]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexShadow.glsl
+[14:42:02]     -> Compiling Shader: ../../Data/Shaders/Common/EmptyFragment.glsl
+[14:42:02]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechGeomShadow.glsl
+[14:42:02]     -> Linking Shader: Success!
+[14:42:02] 
+[14:42:02] Loading Shader:
+[14:42:02]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexFull.glsl
+[14:42:02]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragForwardRender.glsl
+[14:42:02]     -> Linking Shader: Success!
+[14:42:02] 
+[14:42:02] Loading Shader:
+[14:42:02]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointVertex.glsl
+[14:42:02]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointFragment.glsl
+[14:42:02]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointGeometry.glsl
+[14:42:02]     -> Linking Shader: Success!
+[14:42:02] 
+[14:42:02] Loading Shader:
+[14:42:02]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Vertex.glsl
+[14:42:02]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Fragment.glsl
+[14:42:02]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/LineGeometry.glsl
+[14:42:02]     -> Linking Shader: Success!
+[14:42:02] 
+[14:42:02] Loading Shader:
+[14:42:02]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/VertexColOnly.glsl
+[14:42:02]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Fragment.glsl
+[14:42:02]     -> Linking Shader: Success!
+[14:42:02] 
+[14:42:02] Loading Shader:
+[14:42:02]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextVertex.glsl
+[14:42:02]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextFragment.glsl
+[14:42:02]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextGeometry.glsl
+[14:42:02]     -> Linking Shader: Success!
+[14:42:02] 
+[14:42:02] Loading Shader:
+[14:42:02]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexPicker.glsl
+[14:42:02]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragScreenPicker_nsightfix.glsl
+[14:42:02]     -> Linking Shader: Success!
+[14:42:02] 
+[14:42:02] Loading Mesh: ../../Data/Meshes/cube.obj
+[14:42:02] 
+[14:42:02] Loading Mesh: ../../Data/Meshes/sphere.obj
+[14:42:02] 
+[14:42:02] [SceneManager] - Enqueued scene: "Physics Tut #2 - Integration"
+[14:42:02] 
+[14:42:02] [SceneManager] - Scene switched to: "Physics Tut #2 - Integration"
+[14:42:02] [SceneManager] - Enqueued scene: "Physics Tut #3 - Distance Constraints"
+[14:42:02] [SceneManager] - Enqueued scene: "Physics Tut #4 - Collision Detection"
+[14:42:02] Loading Mesh: ../../Data/Meshes/raptor.obj
+[14:42:03]     -> Loading Texture: ../../Data/Textures/raptor.jpg
+[14:42:03] 
+[14:42:03] [SceneManager] - Enqueued scene: "Physics Tut #4 - Collision Detection [Bonus]"
+[14:42:03] [SceneManager] - Enqueued scene: "Physics Tut #5 - Collision Manifolds"
+[14:42:03] [SceneManager] - Enqueued scene: "Physics Tut #6 - Collision Response [Elasticity]"
+[14:42:03] [SceneManager] - Enqueued scene: "Physics Tut #6 - Collision Response [Friction]"
+[14:42:03] [SceneManager] - Enqueued scene: "Physics Tut #7 - Global Solver"
