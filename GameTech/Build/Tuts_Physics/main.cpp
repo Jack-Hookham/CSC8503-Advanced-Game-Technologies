@@ -13,6 +13,8 @@
 #include "Phy6_ColResponseFriction.h"
 #include "Phy7_Solver.h"
 
+#include <iomanip>
+
 PerfTimer timer_total, timer_physics;
 
 bool draw_debug = true;
@@ -99,7 +101,11 @@ void PrintStatusEntries()
 	//Print Engine Options
 	NCLDebug::AddStatusEntry(Vector4(0.8f, 1.0f, 0.8f, 1.0f), "    Physics: %s [P]", PhysicsEngine::Instance()->IsPaused() ? "Paused  " : "Enabled ");
 	NCLDebug::AddStatusEntry(Vector4(0.8f, 1.0f, 0.8f, 1.0f), "    Camera Speed: %f [- +]", GraphicsPipeline::Instance()->GetCamera()->GetSpeed());
-	//NCLDebug::AddStatusEntry(Vector4(0.8f, 1.0f, 0.8f, 1.0f), "    Camera Position: %s", GraphicsPipeline::Instance()->GetCamera()->GetPosition());
+	std::ostringstream oss;
+	oss << std::fixed << std::setprecision(2) << GraphicsPipeline::Instance()->GetCamera()->GetPosition();
+	std::string s = "    Camera Position: " + oss.str();
+	NCLDebug::AddStatusEntry(Vector4(0.8f, 1.0f, 0.8f, 1.0f), s);
+	NCLDebug::AddStatusEntry(status_color_performance, "");
 
 	//Physics Debug Drawing options
 	uint drawFlags = PhysicsEngine::Instance()->GetDebugDrawFlags();
