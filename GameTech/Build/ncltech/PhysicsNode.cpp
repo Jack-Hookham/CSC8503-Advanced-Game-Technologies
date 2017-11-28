@@ -55,11 +55,21 @@ void PhysicsNode::IntegrateForPosition(float dt)
 	//time . The in - accuracy of not taking into account of these changes
 	//over time can be visibly seen in tutorial 1.. and thus how better
 	//integration schemes lead to better approximations by taking into
-	//account of curvature .
+	//account of curvature .
 	position += linVelocity * dt;
 
+	//Update Orientation
+	// - This is a slightly different calculation due to the wierdness
+	//of quaternions. It does the same thing as position update
+	//(with a slight error) but from what I've seen, is generally the best
+	//way to update orientation
 	orientation = orientation + Quaternion(angVelocity * dt * 0.5f, 0.0f) * orientation;
 
+	//invIntertia = invIntertia * (Quaternion(angVelocity * dt * 0.5f, 0.0f)
+	// * orientation).ToMatrix3();
+	//As the above formulation has slight approximation error, we need
+	//to normalize our orientation here to stop them accumulation
+	//over time
 	orientation.Normalise();
 
 	//Finally: Notify any listener's that this PhysicsNode has a new world transform.
