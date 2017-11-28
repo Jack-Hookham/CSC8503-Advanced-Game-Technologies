@@ -193,15 +193,10 @@ public:
 	{
 		m_TrajectoryPoints.push_back(pos);
 		
-		if (m_Sphere->Physics()->GetPosition().y < 0.0f)
-		{
-			PhysicsEngine::Instance()->SetPaused(true);
-		}
-
-		if (m_Sphere2->Physics()->GetPosition().y < 0.0f)
-		{
-			PhysicsEngine::Instance()->SetPaused(true);
-		}
+		//if (m_Sphere->Physics()->GetPosition().y < 0.0f)
+		//{
+		//	PhysicsEngine::Instance()->SetPaused(true);
+		//}
 	}
 
 private:

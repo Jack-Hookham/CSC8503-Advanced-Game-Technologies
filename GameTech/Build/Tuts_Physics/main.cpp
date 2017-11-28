@@ -169,6 +169,53 @@ void HandleKeyboardInputs()
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_V))
 		drawFlags ^= DEBUGDRAW_FLAGS_MANIFOLD;
 
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_M))
+	{
+		GraphicsPipeline::Instance()->ResetCamera();
+	}
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_Q))
+	{
+		//GameObject* sphereProjectile = CommonUtils::BuildSphereObject("",
+		//	Vector3(GraphicsPipeline::Instance()->GetCamera()->GetPosition()),		//Position
+		//	0.5f,																	//Radius
+		//	true,																	//Has Physics Object
+		//	0.0f,																	//Infinite Mass
+		//	false,																	//No Collision Shape Yet
+		//	true,																	//Dragable by the user
+		//	CommonUtils::GenColor(0.3f, 0.9f));										//Color
+
+		//SceneManager::Instance()->GetCurrentScene()->AddGameObject(sphereProjectile);
+
+		float projectTileSpeed = 20.0f;
+
+		//Create a projectile
+		RenderNode* sphereRender = new RenderNode();
+		sphereRender->SetMesh(CommonMeshes::Sphere());
+		sphereRender->SetTransform(Matrix4::Scale(Vector3(0.5f, 0.5f, 0.5f))); //No position! That is now all handled in PhysicsNode
+		sphereRender->SetColor(Vector4(0.2f, 0.2f, 0.9f, 1.0f));
+		sphereRender->SetBoundingRadius(1.0f);
+
+		GameObject* sphereProjectile = new GameObject("Sphere");
+		sphereProjectile->SetRender(new RenderNode());
+		sphereProjectile->Render()->AddChild(sphereRender);
+		sphereProjectile->SetPhysics(new PhysicsNode());
+		sphereProjectile->Physics()->SetInverseMass(1.f);
+		//Position, vel and acceleration all set in "ResetScene()"
+		SceneManager::Instance()->GetCurrentScene()->AddGameObject(sphereProjectile);
+
+		Vector3 direction = Matrix4::Rotation(GraphicsPipeline::Instance()->GetCamera()->GetYaw(), Vector3(0, 1, 0))
+			* Matrix4::Rotation(GraphicsPipeline::Instance()->GetCamera()->GetPitch(), Vector3(1, 0, 0)) * Vector3(0, 0, -1);
+
+		sphereProjectile->Physics()->SetPosition(GraphicsPipeline::Instance()->GetCamera()->GetPosition());
+
+		sphereProjectile->Physics()->SetLinearVelocity(direction * projectTileSpeed);
+
+		sphereProjectile->Physics()->SetForce(Vector3(0.f, -1.f, 0.0f));
+
+		//inverse viewmatrix * speed
+	}
+
 	PhysicsEngine::Instance()->SetDebugDrawFlags(drawFlags);
 
 }

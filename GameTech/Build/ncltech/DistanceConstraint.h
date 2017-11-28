@@ -70,7 +70,8 @@ public:
 		//Compute the velocity of objects A and B at the point of contact
 
 		Vector3 v0 = pnodeA->GetLinearVelocity()
-			+ Vector3::Cross(pnodeA->GetAngularVelocity(), r1);
+			+ Vector3::Cross(pnodeA->GetAngularVelocity(), r1);
+
 		Vector3 v1 = pnodeB->GetLinearVelocity()
 			+ Vector3::Cross(pnodeB->GetAngularVelocity(), r2);
 
@@ -88,7 +89,8 @@ public:
 			Vector3::Cross(pnodeA->GetInverseInertia()
 				* Vector3::Cross(r1, abn), r1)
 			+ Vector3::Cross(pnodeB->GetInverseInertia()
-				* Vector3::Cross(r2, abn), r2));
+				* Vector3::Cross(r2, abn), r2));
+
 
 		float constraintMass = invConstraintMassLin + invConstraintMassRot;
 
@@ -138,7 +140,8 @@ public:
 				+ abn * (pnodeA->GetInverseMass() * jn));
 
 			pnodeB->SetLinearVelocity(pnodeB->GetLinearVelocity()
-				- abn * (pnodeB->GetInverseMass() * jn));
+				- abn * (pnodeB->GetInverseMass() * jn));
+
 			//Apply rotational velocity impulse
 
 			pnodeA->SetAngularVelocity(pnodeA->GetAngularVelocity()

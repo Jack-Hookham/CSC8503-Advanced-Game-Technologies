@@ -71,7 +71,7 @@ void Camera::HandleKeyboard(float dt)
 		speed /= 2.0f;
 	}
 
-	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_PLUS) && speed < 64.0f)
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_PLUS) && speed < 256.0f)
 	{
 		speed *= 2.0f;
 	}
