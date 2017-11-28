@@ -102,6 +102,8 @@ public:
 	inline bool GetVsyncEnabled() const { return isVsyncEnabled; }
 	inline void SetVsyncEnabled(bool enabled) { wglSwapIntervalEXT((isVsyncEnabled = enabled) ? 1 : 0); }
 
+	void ResetCamera();
+
 protected:
 	GraphicsPipeline();
 	virtual ~GraphicsPipeline();

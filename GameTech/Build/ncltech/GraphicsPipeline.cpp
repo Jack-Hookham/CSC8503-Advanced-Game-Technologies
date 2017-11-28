@@ -39,9 +39,7 @@ GraphicsPipeline::GraphicsPipeline()
 
 	sceneBoundingRadius = 30.f; ///Approx based on scene contents
 	
-	camera->SetPosition(Vector3(0.0f, 10.0f, 15.0f));
-	camera->SetYaw(0.f);
-	camera->SetPitch(-20.f);
+	ResetCamera();
 
 	InitializeDefaults();
 	Resize(width, height);
@@ -222,6 +220,11 @@ void GraphicsPipeline::UpdateScene(float dt)
 		projMatrix,
 		viewMatrix,
 		camera->GetPosition());
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_M))
+	{
+		ResetCamera();
+	}
 }
 
 void GraphicsPipeline::RenderScene()
@@ -473,4 +476,11 @@ void GraphicsPipeline::BuildShadowTransforms()
 		//Build Light Projection		
 		shadowProj[i] = Matrix4::Orthographic(bb._max.z, bb._min.z, bb._min.x, bb._max.x, bb._max.y, bb._min.y) * lightview;
 	}
+}
+
+void GraphicsPipeline::ResetCamera()
+{
+	camera->SetPosition(Vector3(0.0f, 10.0f, 15.0f));
+	camera->SetYaw(0.f);
+	camera->SetPitch(-20.f);
 }
