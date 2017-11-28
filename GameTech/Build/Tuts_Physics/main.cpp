@@ -208,10 +208,8 @@ void HandleKeyboardInputs()
 			* Matrix4::Rotation(GraphicsPipeline::Instance()->GetCamera()->GetPitch(), Vector3(1, 0, 0)) * Vector3(0, 0, -1);
 
 		sphereProjectile->Physics()->SetPosition(GraphicsPipeline::Instance()->GetCamera()->GetPosition());
-
 		sphereProjectile->Physics()->SetLinearVelocity(direction * projectTileSpeed);
-
-		sphereProjectile->Physics()->SetForce(Vector3(0.f, -1.f, 0.0f));
+		sphereProjectile->Physics()->SetForce(Vector3(0.0f, -1.0f, 0.0f));
 
 		//inverse viewmatrix * speed
 	}

@@ -41,7 +41,7 @@ public:
 				0.0f,									//Infinite Mass
 				false,									//No Collision Shape Yet
 				true,									//Dragable by the user
-				CommonUtils::GenColor(0.45f, 0.5f));	//Color
+				CommonUtils::GenColor(0.3f, 0.5f));		//Color
 
 			ball = CommonUtils::BuildSphereObject("",
 				Vector3(-4.f, 7.f, -5.0f),				//Position
@@ -75,7 +75,7 @@ public:
 				0.1f,									//Inverse Mass = 1 / 10 kg mass (For creating rotational inertia tensor)
 				false,									//No Collision Shape Yet
 				true,									//Dragable by the user
-				CommonUtils::GenColor(0.55f, 0.5f));	//Color
+				CommonUtils::GenColor(0.25f, 0.5f));	//Color
 
 			//Set linear mass to be infinite, so it can rotate still but not move
 			handle->Physics()->SetInverseMass(0.0f);

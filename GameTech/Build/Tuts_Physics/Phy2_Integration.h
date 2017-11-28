@@ -8,6 +8,7 @@
 #include <ncltech\GameObject.h>
 #include <ncltech\CommonMeshes.h>
 #include <ncltech\CommonUtils.h>
+#include <ncltech\DistanceConstraint.h>
 
 class Phy2_Integration : public Scene
 {
@@ -115,6 +116,14 @@ public:
 			UpdateTrajectory(transform.GetPositionVector()); //Our cheeky injection to store physics engine position updates
 		});
 
+		//Add distance constraint between the two objects
+		PhysicsEngine::Instance()->AddConstraint(
+			new DistanceConstraint(
+			m_Sphere2->Physics(),					//Physics Object A
+			m_Sphere->Physics(),					//Physics Object B
+			m_Sphere2->Physics()->GetPosition(),	//Attachment Position on Object A	-> Currently the centre
+			m_Sphere->Physics()->GetPosition()));	//Attachment Position on Object B	-> Currently the centre );
+
 	//Setup starting values
 		ResetScene(PhysicsEngine::Instance()->GetUpdateTimestep());
 	}
@@ -138,14 +147,14 @@ public:
 		m_Sphere->Physics()->SetOrientation(Quaternion());
 		m_Sphere->Physics()->SetAngularVelocity(Vector3(0.f, 0.f, -2.0f * PI));
 
-		m_Sphere2->Physics()->SetPosition(Vector3(-10.5f, 2.0f, 0.f));
-		m_Sphere2->Physics()->SetLinearVelocity(Vector3(0.f, 2.5f, 0.0f));
-		m_Sphere2->Physics()->SetForce(Vector3(1.f, -1.f, 0.0f));
+		m_Sphere2->Physics()->SetPosition(Vector3(-20.5f, 2.0f, 0.f));
+		//m_Sphere2->Physics()->SetLinearVelocity(Vector3(0.f, 2.5f, 0.0f));
+		//m_Sphere2->Physics()->SetForce(Vector3(1.f, -1.f, 0.0f));
 
 		//Cause we can.. we will also spin the ball 1 revolution per second (5 full spins before hitting target)
 		// - Rotation is in radians (so 2PI is 360 degrees), richard has provided a DegToRad() function in <nclgl\common.h> if you want as well.
-		m_Sphere2->Physics()->SetOrientation(Quaternion());
-		m_Sphere2->Physics()->SetAngularVelocity(Vector3(0.f, 0.f, -2.0f * PI));
+		//m_Sphere2->Physics()->SetOrientation(Quaternion());
+		//m_Sphere2->Physics()->SetAngularVelocity(Vector3(0.f, 0.f, -2.0f * PI));
 	}
 
 	virtual void OnUpdateScene(float dt) override
