@@ -101,6 +101,20 @@ public:
 				CommonUtils::GenColor(0.5f, 1.0f)));	//Color
 		}
 
+		GameObject* orbiting_sphere1 = this->FindGameObject("orbiting_sphere1");
+		orbiting_sphere1->Physics()->SetOnCollisionCallback(&Phy4_ColDetection::TestCallBack);
+
+	}
+
+	//Example of static callback (cannot use 'this' parameter)
+	static bool TestCallBack(PhysicsNode* self, PhysicsNode* collidingObject)
+	{
+		NCLDebug::Log(Vector3(0.3f, 1.0f, 0.3f), "Test Call Back");
+		//GameObject* parent = self->GetParent();
+		//parent->Render()->SetColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+
+		//Return true to enable collision resolution, for AI test's just return false so we can drop the collision pair from the system
+		return false;
 	}
 
 	float m_AccumTime;
