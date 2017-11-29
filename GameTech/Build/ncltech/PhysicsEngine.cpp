@@ -244,6 +244,25 @@ void PhysicsEngine::NarrowPhaseCollisions()
 				if (okA && okB)
 				{
 					/* TUTORIAL 5 CODE */
+					//Build full collision manifold that will also handle the
+					//collision response between the two objects in the solver
+					//stage
+
+					Manifold* manifold = new Manifold();
+					manifold->Initiate(cp.pObjectA, cp.pObjectB);
+
+					//Construct contact points that form the perimeter of the collision manifold
+					colDetect.GenContactPoints(manifold);
+
+					if (manifold->contactPoints.size() > 0)
+					{
+						//Add to list of manifolds that need solving
+						manifolds.push_back(manifold);
+					}
+					else
+					{
+						delete manifold;
+					}
 				}
 			}
 		}
