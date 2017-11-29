@@ -189,7 +189,6 @@ void PhysicsEngine::BroadPhaseCollisions()
 					cp.pObjectB = pnodeB;
 					broadphaseColPairs.push_back(cp);
 				}
-
 			}
 		}
 	}
@@ -266,7 +265,6 @@ void PhysicsEngine::NarrowPhaseCollisions()
 				}
 			}
 		}
-
 	}
 }
 

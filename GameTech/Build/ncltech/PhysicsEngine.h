@@ -110,6 +110,8 @@ public:
 
 	inline float GetDeltaTime() const			{ return updateTimestep; }
 
+	inline std::vector<CollisionPair> GetBroadphaseColPairs() { return broadphaseColPairs; }
+
 	void PrintPerformanceTimers(const Vector4& color)
 	{
 		perfUpdate.PrintOutputToStatusEntry(color,		"    Integration :");

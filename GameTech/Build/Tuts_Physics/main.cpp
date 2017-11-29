@@ -18,8 +18,6 @@
 PerfTimer timer_total, timer_physics;
 float fps;
 
-bool vsync = false;
-
 bool draw_debug = true;
 bool draw_performance = false;
 
@@ -48,8 +46,6 @@ void Initialize()
 	SceneManager::Instance()->EnqueueScene(new Phy6_ColResponseElasticity("Physics Tut #6 - Collision Response [Elasticity]"));
 	SceneManager::Instance()->EnqueueScene(new Phy6_ColResponseFriction("Physics Tut #6 - Collision Response [Friction]"));
 	SceneManager::Instance()->EnqueueScene(new Phy7_Solver("Physics Tut #7 - Global Solver"));
-
-	GraphicsPipeline::Instance()->SetVsyncEnabled(vsync);
 }
 
 
@@ -99,11 +95,13 @@ void PrintStatusEntries()
 	NCLDebug::AddStatusEntry(status_color, "FPS: %5.2f", 1000.f / fps);
 	NCLDebug::AddStatusEntry(status_color, "UPS: %5.2f", 1000.f / timer_total.GetAvg());
 	NCLDebug::AddStatusEntry(status_color, "Camera Speed: %f [- +]", GraphicsPipeline::Instance()->GetCamera()->GetSpeed());
-	NCLDebug::AddStatusEntry(status_color, "Vsync: %s [B]", vsync ? "Enabled " : "Disabled ");
+	NCLDebug::AddStatusEntry(status_color, "Vsync: %s [B]", GraphicsPipeline::Instance()->GetVsyncEnabled() ? "Enabled " : "Disabled ");
 	std::ostringstream oss;
 	oss << std::fixed << std::setprecision(2) << GraphicsPipeline::Instance()->GetCamera()->GetPosition();
 	std::string s = "Camera Position: " + oss.str();
 	NCLDebug::AddStatusEntry(status_color, s);
+
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 1.0f, 1.0f, 1.0f), "Broadphase pairs: %d", PhysicsEngine::Instance()->GetBroadphaseColPairs().size());
 
 	//Print Current Scene Name
 	NCLDebug::AddStatusEntry(status_color, "[%d/%d]: %s ([T]/[Y] to cycle or [R] to reload)",
@@ -186,8 +184,7 @@ void HandleKeyboardInputs()
 	//Toggle vsync
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_B))
 	{
-		vsync = !vsync;
-		GraphicsPipeline::Instance()->SetVsyncEnabled(vsync);
+		GraphicsPipeline::Instance()->SetVsyncEnabled(!GraphicsPipeline::Instance()->GetVsyncEnabled());
 	}
 	
 	//SHOOT
@@ -277,9 +274,10 @@ int main()
 
 		//Render Scene
 		//Only render if totalDT > 1/60 of a second
-		if (totalDT > 1 / 60)
+		const float oneSixtieth = 1 / 60;
+		if (totalDT > oneSixtieth)
 		{
-			totalDT -= 1 / 60;
+			totalDT -= oneSixtieth;
 			GraphicsPipeline::Instance()->UpdateScene(dt);
 			GraphicsPipeline::Instance()->RenderScene();				 //Finish Timing
 		}
