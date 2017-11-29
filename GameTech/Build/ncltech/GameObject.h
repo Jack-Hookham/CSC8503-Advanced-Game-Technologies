@@ -39,9 +39,9 @@ public:
 
 	GameObject(const std::string& name, RenderNode* renderNde, PhysicsNode* physicsNde = NULL)
 		: friendlyName(name)
-		, renderNode(renderNde)
-		, physicsNode(physicsNde)
 	{
+		SetRender(renderNde);
+		SetPhysics(physicsNde);
 		RegisterPhysicsToRenderTransformCallback();
 	}
 

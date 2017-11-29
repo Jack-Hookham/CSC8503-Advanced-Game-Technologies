@@ -91,7 +91,7 @@ public:
 		m_Sphere->Physics()->SetOnUpdateCallback([&](const Matrix4& transform)
 		{
 			m_Sphere->Render()->SetTransform(transform); //Default callback for any object that has a render and physics nodes
-			UpdateTrajectory(transform.GetPositionVector()); //Our cheeky injection to store physics engine position updates
+			UpdateTrajectory(transform.GetPositionVector()); //Our cheeky injection to store physics engine position updatestes
 		});
 
 		//Sphere 2

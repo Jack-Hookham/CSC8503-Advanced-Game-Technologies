@@ -16,6 +16,7 @@
 #include <iomanip>
 
 PerfTimer timer_total, timer_physics;
+float fps;
 
 bool draw_debug = true;
 bool draw_performance = false;
@@ -24,6 +25,7 @@ void Quit(bool error = false, const string &reason = "");
 
 void Initialize()
 {
+	//GraphicsPipeline::Instance()->SetVsyncEnabled(false);
 	//Initialise the Window
 	if (!Window::Initialise("Game Technologies - Collision Resolution", 1280, 800, false))
 		Quit(true, "Window failed to initialise!");
@@ -91,6 +93,14 @@ void PrintStatusEntries()
 	const Vector4 status_color_debug = Vector4(1.0f, 0.6f, 1.0f, 1.0f);
 	const Vector4 status_color_performance = Vector4(1.0f, 0.6f, 0.6f, 1.0f);
 
+	NCLDebug::AddStatusEntry(status_color, "FPS: %5.2f", 1000.f / timer_total.GetAvg());
+//	NCLDebug::AddStatusEntry(status_color, "UPS: %5.2f", 1000.f / timer_physics.GetAvg());
+	NCLDebug::AddStatusEntry(status_color, "Camera Speed: %f [- +]", GraphicsPipeline::Instance()->GetCamera()->GetSpeed());
+	std::ostringstream oss;
+	oss << std::fixed << std::setprecision(2) << GraphicsPipeline::Instance()->GetCamera()->GetPosition();
+	std::string s = "Camera Position: " + oss.str();
+	NCLDebug::AddStatusEntry(status_color, s);
+
 	//Print Current Scene Name
 	NCLDebug::AddStatusEntry(status_color, "[%d/%d]: %s ([T]/[Y] to cycle or [R] to reload)",
 		SceneManager::Instance()->GetCurrentSceneIndex() + 1,
@@ -100,11 +110,6 @@ void PrintStatusEntries()
 
 	//Print Engine Options
 	NCLDebug::AddStatusEntry(Vector4(0.8f, 1.0f, 0.8f, 1.0f), "    Physics: %s [P]", PhysicsEngine::Instance()->IsPaused() ? "Paused  " : "Enabled ");
-	NCLDebug::AddStatusEntry(Vector4(0.8f, 1.0f, 0.8f, 1.0f), "    Camera Speed: %f [- +]", GraphicsPipeline::Instance()->GetCamera()->GetSpeed());
-	std::ostringstream oss;
-	oss << std::fixed << std::setprecision(2) << GraphicsPipeline::Instance()->GetCamera()->GetPosition();
-	std::string s = "    Camera Position: " + oss.str();
-	NCLDebug::AddStatusEntry(Vector4(0.8f, 1.0f, 0.8f, 1.0f), s);
 	NCLDebug::AddStatusEntry(status_color_performance, "");
 
 	//Physics Debug Drawing options
@@ -223,6 +228,9 @@ void HandleKeyboardInputs()
 
 int main()
 {
+	float totalDT = 0.0f;
+	fps = 0.0f;
+
 	//Initialize our Window, Physics, Scenes etc
 	Initialize();
 
@@ -232,6 +240,7 @@ int main()
 	while (Window::GetWindow().UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)) {
 		//Start Timing
 		float dt = Window::GetWindow().GetTimer()->GetTimedMS() * 0.001f;	//How many milliseconds since last update?
+		totalDT += dt;
 		timer_total.BeginTimingSection();
 
 		//Print Status Entries
@@ -255,9 +264,21 @@ int main()
 		PhysicsEngine::Instance()->DebugRender();
 
 		//Render Scene
-
-		GraphicsPipeline::Instance()->UpdateScene(dt);
-		GraphicsPipeline::Instance()->RenderScene();				 //Finish Timing
+		//Only render if totalDT > 1/60 of a second
+		if (totalDT > 1 / 60)
+		{
+			totalDT -= 1 / 60;
+			GraphicsPipeline::Instance()->UpdateScene(dt);
+			GraphicsPipeline::Instance()->RenderScene();				 //Finish Timing
+		}
+		if (timer_total.GetAvg() > 60.0f)
+		{
+			fps = 60.0f;
+		}
+		else
+		{
+			fps = timer_total.GetAvg();
+		}
 		timer_total.EndTimingSection();
 	}
 

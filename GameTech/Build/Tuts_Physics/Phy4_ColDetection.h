@@ -99,19 +99,27 @@ public:
 				true,									//Has Collision Shape
 				true,									//Dragable by the user
 				CommonUtils::GenColor(0.5f, 1.0f)));	//Color
+
+			//this->FindGameObject("orbiting_sphere1")->SetPhysics();
 		}
 
 		GameObject* orbiting_sphere1 = this->FindGameObject("orbiting_sphere1");
 		orbiting_sphere1->Physics()->SetOnCollisionCallback(&Phy4_ColDetection::TestCallBack);
+
+		RenderNode* my_render = orbiting_sphere1->Render();
+		this->RegisterOnUpdateCallback(this, [my_render](float dt)
+		{
+			my_render->SetColorRecursive(Vector4(1.f, 0.f, 0.f, 1.0f));
+		});
 
 	}
 
 	//Example of static callback (cannot use 'this' parameter)
 	static bool TestCallBack(PhysicsNode* self, PhysicsNode* collidingObject)
 	{
-		NCLDebug::Log(Vector3(0.3f, 1.0f, 0.3f), "Test Call Back");
-		//GameObject* parent = self->GetParent();
-		//parent->Render()->SetColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+		//NCLDebug::Log(Vector3(0.3f, 1.0f, 0.3f), "Test Call Back");
+		GameObject* parent = self->GetParent();
+		parent->Render()->SetColorRecursive(Vector4(0.0f, 0.0f, 0.0f, 1.0f));
 
 		//Return true to enable collision resolution, for AI test's just return false so we can drop the collision pair from the system
 		return false;
