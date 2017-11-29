@@ -43,6 +43,7 @@ public:
 	virtual void OnInitializeScene() override
 	{
 		m_TrajectoryPoints.clear();
+		m_TrajectoryPoints2.clear();
 
 	//Set Defaults
 		PhysicsEngine::Instance()->SetGravity(Vector3(0.0f, 0.0f, 0.0f));		//No Gravity!
@@ -98,7 +99,7 @@ public:
 		RenderNode* sphereRender2 = new RenderNode();
 		sphereRender2->SetMesh(CommonMeshes::Sphere());
 		sphereRender2->SetTransform(Matrix4::Scale(Vector3(1.0f, 0.5f, 0.5f))); //No position! That is now all handled in PhysicsNode
-		sphereRender2->SetColor(Vector4(1.0f, 0.2f, 0.5f, 1.0f));
+		sphereRender2->SetColor(Vector4(0.2f, 0.2f, 0.9f, 1.0f));
 		sphereRender2->SetBoundingRadius(1.0f);
 
 		m_Sphere2 = new GameObject("Sphere2");
@@ -113,16 +114,16 @@ public:
 		m_Sphere2->Physics()->SetOnUpdateCallback([&](const Matrix4& transform)
 		{
 			m_Sphere2->Render()->SetTransform(transform); //Default callback for any object that has a render and physics nodes
-			UpdateTrajectory(transform.GetPositionVector()); //Our cheeky injection to store physics engine position updates
+			UpdateTrajectory2(transform.GetPositionVector()); //Our cheeky injection to store physics engine position updates
 		});
 
 		//Add distance constraint between the two objects
-		PhysicsEngine::Instance()->AddConstraint(
-			new DistanceConstraint(
-			m_Sphere2->Physics(),					//Physics Object A
-			m_Sphere->Physics(),					//Physics Object B
-			m_Sphere2->Physics()->GetPosition(),	//Attachment Position on Object A	-> Currently the centre
-			m_Sphere->Physics()->GetPosition()));	//Attachment Position on Object B	-> Currently the centre );
+		//PhysicsEngine::Instance()->AddConstraint(
+		//	new DistanceConstraint(
+		//	m_Sphere2->Physics(),					//Physics Object A
+		//	m_Sphere->Physics(),					//Physics Object B
+		//	m_Sphere2->Physics()->GetPosition(),	//Attachment Position on Object A	-> Currently the centre
+		//	m_Sphere->Physics()->GetPosition()));	//Attachment Position on Object B	-> Currently the centre );
 
 	//Setup starting values
 		ResetScene(PhysicsEngine::Instance()->GetUpdateTimestep());
@@ -134,6 +135,7 @@ public:
 		PhysicsEngine::Instance()->SetPaused(false);
 		
 		m_TrajectoryPoints.clear();
+		m_TrajectoryPoints2.clear();
 
 		//These values were worked out analytically by
 		// doing the integration over time. The ball (if everything works)
@@ -147,14 +149,14 @@ public:
 		m_Sphere->Physics()->SetOrientation(Quaternion());
 		m_Sphere->Physics()->SetAngularVelocity(Vector3(0.f, 0.f, -2.0f * PI));
 
-		m_Sphere2->Physics()->SetPosition(Vector3(-20.5f, 2.0f, 0.f));
-		//m_Sphere2->Physics()->SetLinearVelocity(Vector3(0.f, 2.5f, 0.0f));
-		//m_Sphere2->Physics()->SetForce(Vector3(1.f, -1.f, 0.0f));
+		m_Sphere2->Physics()->SetPosition(Vector3(-10.5f, 2.0f, 0.f));
+		m_Sphere2->Physics()->SetLinearVelocity(Vector3(0.f, 2.5f, 0.0f));
+		m_Sphere2->Physics()->SetForce(Vector3(1.4f, -1.05f, 0.0f));
 
 		//Cause we can.. we will also spin the ball 1 revolution per second (5 full spins before hitting target)
 		// - Rotation is in radians (so 2PI is 360 degrees), richard has provided a DegToRad() function in <nclgl\common.h> if you want as well.
-		//m_Sphere2->Physics()->SetOrientation(Quaternion());
-		//m_Sphere2->Physics()->SetAngularVelocity(Vector3(0.f, 0.f, -2.0f * PI));
+		m_Sphere2->Physics()->SetOrientation(Quaternion());
+		m_Sphere2->Physics()->SetAngularVelocity(Vector3(-2.0f * PI, -2.0f * PI, -2.0f * PI));
 	}
 
 	virtual void OnUpdateScene(float dt) override
@@ -196,6 +198,16 @@ public:
 			);
 		}
 
+
+		for (size_t i = 1; i < m_TrajectoryPoints2.size(); i++)
+		{
+			NCLDebug::DrawThickLine(
+				m_TrajectoryPoints2[i - 1],
+				m_TrajectoryPoints2[i],
+				0.01f,
+				cols[i % 2]
+			);
+		}
 	}
 
 	void UpdateTrajectory(const Vector3& pos)
@@ -208,10 +220,21 @@ public:
 		//}
 	}
 
+	void UpdateTrajectory2(const Vector3& pos)
+	{
+		m_TrajectoryPoints2.push_back(pos);
+
+		//if (m_Sphere->Physics()->GetPosition().y < 0.0f)
+		//{
+		//	PhysicsEngine::Instance()->SetPaused(true);
+		//}
+	}
+
 private:
 	Mesh*					m_TargetMesh;
 	GameObject*				m_Sphere;
 	std::vector<Vector3>	m_TrajectoryPoints;
 
-	GameObject* m_Sphere2;
+	GameObject*				m_Sphere2;
+	std::vector<Vector3>	m_TrajectoryPoints2;
 };
