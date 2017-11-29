@@ -18,6 +18,8 @@
 PerfTimer timer_total, timer_physics;
 float fps;
 
+bool vsync = false;
+
 bool draw_debug = true;
 bool draw_performance = false;
 
@@ -25,7 +27,6 @@ void Quit(bool error = false, const string &reason = "");
 
 void Initialize()
 {
-	//GraphicsPipeline::Instance()->SetVsyncEnabled(false);
 	//Initialise the Window
 	if (!Window::Initialise("Game Technologies - Collision Resolution", 1280, 800, false))
 		Quit(true, "Window failed to initialise!");
@@ -47,6 +48,8 @@ void Initialize()
 	SceneManager::Instance()->EnqueueScene(new Phy6_ColResponseElasticity("Physics Tut #6 - Collision Response [Elasticity]"));
 	SceneManager::Instance()->EnqueueScene(new Phy6_ColResponseFriction("Physics Tut #6 - Collision Response [Friction]"));
 	SceneManager::Instance()->EnqueueScene(new Phy7_Solver("Physics Tut #7 - Global Solver"));
+
+	GraphicsPipeline::Instance()->SetVsyncEnabled(vsync);
 }
 
 
@@ -93,9 +96,10 @@ void PrintStatusEntries()
 	const Vector4 status_color_debug = Vector4(1.0f, 0.6f, 1.0f, 1.0f);
 	const Vector4 status_color_performance = Vector4(1.0f, 0.6f, 0.6f, 1.0f);
 
-	NCLDebug::AddStatusEntry(status_color, "FPS: %5.2f", 1000.f / timer_total.GetAvg());
-//	NCLDebug::AddStatusEntry(status_color, "UPS: %5.2f", 1000.f / timer_physics.GetAvg());
+	NCLDebug::AddStatusEntry(status_color, "FPS: %5.2f", 1000.f / fps);
+	NCLDebug::AddStatusEntry(status_color, "UPS: %5.2f", 1000.f / timer_total.GetAvg());
 	NCLDebug::AddStatusEntry(status_color, "Camera Speed: %f [- +]", GraphicsPipeline::Instance()->GetCamera()->GetSpeed());
+	NCLDebug::AddStatusEntry(status_color, "Vsync: %s [B]", vsync ? "Enabled " : "Disabled ");
 	std::ostringstream oss;
 	oss << std::fixed << std::setprecision(2) << GraphicsPipeline::Instance()->GetCamera()->GetPosition();
 	std::string s = "Camera Position: " + oss.str();
@@ -179,6 +183,14 @@ void HandleKeyboardInputs()
 		GraphicsPipeline::Instance()->ResetCamera();
 	}
 
+	//Toggle vsync
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_B))
+	{
+		vsync = !vsync;
+		GraphicsPipeline::Instance()->SetVsyncEnabled(vsync);
+	}
+	
+	//SHOOT
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_Q))
 	{
 		//GameObject* sphereProjectile = CommonUtils::BuildSphereObject("",
@@ -271,6 +283,7 @@ int main()
 			GraphicsPipeline::Instance()->UpdateScene(dt);
 			GraphicsPipeline::Instance()->RenderScene();				 //Finish Timing
 		}
+
 		if (timer_total.GetAvg() > 60.0f)
 		{
 			fps = 60.0f;
