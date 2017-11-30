@@ -4,14 +4,14 @@ OctTree::OctTree()
 {
 }
 
-OctTree::OctTree(Vector3 pos, Vector3 size, std::vector<PhysicsNode> physicsNodes, OctTree* parent)
+OctTree::~OctTree()
 {
-	mPos = pos;
-	mSize = size;
-	mPhysicsNodes = physicsNodes;
-	mParent = parent;
 }
 
-OctTree::~OctTree()
+void OctTree::insertObject()
+{
+}
+
+void OctTree::removeObject()
 {
 }
