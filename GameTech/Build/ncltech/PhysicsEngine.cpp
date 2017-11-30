@@ -134,6 +134,8 @@ void PhysicsEngine::UpdatePhysics()
 	NarrowPhaseCollisions();
 	perfNarrowphase.EndTimingSection();
 
+	std::random_shuffle(manifolds.begin(), manifolds.end());
+	std::random_shuffle(constraints.begin(), constraints.end());
 
 //3. Initialize Constraint Params (precompute elasticity/baumgarte factor etc)
 	//Optional step to allow constraints to 

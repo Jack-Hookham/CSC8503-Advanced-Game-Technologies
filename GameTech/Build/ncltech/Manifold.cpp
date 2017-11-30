@@ -81,7 +81,8 @@ void Manifold::SolveContactPoint(ContactPoint& c)
 		//As this is run multiple times per frame , we need to clamp the total
 		//amount of movement to be positive otherwise in some scenarios we
 		//may end up solving the constraint backwards to compensate for
-		//collisions with other objects
+		//collisions with other objects
+
 		float oldSumImpulseContact = c.sumImpulseContact;
 		c.sumImpulseContact = min(c.sumImpulseContact + jn, 0.0f);
 		jn = c.sumImpulseContact - oldSumImpulseContact;
@@ -130,6 +131,7 @@ void Manifold::SolveContactPoint(ContactPoint& c)
 
 void Manifold::PreSolverStep(float dt)
 {
+	std::random_shuffle(contactPoints.begin(), contactPoints.end());
 	for (ContactPoint& contact : contactPoints)
 	{
 		UpdateConstraint(contact);
