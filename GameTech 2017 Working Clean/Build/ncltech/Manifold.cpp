@@ -53,6 +53,11 @@ void Manifold::SolveContactPoint(ContactPoint& c)
 		if (constraintMass > 0.0f)
 		{
 			float jn = max(-Vector3::Dot(dv, c.colNormal) + c.b_term, 0.0f);
+
+			float oldSumImpulseContact = c.sumImpulseContact;
+			c.sumImpulseContact = max(c.sumImpulseContact + jn, 0.0f);
+			jn = c.sumImpulseContact - oldSumImpulseContact;
+
 			jn = jn / constraintMass;
 
 			pnodeA->SetLinearVelocity(pnodeA->GetLinearVelocity() - c.colNormal*(jn * pnodeA->GetInverseMass()));
@@ -81,6 +86,19 @@ void Manifold::SolveContactPoint(ContactPoint& c)
 			{
 				float frictionCoef = (pnodeA->GetFriction() * pnodeB->GetFriction());
 				float jt = -Vector3::Dot(dv, tangent) * frictionCoef;
+
+				Vector3 oldImpulseFriction = c.sumImpulseFriction;
+				c.sumImpulseFriction = c.sumImpulseFriction + tangent * jt;
+
+				float len = c.sumImpulseFriction.Length();
+				if (len > 0.0f && len > c.sumImpulseContact)
+				{
+					c.sumImpulseFriction = c.sumImpulseFriction / len * c.sumImpulseContact;
+				}
+				tangent = c.sumImpulseFriction - oldImpulseFriction;
+				jt = 1.0f;
+
+
 				jt = jt / frictionalMass;
 
 				pnodeA->SetLinearVelocity(pnodeA->GetLinearVelocity() - tangent*(jt*pnodeA->GetInverseMass()));
