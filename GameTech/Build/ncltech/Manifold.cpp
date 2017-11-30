@@ -75,7 +75,18 @@ void Manifold::SolveContactPoint(ContactPoint& c)
 
 		float b_real = max(b, c.elasticity_term + b * 0.2f);
 		float jn = -(Vector3::Dot(dv, normal) + b_real) / constraintMass;
-		jn = min(jn, 0.0f);
+
+		//jn = min(jn, 0.0f);
+		//------Tut 7------
+		//As this is run multiple times per frame , we need to clamp the total
+		//amount of movement to be positive otherwise in some scenarios we
+		//may end up solving the constraint backwards to compensate for
+		//collisions with other objects
+		float oldSumImpulseContact = c.sumImpulseContact;
+		c.sumImpulseContact = min(c.sumImpulseContact + jn, 0.0f);
+		jn = c.sumImpulseContact - oldSumImpulseContact;
+
+
 
 		pnodeA->SetLinearVelocity(pnodeA->GetLinearVelocity() + normal * (jn * pnodeA->GetInverseMass()));
 		pnodeB->SetLinearVelocity(pnodeB->GetLinearVelocity() - normal * (jn * pnodeB->GetInverseMass()));
@@ -101,6 +112,11 @@ void Manifold::SolveContactPoint(ContactPoint& c)
 			float frictionCoef = sqrtf(pnodeA->GetFriction() * pnodeB->GetFriction());
 			float jt = -1 * frictionCoef * Vector3::Dot(dv, tangent) / frictionalMass;
 
+			float oldImpulseTangent = c.sumImpulseFriction;
+			float maxJt = frictionCoef * c.sumImpulseContact;
+			c.sumImpulseFriction = min(max(oldImpulseTangent + jt, maxJt), -maxJt);
+			jt = c.sumImpulseFriction - oldImpulseTangent;
+
 			pnodeA->SetLinearVelocity(pnodeA->GetLinearVelocity() + tangent * (jt * pnodeA->GetInverseMass()));
 			pnodeB->SetLinearVelocity(pnodeB->GetLinearVelocity() - tangent * (jt * pnodeB->GetInverseMass()));
 
@@ -124,7 +140,7 @@ void Manifold::UpdateConstraint(ContactPoint& c)
 {
 	//Reset total impulse forces computed this physics timestep 
 	c.sumImpulseContact = 0.0f;
-	c.sumImpulseFriction = Vector3(0.0f, 0.0f, 0.0f);
+	c.sumImpulseFriction = 0.0f;
 	c.b_term = 0.0f;
 
 	/* TUTORIAL 6 CODE */

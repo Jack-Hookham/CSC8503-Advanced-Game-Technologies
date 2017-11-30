@@ -157,14 +157,19 @@ void PhysicsEngine::UpdatePhysics()
 
 //5. Constraint Solver
 	perfSolver.BeginTimingSection();
-	for (Manifold* m : manifolds)
-	{
-		m->ApplyImpulse();
-	}
 
-	for (Constraint* c : constraints)
+	//------Tut 7-------
+	for (size_t i = 0; i < SOLVER_ITERATIONS; ++i);
 	{
-		c->ApplyImpulse();
+		for (Manifold* m : manifolds)
+		{
+			m->ApplyImpulse();
+		}
+
+		for (Constraint* c : constraints)
+		{
+			c->ApplyImpulse();
+		}
 	}
 	perfSolver.EndTimingSection();
 

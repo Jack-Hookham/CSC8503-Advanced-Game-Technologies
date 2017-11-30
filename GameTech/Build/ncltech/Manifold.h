@@ -42,7 +42,7 @@ struct ContactPoint
 	// - Used to clamp contact constraint over the course of the entire solver
 	//   to expected bounds.
 	float   sumImpulseContact;
-	Vector3 sumImpulseFriction;
+	float sumImpulseFriction;
 
 	float elasticity_term;
 };
