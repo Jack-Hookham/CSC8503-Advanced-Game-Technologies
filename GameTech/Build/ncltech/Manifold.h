@@ -43,6 +43,8 @@ struct ContactPoint
 	//   to expected bounds.
 	float   sumImpulseContact;
 	Vector3 sumImpulseFriction;
+
+	float elasticity_term;
 };
 
 

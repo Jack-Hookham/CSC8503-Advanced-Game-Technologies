@@ -139,7 +139,15 @@ void PhysicsEngine::UpdatePhysics()
 	//Optional step to allow constraints to 
 	// precompute values based off current velocities 
 	// before they are updated loop below.
-	for (Constraint* c : constraints) c->PreSolverStep(updateTimestep);
+	for (Manifold* m : manifolds)
+	{
+		m->PreSolverStep(updateTimestep);
+	}
+
+	for (Constraint* c : constraints)
+	{
+		c->PreSolverStep(updateTimestep);
+	}
 
 
 //4. Update Velocities
@@ -149,7 +157,15 @@ void PhysicsEngine::UpdatePhysics()
 
 //5. Constraint Solver
 	perfSolver.BeginTimingSection();
-	for (Constraint* c : constraints) c->ApplyImpulse();
+	for (Manifold* m : manifolds)
+	{
+		m->ApplyImpulse();
+	}
+
+	for (Constraint* c : constraints)
+	{
+		c->ApplyImpulse();
+	}
 	perfSolver.EndTimingSection();
 
 //6. Update Positions (with final 'real' velocities)
