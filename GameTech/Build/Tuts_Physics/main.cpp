@@ -252,8 +252,6 @@ int main()
 		fpsTimer += dt;
 		timer_total.BeginTimingSection();
 
-		//Print Status Entries
-		PrintStatusEntries();
 
 		//Handle Keyboard Inputs
 		HandleKeyboardInputs();
@@ -280,6 +278,8 @@ int main()
 			totalDT -= oneSixtieth;
 			GraphicsPipeline::Instance()->UpdateScene(dt);
 			GraphicsPipeline::Instance()->RenderScene();				 //Finish Timing
+		    //Print Status Entries
+			PrintStatusEntries();
 
 			//if 1 second has passed update the fps count
 			if (fpsTimer > 1.0f)
