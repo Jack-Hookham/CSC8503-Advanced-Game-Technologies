@@ -46,7 +46,7 @@ Description:
 
 //Number of jacobi iterations to apply in order to
 // assure the constraints are solved. (Last tutorial)
-#define SOLVER_ITERATIONS 500
+#define SOLVER_ITERATIONS 50
 
 
 //Just saves including windows.h for the sake of defining true/false

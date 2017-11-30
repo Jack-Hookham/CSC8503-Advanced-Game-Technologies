@@ -161,7 +161,7 @@ void PhysicsEngine::UpdatePhysics()
 	perfSolver.BeginTimingSection();
 
 	//------Tut 7-------
-	for (size_t i = 0; i < SOLVER_ITERATIONS; ++i);
+	for (size_t i = 0; i < SOLVER_ITERATIONS; ++i)
 	{
 		for (Manifold* m : manifolds)
 		{
