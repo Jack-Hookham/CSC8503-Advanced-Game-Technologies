@@ -46,12 +46,9 @@ void Initialize()
 	SceneManager::Instance()->EnqueueScene(new Phy6_ColResponseElasticity("Physics Tut #6 - Collision Response [Elasticity]"));
 	SceneManager::Instance()->EnqueueScene(new Phy6_ColResponseFriction("Physics Tut #6 - Collision Response [Friction]"));
 	SceneManager::Instance()->EnqueueScene(new Phy7_Solver("Physics Tut #7 - Global Solver"));
+
+	GraphicsPipeline::Instance()->SetVsyncEnabled(true);
 }
-
-
-
-
-
 
 
 
@@ -92,7 +89,7 @@ void PrintStatusEntries()
 	const Vector4 status_color_debug = Vector4(1.0f, 0.6f, 1.0f, 1.0f);
 	const Vector4 status_color_performance = Vector4(1.0f, 0.6f, 0.6f, 1.0f);
 
-	NCLDebug::AddStatusEntry(status_color, "FPS: %5.2f", 1000.f / fps);
+	NCLDebug::AddStatusEntry(status_color, "FPS: %5.2f", fps);
 	NCLDebug::AddStatusEntry(status_color, "UPS: %5.2f", 1000.f / timer_total.GetAvg());
 	NCLDebug::AddStatusEntry(status_color, "Camera Speed: %f [- +]", GraphicsPipeline::Instance()->GetCamera()->GetSpeed());
 	NCLDebug::AddStatusEntry(status_color, "Vsync: %s [B]", GraphicsPipeline::Instance()->GetVsyncEnabled() ? "Enabled " : "Disabled ");
@@ -188,7 +185,7 @@ void HandleKeyboardInputs()
 	}
 	
 	//SHOOT
-	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_Q))
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_J))
 	{
 		//GameObject* sphereProjectile = CommonUtils::BuildSphereObject("",
 		//	Vector3(GraphicsPipeline::Instance()->GetCamera()->GetPosition()),		//Position
@@ -237,6 +234,8 @@ void HandleKeyboardInputs()
 
 int main()
 {
+	int frameCount = 0;
+	float fpsTimer = 0.0f;
 	float totalDT = 0.0f;
 	fps = 0.0f;
 
@@ -250,6 +249,7 @@ int main()
 		//Start Timing
 		float dt = Window::GetWindow().GetTimer()->GetTimedMS() * 0.001f;	//How many milliseconds since last update?
 		totalDT += dt;
+		fpsTimer += dt;
 		timer_total.BeginTimingSection();
 
 		//Print Status Entries
@@ -274,22 +274,32 @@ int main()
 
 		//Render Scene
 		//Only render if totalDT > 1/60 of a second
-		const float oneSixtieth = 1 / 60;
-		if (totalDT > oneSixtieth)
+		const float oneSixtieth = 1.0f / 60.0f;
+		//if (totalDT > oneSixtieth)
 		{
 			totalDT -= oneSixtieth;
 			GraphicsPipeline::Instance()->UpdateScene(dt);
 			GraphicsPipeline::Instance()->RenderScene();				 //Finish Timing
+
+			//if 1 second has passed update the fps count
+			if (fpsTimer > 1.0f)
+			{
+				fps = frameCount / fpsTimer;
+				frameCount = 0;
+				fpsTimer = 0.0f;
+			}
+
+			frameCount++;
 		}
 
-		if (timer_total.GetAvg() > 60.0f)
-		{
-			fps = 60.0f;
-		}
-		else
-		{
-			fps = timer_total.GetAvg();
-		}
+		//if (1000.0f / timer_total.GetAvg() > 60.0f)
+		//{
+		//	fps = 60.0f;
+		//}
+		//else
+		//{
+		//	fps = 1000.0f / timer_total.GetAvg();
+		//}
 		timer_total.EndTimingSection();
 	}
 
