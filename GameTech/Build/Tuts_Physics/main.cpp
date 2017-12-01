@@ -189,7 +189,7 @@ void HandleKeyboardInputs()
 	{
 		float projectTileSpeed = 20.0f;
 
-		//Set direction to view direction
+		//Set direction to camera direction
 		Vector3 direction = Matrix4::Rotation(GraphicsPipeline::Instance()->GetCamera()->GetYaw(), Vector3(0, 1, 0))
 			* Matrix4::Rotation(GraphicsPipeline::Instance()->GetCamera()->GetPitch(), Vector3(1, 0, 0)) * Vector3(0, 0, -1);
 

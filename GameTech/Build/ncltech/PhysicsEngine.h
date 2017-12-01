@@ -38,6 +38,8 @@ Description:
 #include "PhysicsNode.h"
 #include "Constraint.h"
 #include "Manifold.h"
+#include "Octree.h"
+
 #include <nclgl\TSingleton.h>
 #include <nclgl\PerfTimer.h>
 #include <vector>
@@ -133,7 +135,6 @@ protected:
 	//Handles narrowphase collision detection
 	void NarrowPhaseCollisions();
 
-protected:
 	bool		isPaused;
 	float		updateTimestep, updateRealTimeAccum;
 	uint		debugDrawFlags;

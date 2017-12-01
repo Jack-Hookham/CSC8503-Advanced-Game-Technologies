@@ -30,6 +30,11 @@ struct BoundingBox
 		, _max(-FLT_MAX, -FLT_MAX, -FLT_MAX)
 	{}
 
+	BoundingBox(Vector3 min, Vector3 max)
+		: _min(min)
+		, _max(max)
+	{}
+
 	//Expand the boundingbox to fit a given point. 
 	//  If no points have been set yet, both _min and _max will equal the point provided.
 	void ExpandToFit(const Vector3& point)

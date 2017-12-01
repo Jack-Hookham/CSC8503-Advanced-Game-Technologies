@@ -7,6 +7,7 @@
 #include <algorithm>
 
 
+
 void PhysicsEngine::SetDefaults()
 {
 	//Variables set here /will/ be reset with each scene
@@ -183,6 +184,9 @@ void PhysicsEngine::UpdatePhysics()
 
 void PhysicsEngine::BroadPhaseCollisions()
 {
+	//OCTTREES
+	//SORT AND SWEEP
+
 	broadphaseColPairs.clear();
 
 	PhysicsNode *pnodeA, *pnodeB;
