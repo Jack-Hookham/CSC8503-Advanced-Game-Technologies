@@ -69,10 +69,7 @@
     <ClCompile Include="SphereCollisionShape.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="OctTree.cpp">
-      <Filter>Source Files\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Octant.cpp">
+    <ClCompile Include="Octree.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
   </ItemGroup>
@@ -137,10 +134,7 @@
     <ClInclude Include="SphereCollisionShape.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="OctTree.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Octant.h">
+    <ClInclude Include="Octree.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
   </ItemGroup>
