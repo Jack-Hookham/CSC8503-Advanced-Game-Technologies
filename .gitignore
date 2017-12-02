@@ -286,3 +286,7 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
+
+
+# Coursework specific
+GameTech/Build/Tuts_Physics/program_output.txt
