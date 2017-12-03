@@ -122,6 +122,8 @@ public:
 		perfSolver.PrintOutputToStatusEntry(color,		"    Solver      :");
 	}
 
+	inline Octree* GetOctree() const { return m_octree; }
+
 protected:
 	PhysicsEngine();
 	~PhysicsEngine();
@@ -154,4 +156,6 @@ protected:
 	PerfTimer perfBroadphase;
 	PerfTimer perfNarrowphase;
 	PerfTimer perfSolver;
+
+	Octree* m_octree;
 };

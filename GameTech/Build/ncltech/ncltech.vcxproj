@@ -141,6 +141,7 @@
     <ClCompile Include="Hull.cpp" />
     <ClCompile Include="Manifold.cpp" />
     <ClCompile Include="NetworkBase.cpp" />
+    <ClCompile Include="Octant.cpp" />
     <ClCompile Include="Octree.cpp" />
     <ClCompile Include="PhysicsEngine.cpp" />
     <ClCompile Include="PhysicsNode.cpp" />
@@ -163,6 +164,7 @@
     <ClInclude Include="Hull.h" />
     <ClInclude Include="Manifold.h" />
     <ClInclude Include="NetworkBase.h" />
+    <ClInclude Include="Octant.h" />
     <ClInclude Include="Octree.h" />
     <ClInclude Include="PhysicsEngine.h" />
     <ClInclude Include="PhysicsNode.h" />

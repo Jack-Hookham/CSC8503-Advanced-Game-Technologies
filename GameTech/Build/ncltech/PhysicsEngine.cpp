@@ -23,12 +23,15 @@ PhysicsEngine::PhysicsEngine()
 	isPaused = false;  
 	debugDrawFlags = DEBUGDRAW_FLAGS_MANIFOLD | DEBUGDRAW_FLAGS_CONSTRAINT;
 
+	Vector3 max = Vector3(30.0f, 30.0f, 30.0f);
+	m_octree = new Octree(BoundingBox(-max, max), physicsNodes);
 	SetDefaults();
 }
 
 PhysicsEngine::~PhysicsEngine()
 {
 	RemoveAllPhysicsObjects();
+	SAFE_DELETE(m_octree);
 }
 
 void PhysicsEngine::AddPhysicsObject(PhysicsNode* obj)
@@ -188,6 +191,10 @@ void PhysicsEngine::BroadPhaseCollisions()
 	//SORT AND SWEEP
 
 	broadphaseColPairs.clear();
+
+	m_octree->updateObjects(physicsNodes);
+	m_octree->buildOctree();
+	m_octree->deubDraw();
 
 	PhysicsNode *pnodeA, *pnodeB;
 	//	The broadphase needs to build a list of all potentially colliding objects in the world,

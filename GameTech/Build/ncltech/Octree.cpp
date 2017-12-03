@@ -2,19 +2,17 @@
 
 Octree::Octree()
 {
-	m_region = BoundingBox();
-	m_parent = NULL;
+	m_root = new Octant();
 }
 
-Octree::Octree(BoundingBox region, std::vector<PhysicsNode> physicsNodes, Octree* parent)
+Octree::Octree(BoundingBox region, std::vector<PhysicsNode*>& pNodes)
 {
-	m_region = region;
-	m_physicsNodes = physicsNodes;
-	m_parent = parent;
+	m_root = new Octant(region, pNodes);
 }
 
 Octree::~Octree()
 {
+	SAFE_DELETE(m_root)
 }
 
 void Octree::insertObject()
@@ -26,39 +24,26 @@ void Octree::removeObject()
 {
 }
 
+void Octree::updateObjects(std::vector<PhysicsNode*>& pNodes)
+{
+	m_pNodes = pNodes;
+}
+
 void Octree::buildOctree()
 {
-	//Only continue if the octree contains more than the maximum number of objects
-	if (m_physicsNodes.size() <= MAX_OBJECTS)
-	{
-		return;
-	}
+	//Divide the root octant into 8 octants
+	//These octants will then continue to be recursively divided until each octant contains a maximum 
+	//number of physics nodes
 
-	//Only continue if dimensions are greater than the minumum dimensions
-	Vector3 dimensions = m_region._max - m_region._min;
-	if (dimensions.x < MIN_SIZE && dimensions.y < MIN_SIZE && dimensions.z < MIN_SIZE)
-	{
-		return;
-	}
-
-	/*
-	 *     +-------+
-	 *	  /|      /|
-	 *	 / |     / |
-	 *	Y--|----+  |
-	 *	|  Z----|--+
-	 *	| /     | /
-	 *	+-------X
-	 */
-
-	Vector3 halfDims = dimensions / 2;
-	Vector3 centre = m_region._min + halfDims;
-	//Divide the octree into its 8 octants
-	BoundingBox octants[NUM_CHILDREN] = { BoundingBox() };
-	octants[0] = BoundingBox(m_region._min, centre);		//bottom left close
-	octants[1] = BoundingBox(Vector3(centre.x, m_region._min.y, m_region._min.z), Vector3());					//bottom right close
+	m_root->updateObjects(m_pNodes);
+	m_root->divideOctant();
 }
 
 void Octree::updateOctree()
 {
+}
+
+void Octree::deubDraw()
+{
+	m_root->debugDraw();
 }

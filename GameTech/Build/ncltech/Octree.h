@@ -1,36 +1,31 @@
 #pragma once
 
-#include "nclgl/Vector3.h"
-#include "PhysicsNode.h"
-#include "BoundingBox.h"
+#include "Octant.h"
 
-#define NUM_CHILDREN 8		//Number of child octrees in an octree
-#define MIN_SIZE 1			//Minumum dimensions for an octree
-#define MAX_OBJECTS 1		//Maximum number of physics objects that can occupy an octree segment
-
-//OctTree class to manage the world's octants
-//The octree is split into 8 octants which can each be split again into another 8 octants
+//Octree class to manage the world's octants
+//The octree contains a single octant which can be split into another 8 octants as required
 
 class Octree
 {
 public:
 	Octree();
-	Octree(BoundingBox region, std::vector<PhysicsNode> physicsNodes, Octree* parent);
+	Octree(BoundingBox region, std::vector<PhysicsNode*>& pNodes);
 	~Octree();
 
-	//Add and remove objects from the Octree
+	//Add and remove objects from the octree
 	void insertObject();
-	void removeObject();
+	void removeObject(); 
+	void updateObjects(std::vector<PhysicsNode*>& pNodes);
 
 	void buildOctree();
 	void updateOctree();
 
-	inline void setPhysicsNodes(const std::vector<PhysicsNode> nodes) { m_physicsNodes = nodes; }
-	inline std::vector<PhysicsNode> getPhysicsNodes() const { return m_physicsNodes; }
+	void deubDraw();
+
+	//inline void setPhysicsNodes(const std::vector<PhysicsNode> pNodes) { m_physicsNodes = pNodes; }
+	//inline std::vector<PhysicsNode> getPhysicsNodes() const { return m_physicsNodes; }
 
 private:
-	BoundingBox m_region;							//The OctTree's bounding region
-	std::vector<PhysicsNode> m_physicsNodes;		//The physics objects contained within the OctTree
-	Octree* m_parent = NULL;
-	Octree* m_children[NUM_CHILDREN] = { NULL };	//8 children
+	Octant* m_root = NULL;							//The octree contains a single root octant
+	std::vector<PhysicsNode*> m_pNodes = { NULL };	//All of the physics nodes in the tree that need to be put into octants
 };
