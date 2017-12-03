@@ -21,6 +21,8 @@ public:
 	void updateObjects(std::vector<PhysicsNode*>& pNodes);
 
 	void divideOctant();
+
+	//Draw the outline of the octant and its child octants
 	void debugDraw();
 
 	//inline void setPhysicsNodes(const std::vector<PhysicsNode> pNodes) { m_physicsNodes = pNodes; }

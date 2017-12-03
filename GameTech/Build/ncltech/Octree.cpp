@@ -31,11 +31,11 @@ void Octree::updateObjects(std::vector<PhysicsNode*>& pNodes)
 
 void Octree::buildOctree()
 {
-	//Divide the root octant into 8 octants
+	//Update the physics nodes in the root octant
+	m_root->updateObjects(m_pNodes);
+	//Divide the root octant into 8 octants and split the physics nodes between these octants based on their position
 	//These octants will then continue to be recursively divided until each octant contains a maximum 
 	//number of physics nodes
-
-	m_root->updateObjects(m_pNodes);
 	m_root->divideOctant();
 }
 

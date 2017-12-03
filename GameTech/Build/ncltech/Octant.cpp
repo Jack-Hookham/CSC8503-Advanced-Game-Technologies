@@ -67,12 +67,14 @@ void Octant::divideOctant()
 	BoundingBox regions[NUM_OCTANTS] = { BoundingBox() };
 	std::vector<PhysicsNode*> pNodeLists[NUM_OCTANTS];
 	std::vector<PhysicsNode*> deleteList;
+
 	for (int i = 0; i < NUM_OCTANTS; ++i)
 	{
+		//Bitwise AND used to determine octant centres within the for loop
 		Vector3 newCentre = centre;
-		newCentre.x += halfDims.x * (i & 4 ? 0.5f : -0.5f);
-		newCentre.y += halfDims.y * (i & 2 ? 0.5f : -0.5f);
-		newCentre.z += halfDims.z * (i & 1 ? 0.5f : -0.5f);
+		newCentre.x += halfDims.x * (i & 4 ? 0.5f : -0.5f);			//True for i = 4, 5, 6, 7 
+		newCentre.y += halfDims.y * (i & 2 ? 0.5f : -0.5f);			//True for i = 2, 3, 6, 7
+		newCentre.z += halfDims.z * (i & 1 ? 0.5f : -0.5f);			//True for i = 1, 3, 5, 7
 
 		regions[i]._min = newCentre - halfDims * 0.5f;
 		regions[i]._max = newCentre + halfDims * 0.5f;

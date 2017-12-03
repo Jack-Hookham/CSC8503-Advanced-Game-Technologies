@@ -3,6 +3,7 @@
 #include "BoundingBox.h"
 #include <nclgl\NCLDebug.h>
 #include <algorithm>
+#include "PhysicsEngine.h"
 
 GraphicsPipeline::GraphicsPipeline()
 	: OGLRenderer(Window::GetWindow())
@@ -259,8 +260,7 @@ void GraphicsPipeline::RenderScene()
 				glUniformMatrix4fv(uModelMtx, 1, GL_FALSE, (float*)&node->GetWorldTransform());
 			}
 		);
-	
-	
+
 
 
 	//Render scene to screen fbo
