@@ -22,6 +22,8 @@ public:
 
 	void deubDraw();
 
+	Octant* getRoot() { return m_root; }
+
 	//inline void setPhysicsNodes(const std::vector<PhysicsNode> pNodes) { m_physicsNodes = pNodes; }
 	//inline std::vector<PhysicsNode> getPhysicsNodes() const { return m_physicsNodes; }
 

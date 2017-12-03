@@ -21,7 +21,7 @@ public:
 		//Create Ground
 		this->AddGameObject(CommonUtils::BuildCuboidObject(
 			"Ground",
-			Vector3(0.0f, -1.0f, 0.0f),
+			Vector3(0.0f, -5.0f, 0.0f),
 			Vector3(20.0f, 1.0f, 20.0f),
 			true,
 			0.0f,

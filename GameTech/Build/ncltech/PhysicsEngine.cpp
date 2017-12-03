@@ -202,11 +202,18 @@ void PhysicsEngine::BroadPhaseCollisions()
 	//	the complexity of narrowphase collision checking, if this is too fine then collisions may be missed.
 
 
+	if (physicsNodes.size() > 0)
+	{
+		//m_octree->getRoot()->genPairs(broadphaseColPairs);
+	}
+
+
 	//	Brute force approach.
 	//  - For every object A, assume it could collide with every other object.. 
 	//    even if they are on the opposite sides of the world.
 	if (physicsNodes.size() > 0)
 	{
+		//Calculate octree collision pairs
 		for (size_t i = 0; i < physicsNodes.size() - 1; ++i)
 		{
 			for (size_t j = i + 1; j < physicsNodes.size(); ++j)

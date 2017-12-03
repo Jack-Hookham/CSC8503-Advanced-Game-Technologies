@@ -66,12 +66,6 @@ Description:
 #define DEBUGDRAW_FLAGS_OCTREE					0x10
 #define DEBUGDRAW_FLAGS_BOUNDINGRADIUS			0x20
 
-struct CollisionPair	//Forms the output of the broadphase collision detection
-{
-	PhysicsNode* pObjectA;
-	PhysicsNode* pObjectB;
-};
-
 class PhysicsEngine : public TSingleton<PhysicsEngine>
 {
 	friend class TSingleton < PhysicsEngine > ;

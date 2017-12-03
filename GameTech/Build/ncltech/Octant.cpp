@@ -118,6 +118,46 @@ void Octant::divideOctant()
 	m_physicsNodes.clear();
 }
 
+void Octant::genPairs(std::vector<CollisionPair>& colPairs)
+{
+	//if this is a leaf
+	if (m_physicsNodes.size() > 0)
+	{
+		PhysicsNode *pnodeA, *pnodeB;
+
+		//Calculate octree collision pairs
+		for (size_t i = 0; i < m_physicsNodes.size() - 1; ++i)
+		{
+			for (size_t j = i + 1; j < m_physicsNodes.size(); ++j)
+			{
+				pnodeA = m_physicsNodes[i];
+				pnodeB = m_physicsNodes[j];
+
+				//Check they both atleast have collision shapes
+				if (pnodeA->GetCollisionShape() != NULL
+					&& pnodeB->GetCollisionShape() != NULL)
+				{
+					CollisionPair cp;
+					cp.pObjectA = pnodeA;
+					cp.pObjectB = pnodeB;
+					colPairs.push_back(cp);
+				}
+			}
+		}
+	}
+	//This is not a leaf. Generate pairs for children
+	else
+	{
+		for (size_t i = 0; i < NUM_OCTANTS; ++i)
+		{
+			if (m_octants[i])
+			{
+				m_octants[i]->genPairs(colPairs);
+			}
+		}
+	}
+}
+
 void Octant::debugDraw()
 {
 	/*

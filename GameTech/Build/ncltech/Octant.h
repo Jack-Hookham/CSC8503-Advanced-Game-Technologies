@@ -6,7 +6,7 @@
 
 #define NUM_OCTANTS 8		//Number of child octants
 #define MIN_SIZE 1			//Minumum dimensions for an octant
-#define MAX_OBJECTS 1		//Maximum number of physics objects that can occupy an octant
+#define MAX_OBJECTS 5		//Maximum number of physics objects that can occupy an octant
 
 class Octant
 {
@@ -21,6 +21,8 @@ public:
 	void updateObjects(std::vector<PhysicsNode*>& pNodes);
 
 	void divideOctant();
+
+	void genPairs(std::vector<CollisionPair>& colPairs);
 
 	//Draw the outline of the octant and its child octants
 	void debugDraw();

@@ -35,6 +35,12 @@ Description:
 #include "CollisionShape.h"
 #include <functional>
 
+struct CollisionPair	//Forms the output of the broadphase collision detection
+{
+	PhysicsNode* pObjectA;
+	PhysicsNode* pObjectB;
+};
+
 class PhysicsNode;
 
 //Callback function called whenever a collision is detected between two objects
