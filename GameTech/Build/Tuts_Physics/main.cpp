@@ -92,7 +92,7 @@ void PrintStatusEntries()
 	NCLDebug::AddStatusEntry(status_color, "FPS: %5.2f", fps);
 	NCLDebug::AddStatusEntry(status_color, "UPS: %5.2f", 1000.f / timer_total.GetAvg());
 	NCLDebug::AddStatusEntry(status_color, "Camera Speed: %f [- +]", GraphicsPipeline::Instance()->GetCamera()->GetSpeed());
-	NCLDebug::AddStatusEntry(status_color, "Vsync: %s [B]", GraphicsPipeline::Instance()->GetVsyncEnabled() ? "Enabled " : "Disabled ");
+	NCLDebug::AddStatusEntry(status_color, "Vsync: %s [N]", GraphicsPipeline::Instance()->GetVsyncEnabled() ? "Enabled " : "Disabled ");
 	std::ostringstream oss;
 	oss << std::fixed << std::setprecision(2) << GraphicsPipeline::Instance()->GetCamera()->GetPosition();
 	std::string s = "Camera Position: " + oss.str();
@@ -120,6 +120,8 @@ void PrintStatusEntries()
 		NCLDebug::AddStatusEntry(status_color_debug, "Collision Normals : %s [X] - Tut 4", (drawFlags & DEBUGDRAW_FLAGS_COLLISIONNORMALS) ? "Enabled " : "Disabled");
 		NCLDebug::AddStatusEntry(status_color_debug, "Collision Volumes : %s [C] - Tut 4+", (drawFlags & DEBUGDRAW_FLAGS_COLLISIONVOLUMES) ? "Enabled " : "Disabled");
 		NCLDebug::AddStatusEntry(status_color_debug, "Manifolds         : %s [V] - Tut 5+", (drawFlags & DEBUGDRAW_FLAGS_MANIFOLD) ? "Enabled " : "Disabled");
+		NCLDebug::AddStatusEntry(status_color_debug, "Octree            : %s [O]", (drawFlags & DEBUGDRAW_FLAGS_OCTREE) ? "Enabled " : "Disabled");
+		NCLDebug::AddStatusEntry(status_color_debug, "Bounding Radius   : %s [B]", (drawFlags & DEBUGDRAW_FLAGS_BOUNDINGRADIUS) ? "Enabled " : "Disabled");
 		NCLDebug::AddStatusEntry(status_color_debug, "");
 	}
 
@@ -173,13 +175,19 @@ void HandleKeyboardInputs()
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_V))
 		drawFlags ^= DEBUGDRAW_FLAGS_MANIFOLD;
 
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_O))
+		drawFlags ^= DEBUGDRAW_FLAGS_OCTREE;
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_B))
+		drawFlags ^= DEBUGDRAW_FLAGS_BOUNDINGRADIUS;
+
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_M))
 	{
 		GraphicsPipeline::Instance()->ResetCamera();
 	}
 
 	//Toggle vsync
-	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_B))
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_N))
 	{
 		GraphicsPipeline::Instance()->SetVsyncEnabled(!GraphicsPipeline::Instance()->GetVsyncEnabled());
 	}

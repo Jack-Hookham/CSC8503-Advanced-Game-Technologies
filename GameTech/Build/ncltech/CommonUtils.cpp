@@ -125,6 +125,7 @@ GameObject* CommonUtils::BuildSphereObject(
 		pnode = new PhysicsNode();
 		pnode->SetPosition(pos);
 		pnode->SetInverseMass(inverse_mass);
+		pnode->SetBoundingRadius(radius);
 
 		if (!collidable)
 		{
@@ -170,8 +171,9 @@ GameObject* CommonUtils::BuildCuboidObject(
 	dummy->SetTransform(Matrix4::Scale(halfdims));
 	rnode->AddChild(dummy);
 
+	float radius = halfdims.Length();
 	rnode->SetTransform(Matrix4::Translation(pos));
-	rnode->SetBoundingRadius(halfdims.Length());
+	rnode->SetBoundingRadius(radius);
 
 	PhysicsNode* pnode = NULL;
 	if (physics_enabled)
@@ -179,6 +181,7 @@ GameObject* CommonUtils::BuildCuboidObject(
 		pnode = new PhysicsNode();
 		pnode->SetPosition(pos);
 		pnode->SetInverseMass(inverse_mass);
+		pnode->SetBoundingRadius(radius);
 
 		if (!collidable)
 		{

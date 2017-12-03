@@ -192,9 +192,9 @@ void PhysicsEngine::BroadPhaseCollisions()
 
 	broadphaseColPairs.clear();
 
+
 	m_octree->updateObjects(physicsNodes);
 	m_octree->buildOctree();
-	m_octree->deubDraw();
 
 	PhysicsNode *pnodeA, *pnodeB;
 	//	The broadphase needs to build a list of all potentially colliding objects in the world,
@@ -332,6 +332,19 @@ void PhysicsEngine::DebugRender()
 			{
 				obj->GetCollisionShape()->DebugDraw();
 			}
+		}
+	}
+
+	if (debugDrawFlags & DEBUGDRAW_FLAGS_OCTREE)
+	{
+		m_octree->deubDraw();
+	}
+
+	if (debugDrawFlags & DEBUGDRAW_FLAGS_BOUNDINGRADIUS)
+	{
+		for (PhysicsNode* pnode : physicsNodes)
+		{
+			pnode->DrawBoundingRadius();
 		}
 	}
 }

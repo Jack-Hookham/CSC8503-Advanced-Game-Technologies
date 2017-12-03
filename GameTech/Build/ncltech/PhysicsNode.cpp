@@ -77,3 +77,35 @@ void PhysicsNode::IntegrateForPosition(float dt)
 	//   Please don't delete this!!!!!
 	FireOnUpdateCallback();
 }
+
+void PhysicsNode::DrawBoundingRadius()
+{
+	//Vector3 pos = position;
+
+	//Draw Filled Circle
+	NCLDebug::DrawPointNDT(position, boundingRadius, Vector4(1.0f, 1.0f, 1.0f, 0.2f));
+
+	//Draw Perimeter Axes
+	Vector3 lastX = position + Vector3(0.0f, 1.0f, 0.0f) * boundingRadius;
+	Vector3 lastY = position + Vector3(1.0f, 0.0f, 0.0f) * boundingRadius;
+	Vector3 lastZ = position + Vector3(1.0f, 0.0f, 0.0f) * boundingRadius;
+	const int nSubdivisions = 20;
+	for (int itr = 1; itr <= nSubdivisions; ++itr)
+	{
+		float angle = itr / float(nSubdivisions) * PI * 2.f;
+		float alpha = cosf(angle) * boundingRadius;
+		float beta = sinf(angle) * boundingRadius;
+
+		Vector3 newX = position + Vector3(0.0f, alpha, beta);
+		Vector3 newY = position + Vector3(alpha, 0.0f, beta);
+		Vector3 newZ = position + Vector3(alpha, beta, 0.0f);
+
+		NCLDebug::DrawThickLineNDT(lastX, newX, 0.02f, Vector4(1.0f, 0.3f, 1.0f, 1.0f));
+		NCLDebug::DrawThickLineNDT(lastY, newY, 0.02f, Vector4(1.0f, 0.3f, 1.0f, 1.0f));
+		NCLDebug::DrawThickLineNDT(lastZ, newZ, 0.02f, Vector4(1.0f, 0.3f, 1.0f, 1.0f));
+
+		lastX = newX;
+		lastY = newY;
+		lastZ = newZ;
+	}
+}

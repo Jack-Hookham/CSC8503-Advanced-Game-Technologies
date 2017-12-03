@@ -153,7 +153,11 @@ public:
 		// listeners that this PhysicsNode has a new world transform.
 		if (onUpdateCallback) onUpdateCallback(worldTransform);
 	}
+
+	float GetBoundingRadius() const { return boundingRadius; }
+	void SetBoundingRadius(const float radius) { boundingRadius = radius; }
 	
+	void DrawBoundingRadius();
 
 protected:
 	//Useful parameters
@@ -187,4 +191,6 @@ protected:
 	float				elasticity;		///Value from 0-1 definiing how much the object bounces off other objects
 	float				friction;		///Value from 0-1 defining how much the object can slide off other objects
 
+	//Bounding radius used for broadphase collision checks
+	float boundingRadius;
 };

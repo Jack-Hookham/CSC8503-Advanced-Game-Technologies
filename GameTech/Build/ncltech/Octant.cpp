@@ -82,9 +82,26 @@ void Octant::divideOctant()
 		//Add the physicsNodes to each new octree if they are inside
 		for (PhysicsNode* pNode : m_physicsNodes)
 		{
-			if (pNode->GetPosition().x > regions[i]._min.x && pNode->GetPosition().x < regions[i]._max.x &&
-				pNode->GetPosition().y > regions[i]._min.y && pNode->GetPosition().y < regions[i]._max.y &&
-				pNode->GetPosition().z > regions[i]._min.z && pNode->GetPosition().z < regions[i]._max.z)
+			//if (pNode->GetPosition().x - pNode->GetBoundingRadius() > regions[i]._min.x &&
+			//	pNode->GetPosition().x + pNode->GetBoundingRadius() < regions[i]._max.x &&
+			//	pNode->GetPosition().y - pNode->GetBoundingRadius() > regions[i]._min.y &&
+			//	pNode->GetPosition().y + pNode->GetBoundingRadius() < regions[i]._max.y &&
+			//	pNode->GetPosition().z - pNode->GetBoundingRadius() > regions[i]._min.z &&
+			//	pNode->GetPosition().z + pNode->GetBoundingRadius() < regions[i]._max.z)
+
+			//if (pNode->GetPosition().x + pNode->GetBoundingRadius() > regions[i]._min.x &&
+			//	pNode->GetPosition().x - pNode->GetBoundingRadius() < regions[i]._max.x &&
+			//	pNode->GetPosition().y + pNode->GetBoundingRadius() > regions[i]._min.y &&
+			//	pNode->GetPosition().y - pNode->GetBoundingRadius() < regions[i]._max.y &&
+			//	pNode->GetPosition().z + pNode->GetBoundingRadius() > regions[i]._min.z &&
+			//	pNode->GetPosition().z - pNode->GetBoundingRadius() < regions[i]._max.z)
+
+			if (pNode->GetPosition().x > regions[i]._min.x &&
+				pNode->GetPosition().x < regions[i]._max.x &&
+				pNode->GetPosition().y > regions[i]._min.y &&
+				pNode->GetPosition().y < regions[i]._max.y &&
+				pNode->GetPosition().z > regions[i]._min.z &&
+				pNode->GetPosition().z < regions[i]._max.z)
 			{
 				//Add node to this child
 				pNodeLists[i].push_back(pNode);
@@ -99,8 +116,6 @@ void Octant::divideOctant()
 
 	//Remove all the nodes from this octant because they've all been added to child octants
 	m_physicsNodes.clear();
-
-
 }
 
 void Octant::debugDraw()
