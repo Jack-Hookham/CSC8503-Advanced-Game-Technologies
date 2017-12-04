@@ -39,6 +39,16 @@ struct CollisionPair	//Forms the output of the broadphase collision detection
 {
 	PhysicsNode* pObjectA;
 	PhysicsNode* pObjectB;
+
+	bool operator==(CollisionPair rhs)
+	{
+		return pObjectA == rhs.pObjectA && pObjectB == rhs.pObjectB;
+	}
+
+	bool operator!=(CollisionPair rhs)
+	{
+		return pObjectA != rhs.pObjectA || pObjectB != rhs.pObjectB;
+	}
 };
 
 class PhysicsNode;
@@ -110,7 +120,9 @@ public:
 
 	inline CollisionShape*		GetCollisionShape()			const { return collisionShape; }
 
-	const Matrix4&				GetWorldSpaceTransform()    const { return worldTransform; }
+	inline const Matrix4&		GetWorldSpaceTransform()    const { return worldTransform; }
+
+	inline const float			GetBoundingRadius()			const { return boundingRadius; }
 
 
 
@@ -137,8 +149,8 @@ public:
 		collisionShape = colShape;
 		if (collisionShape) collisionShape->SetParent(this);
 	}
-	
 
+	inline void SetBoundingRadius(const float radius) { boundingRadius = radius; }
 
 
 	//<---------- CALLBACKS ------------>
@@ -159,17 +171,26 @@ public:
 		// listeners that this PhysicsNode has a new world transform.
 		if (onUpdateCallback) onUpdateCallback(worldTransform);
 	}
-
-	float GetBoundingRadius() const { return boundingRadius; }
-	void SetBoundingRadius(const float radius) { boundingRadius = radius; }
 	
 	void DrawBoundingRadius();
+
+	float GetMinX() { return minX; }
+	float GetMaxX() { return maxX; }
+	void SetMinX(float x) { minX = x; }
+	void SetMaxX(float x) { maxX = x; }
+
+	float GetMinZ() { return minZ; }
+	float GetMaxZ() { return maxZ; }
+	void SetMinZ(float z) { minZ = z; }
+	void SetMaxZ(float z) { maxZ = z; }
 
 protected:
 	//Useful parameters
 	GameObject*				parent;
 	Matrix4					worldTransform;
 	PhysicsUpdateCallback	onUpdateCallback;
+	
+	float					boundingRadius;		//Bounding radius used for broadphase collision checks
 
 
 //Added in Tutorial 2
@@ -197,6 +218,8 @@ protected:
 	float				elasticity;		///Value from 0-1 definiing how much the object bounces off other objects
 	float				friction;		///Value from 0-1 defining how much the object can slide off other objects
 
-	//Bounding radius used for broadphase collision checks
-	float boundingRadius;
+	float minX;
+	float maxX;
+	float minZ;
+	float maxZ;
 };

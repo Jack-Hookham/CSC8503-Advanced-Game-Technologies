@@ -86,7 +86,9 @@ void PhysicsEngine::Update(float deltaTime)
 	//   a way of calling "UpdatePhysics()" at regular intervals
 	//   or multiple times a frame if the physics timestep is higher
 	//   than the renderers.
-	const int max_updates_per_frame = 5;
+
+	//const int max_updates_per_frame = 5;
+	const int max_updates_per_frame = 1;
 
 	if (!isPaused)
 	{
@@ -185,53 +187,164 @@ void PhysicsEngine::UpdatePhysics()
 	perfUpdate.EndTimingSection();
 }
 
+bool PhysicsEngine::SweepSortFunc(PhysicsNode* nodeA, PhysicsNode* nodeB)
+{
+	if (nodeA->GetCollisionShape() != NULL && nodeB->GetCollisionShape() != NULL) 
+	{
+		Vector3 xMinA = Vector3();
+		Vector3 xMaxA = Vector3();
+		Vector3 xMinB = Vector3();
+		Vector3 xMaxB = Vector3();
+
+		//Check X
+		nodeA->GetCollisionShape()->GetMinMaxVertexOnAxis(Vector3(1, 0, 0), xMinA, xMaxA);
+		nodeA->SetMinX(xMinA.x);
+		nodeA->SetMaxX(xMaxA.x);
+		nodeB->GetCollisionShape()->GetMinMaxVertexOnAxis(Vector3(1, 0, 0), xMinB, xMaxB);
+		nodeB->SetMinX(xMinB.x);
+		nodeB->SetMaxX(xMaxB.x);
+
+		//Check Z
+		if (xMinA.x < xMinB.x)
+		{
+			Vector3 zMinA = Vector3();
+			Vector3 zMaxA = Vector3();
+			Vector3 zMinB = Vector3();
+			Vector3 zMaxB = Vector3();
+
+			nodeA->GetCollisionShape()->GetMinMaxVertexOnAxis(Vector3(0, 0, 1), zMinA, zMaxA);
+			nodeA->SetMinZ(zMinA.z);
+			nodeA->SetMaxZ(zMaxA.z);
+			nodeB->GetCollisionShape()->GetMinMaxVertexOnAxis(Vector3(0, 0, 1), zMinB, zMaxB);
+			nodeB->SetMinZ(zMinB.z);
+			nodeB->SetMaxZ(zMaxB.z);
+
+			return zMinA.z < zMinB.z;
+		}
+
+		
+	}
+	return true;
+}
+
 void PhysicsEngine::BroadPhaseCollisions()
 {
-	//OCTTREES
+	//OCTREES
 	//SORT AND SWEEP
 
+	numSphereSphereChecks = 0;
 	broadphaseColPairs.clear();
 
-
-	m_octree->updateObjects(physicsNodes);
-	m_octree->buildOctree();
 
 	PhysicsNode *pnodeA, *pnodeB;
 	//	The broadphase needs to build a list of all potentially colliding objects in the world,
 	//	which then get accurately assesed in narrowphase. If this is too coarse then the system slows down with
 	//	the complexity of narrowphase collision checking, if this is too fine then collisions may be missed.
 
-
 	if (physicsNodes.size() > 0)
 	{
-		m_octree->getRoot()->genPairs(broadphaseColPairs);
+		if (useOctrees)
+		{
+			m_octree->updateObjects(physicsNodes);
+			m_octree->buildOctree();
+			m_octree->getRoot()->genPairs(broadphaseColPairs);
+		}
+		else
+		{
+			//	Brute force approach.
+			//  - For every object A, assume it could collide with every other object.. 
+			//    even if they are on the opposite sides of the world.
+			//Calculate octree collision pairs
+			for (size_t i = 0; i < physicsNodes.size() - 1; ++i)
+			{
+				for (size_t j = i + 1; j < physicsNodes.size(); ++j)
+				{
+					pnodeA = physicsNodes[i];
+					pnodeB = physicsNodes[j];
+
+					//Check they both atleast have collision shapes
+					if (pnodeA->GetCollisionShape() != NULL
+						&& pnodeB->GetCollisionShape() != NULL)
+					{
+						CollisionPair cp;
+						cp.pObjectA = pnodeA;
+						cp.pObjectB = pnodeB;
+						broadphaseColPairs.push_back(cp);
+					}
+				}
+			}
+		}
+
+		if (useSphereSphere)
+		{
+			SphereSphereCheck();
+		}
+		//std::vector<CollisionPair> newPairs;
+		////Sort the remaining pairs
+		//sort(broadphaseColPairs.begin(), broadphaseColPairs.end(), SweepSortFunc);
+
+		//for (size_t i = 0; i < physicsNodes.size() - 1; ++i)
+		//{
+		//	for (size_t j = i + 1; j < physicsNodes.size(); ++j)
+		//	{
+		//		pnodeA = physicsNodes[i];
+		//		pnodeB = physicsNodes[j];
+
+		//		//Check they both atleast have collision shapes
+		//		if (pnodeA->GetCollisionShape() != NULL && pnodeB->GetCollisionShape() != NULL)
+		//		{
+		//			//Sweep
+		//			//Check based on sort
+		//			if (pnodeA->GetMaxZ() < pnodeB->GetMinZ()) {
+		//				break;
+		//			}
+
+		//			//Also check X axis
+		//			if (pnodeA->GetMaxX() > pnodeB->GetMinX()) {
+		//				CollisionPair cp;
+		//				cp.pObjectA = pnodeA;
+		//				cp.pObjectB = pnodeB;
+		//				newPairs.push_back(cp);
+		//			}
+		//		}
+		//	}
+		//}
+		//broadphaseColPairs = newPairs;
 	}
+}
 
+void PhysicsEngine::SphereSphereCheck()
+{
+	//broadphaseColPairs = SphereSpherePairs();
+	PhysicsNode *pnodeA, *pnodeB;
 
-	//	Brute force approach.
-	//  - For every object A, assume it could collide with every other object.. 
-	//    even if they are on the opposite sides of the world.
-	if (physicsNodes.size() > 0)
+	if (broadphaseColPairs.size() > 0)
 	{
-	//	//Calculate octree collision pairs
-	//	for (size_t i = 0; i < physicsNodes.size() - 1; ++i)
-	//	{
-	//		for (size_t j = i + 1; j < physicsNodes.size(); ++j)
-	//		{
-	//			pnodeA = physicsNodes[i];
-	//			pnodeB = physicsNodes[j];
+		std::vector<CollisionPair> oldPairs = broadphaseColPairs;
+		broadphaseColPairs.clear();
 
-	//			//Check they both atleast have collision shapes
-	//			if (pnodeA->GetCollisionShape() != NULL
-	//				&& pnodeB->GetCollisionShape() != NULL)
-	//			{
-	//				CollisionPair cp;
-	//				cp.pObjectA = pnodeA;
-	//				cp.pObjectB = pnodeB;
-	//				broadphaseColPairs.push_back(cp);
-	//			}
-	//		}
-	//	}
+		for (CollisionPair cp : oldPairs)
+		{
+			pnodeA = cp.pObjectA;
+			pnodeB = cp.pObjectB;
+
+			numSphereSphereChecks++;
+
+			//Check they both atleast have collision shapes
+			if (pnodeA->GetCollisionShape() != NULL
+				&& pnodeB->GetCollisionShape() != NULL)
+			{
+				Vector3 dist = pnodeA->GetPosition() - pnodeB->GetPosition();
+				//if distance between the two objects is less than the sum of their bounding radii then they might be colliding
+				if (dist.Length() <= pnodeA->GetBoundingRadius() + pnodeB->GetBoundingRadius())
+				{
+					CollisionPair cp;
+					cp.pObjectA = pnodeA;
+					cp.pObjectB = pnodeB;
+					broadphaseColPairs.push_back(cp);
+				}
+			}
+		}
 	}
 }
 
@@ -344,7 +457,10 @@ void PhysicsEngine::DebugRender()
 
 	if (debugDrawFlags & DEBUGDRAW_FLAGS_OCTREE)
 	{
-		m_octree->debugDraw();
+		if (m_octree)
+		{
+			m_octree->debugDraw();
+		}
 	}
 
 	if (debugDrawFlags & DEBUGDRAW_FLAGS_BOUNDINGRADIUS)

@@ -95,12 +95,15 @@ void PrintStatusEntries()
 	NCLDebug::AddStatusEntry(status_color, "UPS: %5.2f", 1000.f / timer_total.GetAvg());
 	NCLDebug::AddStatusEntry(status_color, "Camera Speed: %f [- +]", GraphicsPipeline::Instance()->GetCamera()->GetSpeed());
 	NCLDebug::AddStatusEntry(status_color, "Vsync: %s [N]", GraphicsPipeline::Instance()->GetVsyncEnabled() ? "Enabled " : "Disabled ");
+	NCLDebug::AddStatusEntry(status_color, "Use Octree        : %s [U]", (PhysicsEngine::Instance()->UsingOctrees()) ? "Enabled " : "Disabled");
+	NCLDebug::AddStatusEntry(status_color, "Use SphereSphere  : %s [I]", (PhysicsEngine::Instance()->UsingSphereSphere()) ? "Enabled " : "Disabled");
 	std::ostringstream oss;
 	oss << std::fixed << std::setprecision(2) << GraphicsPipeline::Instance()->GetCamera()->GetPosition();
 	std::string s = "Camera Position: " + oss.str();
 	NCLDebug::AddStatusEntry(status_color, s);
 
-	NCLDebug::AddStatusEntry(Vector4(1.0f, 1.0f, 1.0f, 1.0f), "Broadphase pairs: %d", PhysicsEngine::Instance()->GetBroadphaseColPairs().size());
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 1.0f, 1.0f, 1.0f), "Sphere Sphere Checks    : %d", PhysicsEngine::Instance()->GetNumSphereSphereChecks());
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 1.0f, 1.0f, 1.0f), "Broadphase pairs        : %d", PhysicsEngine::Instance()->GetBroadphaseColPairs().size());
 
 	//Print Current Scene Name
 	NCLDebug::AddStatusEntry(status_color, "[%d/%d]: %s ([T]/[Y] to cycle or [R] to reload)",
@@ -122,7 +125,7 @@ void PrintStatusEntries()
 		NCLDebug::AddStatusEntry(status_color_debug, "Collision Normals : %s [X] - Tut 4", (drawFlags & DEBUGDRAW_FLAGS_COLLISIONNORMALS) ? "Enabled " : "Disabled");
 		NCLDebug::AddStatusEntry(status_color_debug, "Collision Volumes : %s [C] - Tut 4+", (drawFlags & DEBUGDRAW_FLAGS_COLLISIONVOLUMES) ? "Enabled " : "Disabled");
 		NCLDebug::AddStatusEntry(status_color_debug, "Manifolds         : %s [V] - Tut 5+", (drawFlags & DEBUGDRAW_FLAGS_MANIFOLD) ? "Enabled " : "Disabled");
-		NCLDebug::AddStatusEntry(status_color_debug, "Octree            : %s [O]", (drawFlags & DEBUGDRAW_FLAGS_OCTREE) ? "Enabled " : "Disabled");
+		NCLDebug::AddStatusEntry(status_color_debug, "Draw Octree       : %s [O]", (drawFlags & DEBUGDRAW_FLAGS_OCTREE) ? "Enabled " : "Disabled");
 		NCLDebug::AddStatusEntry(status_color_debug, "Bounding Radius   : %s [B]", (drawFlags & DEBUGDRAW_FLAGS_BOUNDINGRADIUS) ? "Enabled " : "Disabled");
 		NCLDebug::AddStatusEntry(status_color_debug, "");
 	}
@@ -183,6 +186,12 @@ void HandleKeyboardInputs()
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_B))
 		drawFlags ^= DEBUGDRAW_FLAGS_BOUNDINGRADIUS;
 
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_U))
+		PhysicsEngine::Instance()->ToggleOctrees();
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_I))
+		PhysicsEngine::Instance()->ToggleSphereSphere();
+
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_M))
 	{
 		GraphicsPipeline::Instance()->ResetCamera();
@@ -213,7 +222,8 @@ void HandleKeyboardInputs()
 			1.0f,
 			true,
 			true,
-			color);
+			color,
+			false);
 		obj->Physics()->SetFriction(0.5f);
 		obj->Physics()->SetElasticity(0.5f);
 		obj->Physics()->SetLinearVelocity(direction * projectTileSpeed);
@@ -238,7 +248,8 @@ void HandleKeyboardInputs()
 			1.f,
 			true,
 			true,
-			color);
+			color,
+			false);
 		obj->Physics()->SetElasticity(0.1f);
 		obj->Physics()->SetFriction(0.9f);
 		obj->Physics()->SetLinearVelocity(direction * projectTileSpeed);

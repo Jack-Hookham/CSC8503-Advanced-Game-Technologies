@@ -7,8 +7,8 @@
 #include "nclgl/NCLDebug.h"
 
 #define NUM_OCTANTS 8		//Number of child octants
-#define MIN_SIZE 1			//Minumum dimensions for an octant
-#define MAX_OBJECTS 5		//Maximum number of physics objects that can occupy an octant
+#define MIN_SIZE 3			//Minumum dimensions for an octant
+#define MAX_OBJECTS 3		//Maximum number of physics objects that can occupy an octant
 
 class Octant
 {

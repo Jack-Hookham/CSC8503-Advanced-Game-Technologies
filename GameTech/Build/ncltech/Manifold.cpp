@@ -118,6 +118,7 @@ void Manifold::SolveContactPoint(ContactPoint& c)
 
 void Manifold::PreSolverStep(float dt)
 {
+	std::random_shuffle(contactPoints.begin(), contactPoints.end());
 	for (ContactPoint& contact : contactPoints)
 	{
 		UpdateConstraint(contact);

@@ -38,15 +38,16 @@ void Octant::updateObjects(std::vector<PhysicsNode*>& pNodes)
 
 void Octant::divideOctant()
 {
+	//Reset the octants before dividing
 	for (int i = 0; i < NUM_OCTANTS; ++i)
 	{
+		delete m_octants[i];
 		m_octants[i] = NULL;
 	}
 
 	//Only continue if the octree contains more than the maximum number of objects
 	if (m_physicsNodes.size() <= MAX_OBJECTS)
 	{
-
 		return;
 	}
 
@@ -85,31 +86,17 @@ void Octant::divideOctant()
 		regions[i]._min = newCentre - halfDims * 0.5f;
 		regions[i]._max = newCentre + halfDims * 0.5f;
 
-		//Add the physicsNodes to each new octree if they are inside
+		//Add the physicsNodes to each new octree if any point on the node's bounding radius is inside the octant
 		for (PhysicsNode* pNode : m_physicsNodes)
 		{
-			//if (pNode->GetPosition().x - pNode->GetBoundingRadius() > regions[i]._min.x &&
-			//	pNode->GetPosition().x + pNode->GetBoundingRadius() < regions[i]._max.x &&
-			//	pNode->GetPosition().y - pNode->GetBoundingRadius() > regions[i]._min.y &&
-			//	pNode->GetPosition().y + pNode->GetBoundingRadius() < regions[i]._max.y &&
-			//	pNode->GetPosition().z - pNode->GetBoundingRadius() > regions[i]._min.z &&
-			//	pNode->GetPosition().z + pNode->GetBoundingRadius() < regions[i]._max.z)
-
 			if (pNode->GetPosition().x + pNode->GetBoundingRadius() > regions[i]._min.x &&
 				pNode->GetPosition().x - pNode->GetBoundingRadius() < regions[i]._max.x &&
 				pNode->GetPosition().y + pNode->GetBoundingRadius() > regions[i]._min.y &&
 				pNode->GetPosition().y - pNode->GetBoundingRadius() < regions[i]._max.y &&
 				pNode->GetPosition().z + pNode->GetBoundingRadius() > regions[i]._min.z &&
 				pNode->GetPosition().z - pNode->GetBoundingRadius() < regions[i]._max.z)
-
-			//if (pNode->GetPosition().x > regions[i]._min.x &&
-			//	pNode->GetPosition().x < regions[i]._max.x &&
-			//	pNode->GetPosition().y > regions[i]._min.y &&
-			//	pNode->GetPosition().y < regions[i]._max.y &&
-			//	pNode->GetPosition().z > regions[i]._min.z &&
-			//	pNode->GetPosition().z < regions[i]._max.z)
 			{
-				//Add node to this child
+				//Add node to this octant's list
 				pNodeLists[i].push_back(pNode);
 			}
 		}
@@ -126,7 +113,7 @@ void Octant::divideOctant()
 
 void Octant::genPairs(std::vector<CollisionPair>& colPairs)
 {
-	//if this is a leaf
+	//if this is a leaf so generate pairs
 	if (m_physicsNodes.size() > 0)
 	{
 		PhysicsNode *pnodeA, *pnodeB;
@@ -146,7 +133,19 @@ void Octant::genPairs(std::vector<CollisionPair>& colPairs)
 					CollisionPair cp;
 					cp.pObjectA = pnodeA;
 					cp.pObjectB = pnodeB;
-					colPairs.push_back(cp);
+					bool pairFound = false;
+					for (CollisionPair cp2 : colPairs)
+					{
+						if (cp == cp2)
+						{
+							pairFound = true;
+							continue;
+						}
+					}
+					if (!pairFound)
+					{
+						colPairs.push_back(cp);
+					}
 				}
 			}
 		}

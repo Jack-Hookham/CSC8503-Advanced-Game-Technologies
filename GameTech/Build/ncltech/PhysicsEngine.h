@@ -45,6 +45,9 @@ Description:
 #include <vector>
 #include <mutex>
 
+#include <algorithm>
+#include <functional>
+
 
 //Number of jacobi iterations to apply in order to
 // assure the constraints are solved. (Last tutorial)
@@ -119,6 +122,26 @@ public:
 	}
 
 	inline Octree* GetOctree() const { return m_octree; }
+	inline const int GetNumSphereSphereChecks() const { return numSphereSphereChecks; }
+
+	inline void ToggleOctrees()
+	{
+		useOctrees = !useOctrees;
+		if (!useOctrees)
+		{
+			delete m_octree;
+			m_octree = NULL;
+		}
+		else
+		{
+			Vector3 max = Vector3(30.0f, 30.0f, 30.0f);
+			m_octree = new Octree(BoundingBox(-max, max), physicsNodes);
+		}
+	}
+	inline void ToggleSphereSphere() { useSphereSphere = !useSphereSphere; }
+
+	inline const bool UsingOctrees() { return useOctrees; }
+	inline const bool UsingSphereSphere() { return useSphereSphere; }
 
 protected:
 	PhysicsEngine();
@@ -128,7 +151,10 @@ protected:
 	void UpdatePhysics();
 
 	//Handles broadphase collision detection
+	bool SweepSortFunc(PhysicsNode* nodeA, PhysicsNode* nodeB);
 	void BroadPhaseCollisions();
+
+	void SphereSphereCheck();
 
 	//Handles narrowphase collision detection
 	void NarrowPhaseCollisions();
@@ -155,4 +181,9 @@ protected:
 
 	bool drawOctree = false;
 	Octree* m_octree;
+
+	bool useOctrees = true;
+	bool useSphereSphere = true;
+
+	int numSphereSphereChecks = 0;
 };

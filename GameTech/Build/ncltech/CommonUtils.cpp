@@ -106,7 +106,8 @@ GameObject* CommonUtils::BuildSphereObject(
 	float inverse_mass,
 	bool collidable,
 	bool dragable,
-	const Vector4& color)
+	const Vector4& color,
+	const bool rest)
 {
 	//Due to the way SceneNode/RenderNode's were setup, we have to make a dummy node which has the mesh and scaling transform
 	// and a parent node that will contain the world transform/physics transform
@@ -161,7 +162,8 @@ GameObject* CommonUtils::BuildCuboidObject(
 	float inverse_mass,
 	bool collidable,
 	bool dragable,
-	const Vector4& color)
+	const Vector4& color,
+	bool rest)
 {
 	//Due to the way SceneNode/RenderNode's were setup, we have to make a dummy node which has the mesh and scaling transform
 	// and a parent node that will contain the world transform/physics transform
