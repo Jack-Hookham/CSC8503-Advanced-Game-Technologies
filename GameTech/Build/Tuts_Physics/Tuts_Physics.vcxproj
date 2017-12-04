@@ -133,6 +133,7 @@
     <ClInclude Include="Phy6_ColResponseFriction.h" />
     <ClInclude Include="Phy6_ColResponseElasticity.h" />
     <ClInclude Include="Phy7_Solver.h" />
+    <ClInclude Include="Phy8_Empty.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

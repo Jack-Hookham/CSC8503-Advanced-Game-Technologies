@@ -204,7 +204,7 @@ void PhysicsEngine::BroadPhaseCollisions()
 
 	if (physicsNodes.size() > 0)
 	{
-		//m_octree->getRoot()->genPairs(broadphaseColPairs);
+		m_octree->getRoot()->genPairs(broadphaseColPairs);
 	}
 
 
@@ -213,25 +213,25 @@ void PhysicsEngine::BroadPhaseCollisions()
 	//    even if they are on the opposite sides of the world.
 	if (physicsNodes.size() > 0)
 	{
-		//Calculate octree collision pairs
-		for (size_t i = 0; i < physicsNodes.size() - 1; ++i)
-		{
-			for (size_t j = i + 1; j < physicsNodes.size(); ++j)
-			{
-				pnodeA = physicsNodes[i];
-				pnodeB = physicsNodes[j];
+	//	//Calculate octree collision pairs
+	//	for (size_t i = 0; i < physicsNodes.size() - 1; ++i)
+	//	{
+	//		for (size_t j = i + 1; j < physicsNodes.size(); ++j)
+	//		{
+	//			pnodeA = physicsNodes[i];
+	//			pnodeB = physicsNodes[j];
 
-				//Check they both atleast have collision shapes
-				if (pnodeA->GetCollisionShape() != NULL
-					&& pnodeB->GetCollisionShape() != NULL)
-				{
-					CollisionPair cp;
-					cp.pObjectA = pnodeA;
-					cp.pObjectB = pnodeB;
-					broadphaseColPairs.push_back(cp);
-				}
-			}
-		}
+	//			//Check they both atleast have collision shapes
+	//			if (pnodeA->GetCollisionShape() != NULL
+	//				&& pnodeB->GetCollisionShape() != NULL)
+	//			{
+	//				CollisionPair cp;
+	//				cp.pObjectA = pnodeA;
+	//				cp.pObjectB = pnodeB;
+	//				broadphaseColPairs.push_back(cp);
+	//			}
+	//		}
+	//	}
 	}
 }
 

@@ -14,6 +14,7 @@
 #include "Phy7_Solver.h"
 
 #include <iomanip>
+#include "Phy8_Empty.h"
 
 PerfTimer timer_total, timer_physics;
 float fps;
@@ -38,14 +39,15 @@ void Initialize()
 
 								//Enqueue All Scenes
 								// - Add any new scenes you want here =D
-	SceneManager::Instance()->EnqueueScene(new Phy2_Integration("Physics Tut #2 - Integration"));
-	SceneManager::Instance()->EnqueueScene(new Phy3_Constraints("Physics Tut #3 - Distance Constraints"));
-	SceneManager::Instance()->EnqueueScene(new Phy4_ColDetection("Physics Tut #4 - Collision Detection"));
-	SceneManager::Instance()->EnqueueScene(new Phy4_AiCallbacks("Physics Tut #4 - Collision Detection [Bonus]"));
+	//SceneManager::Instance()->EnqueueScene(new Phy2_Integration("Physics Tut #2 - Integration"));
+	//SceneManager::Instance()->EnqueueScene(new Phy3_Constraints("Physics Tut #3 - Distance Constraints"));
+	//SceneManager::Instance()->EnqueueScene(new Phy4_ColDetection("Physics Tut #4 - Collision Detection"));
+	//SceneManager::Instance()->EnqueueScene(new Phy4_AiCallbacks("Physics Tut #4 - Collision Detection [Bonus]"));
 	SceneManager::Instance()->EnqueueScene(new Phy5_ColManifolds("Physics Tut #5 - Collision Manifolds"));
 	SceneManager::Instance()->EnqueueScene(new Phy6_ColResponseElasticity("Physics Tut #6 - Collision Response [Elasticity]"));
 	SceneManager::Instance()->EnqueueScene(new Phy6_ColResponseFriction("Physics Tut #6 - Collision Response [Friction]"));
 	SceneManager::Instance()->EnqueueScene(new Phy7_Solver("Physics Tut #7 - Global Solver"));
+	SceneManager::Instance()->EnqueueScene(new Phy8_Empty("Empty"));
 
 	GraphicsPipeline::Instance()->SetVsyncEnabled(true);
 }
@@ -192,7 +194,7 @@ void HandleKeyboardInputs()
 		GraphicsPipeline::Instance()->SetVsyncEnabled(!GraphicsPipeline::Instance()->GetVsyncEnabled());
 	}
 	
-	//SHOOT
+	//Fire sphere
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_J))
 	{
 		float projectTileSpeed = 20.0f;
@@ -215,6 +217,34 @@ void HandleKeyboardInputs()
 		obj->Physics()->SetFriction(0.5f);
 		obj->Physics()->SetElasticity(0.5f);
 		obj->Physics()->SetLinearVelocity(direction * projectTileSpeed);
+		SceneManager::Instance()->GetCurrentScene()->AddGameObject(obj);
+	}
+
+	//Fire cube
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_K))
+	{
+		float projectTileSpeed = 20.0f;
+
+		//Set direction to camera direction
+		Vector3 direction = Matrix4::Rotation(GraphicsPipeline::Instance()->GetCamera()->GetYaw(), Vector3(0, 1, 0))
+			* Matrix4::Rotation(GraphicsPipeline::Instance()->GetCamera()->GetPitch(), Vector3(1, 0, 0)) * Vector3(0, 0, -1);
+
+		Vector4 color = CommonUtils::GenColor(0.7f, 1.0f);
+		GameObject* obj = CommonUtils::BuildCuboidObject(
+			"",
+			Vector3(GraphicsPipeline::Instance()->GetCamera()->GetPosition()),
+			Vector3(0.5f, 0.5f, 0.5f),
+			true,
+			1.f,
+			true,
+			true,
+			color);
+		obj->Physics()->SetElasticity(0.1f);
+		obj->Physics()->SetFriction(0.9f);
+		obj->Physics()->SetLinearVelocity(direction * projectTileSpeed);
+
+		//Initial push??
+		//cube->Physics()->SetLinearVelocity(Quaternion::AxisAngleToQuaterion(Vector3(0.0f, 0.0f, 1.0f), 20.0f).ToMatrix3() * Vector3(-1.f, 0.f, 0.f));
 		SceneManager::Instance()->GetCurrentScene()->AddGameObject(obj);
 	}
 
