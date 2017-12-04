@@ -20,7 +20,7 @@ public:
 	void buildOctree();
 	void updateOctree();
 
-	void deubDraw();
+	void debugDraw();
 
 	Octant* getRoot() { return m_root; }
 

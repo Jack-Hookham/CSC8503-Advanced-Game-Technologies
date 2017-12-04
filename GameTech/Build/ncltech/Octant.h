@@ -3,6 +3,8 @@
 #include "nclgl/Vector3.h"
 #include "PhysicsNode.h"
 #include "BoundingBox.h"
+#include "CollisionDetectionSAT.h"
+#include "nclgl/NCLDebug.h"
 
 #define NUM_OCTANTS 8		//Number of child octants
 #define MIN_SIZE 1			//Minumum dimensions for an octant

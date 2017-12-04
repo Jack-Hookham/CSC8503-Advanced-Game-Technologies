@@ -43,7 +43,7 @@ void Octree::updateOctree()
 {
 }
 
-void Octree::deubDraw()
+void Octree::debugDraw()
 {
 	m_root->debugDraw();
 }

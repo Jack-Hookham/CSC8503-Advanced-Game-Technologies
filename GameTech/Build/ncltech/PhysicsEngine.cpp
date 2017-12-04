@@ -21,7 +21,7 @@ PhysicsEngine::PhysicsEngine()
 {
 	//Variables set here will /not/ be reset with each scene
 	isPaused = false;  
-	debugDrawFlags = DEBUGDRAW_FLAGS_MANIFOLD | DEBUGDRAW_FLAGS_CONSTRAINT;
+	debugDrawFlags = DEBUGDRAW_FLAGS_MANIFOLD | DEBUGDRAW_FLAGS_CONSTRAINT | DEBUGDRAW_FLAGS_OCTREE;
 
 	Vector3 max = Vector3(30.0f, 30.0f, 30.0f);
 	m_octree = new Octree(BoundingBox(-max, max), physicsNodes);
@@ -344,7 +344,7 @@ void PhysicsEngine::DebugRender()
 
 	if (debugDrawFlags & DEBUGDRAW_FLAGS_OCTREE)
 	{
-		m_octree->deubDraw();
+		m_octree->debugDraw();
 	}
 
 	if (debugDrawFlags & DEBUGDRAW_FLAGS_BOUNDINGRADIUS)

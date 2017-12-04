@@ -38,9 +38,15 @@ void Octant::updateObjects(std::vector<PhysicsNode*>& pNodes)
 
 void Octant::divideOctant()
 {
+	for (int i = 0; i < NUM_OCTANTS; ++i)
+	{
+		m_octants[i] = NULL;
+	}
+
 	//Only continue if the octree contains more than the maximum number of objects
 	if (m_physicsNodes.size() <= MAX_OBJECTS)
 	{
+
 		return;
 	}
 
@@ -89,19 +95,19 @@ void Octant::divideOctant()
 			//	pNode->GetPosition().z - pNode->GetBoundingRadius() > regions[i]._min.z &&
 			//	pNode->GetPosition().z + pNode->GetBoundingRadius() < regions[i]._max.z)
 
-			//if (pNode->GetPosition().x + pNode->GetBoundingRadius() > regions[i]._min.x &&
-			//	pNode->GetPosition().x - pNode->GetBoundingRadius() < regions[i]._max.x &&
-			//	pNode->GetPosition().y + pNode->GetBoundingRadius() > regions[i]._min.y &&
-			//	pNode->GetPosition().y - pNode->GetBoundingRadius() < regions[i]._max.y &&
-			//	pNode->GetPosition().z + pNode->GetBoundingRadius() > regions[i]._min.z &&
-			//	pNode->GetPosition().z - pNode->GetBoundingRadius() < regions[i]._max.z)
+			if (pNode->GetPosition().x + pNode->GetBoundingRadius() > regions[i]._min.x &&
+				pNode->GetPosition().x - pNode->GetBoundingRadius() < regions[i]._max.x &&
+				pNode->GetPosition().y + pNode->GetBoundingRadius() > regions[i]._min.y &&
+				pNode->GetPosition().y - pNode->GetBoundingRadius() < regions[i]._max.y &&
+				pNode->GetPosition().z + pNode->GetBoundingRadius() > regions[i]._min.z &&
+				pNode->GetPosition().z - pNode->GetBoundingRadius() < regions[i]._max.z)
 
-			if (pNode->GetPosition().x > regions[i]._min.x &&
-				pNode->GetPosition().x < regions[i]._max.x &&
-				pNode->GetPosition().y > regions[i]._min.y &&
-				pNode->GetPosition().y < regions[i]._max.y &&
-				pNode->GetPosition().z > regions[i]._min.z &&
-				pNode->GetPosition().z < regions[i]._max.z)
+			//if (pNode->GetPosition().x > regions[i]._min.x &&
+			//	pNode->GetPosition().x < regions[i]._max.x &&
+			//	pNode->GetPosition().y > regions[i]._min.y &&
+			//	pNode->GetPosition().y < regions[i]._max.y &&
+			//	pNode->GetPosition().z > regions[i]._min.z &&
+			//	pNode->GetPosition().z < regions[i]._max.z)
 			{
 				//Add node to this child
 				pNodeLists[i].push_back(pNode);
