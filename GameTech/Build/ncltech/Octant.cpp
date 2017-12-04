@@ -134,6 +134,8 @@ void Octant::genPairs(std::vector<CollisionPair>& colPairs)
 					cp.pObjectA = pnodeA;
 					cp.pObjectB = pnodeB;
 					bool pairFound = false;
+
+					//Only add if this pair hasn't been added previously
 					for (CollisionPair cp2 : colPairs)
 					{
 						if (cp == cp2)
