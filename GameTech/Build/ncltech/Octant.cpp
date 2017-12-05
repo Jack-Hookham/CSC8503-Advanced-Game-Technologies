@@ -105,31 +105,9 @@ void Octant::divideOctant()
 		//Recursively divide each sub octant where required
 		m_octants[i]->divideOctant();
 	}
-
-	//If this is the parent then check if any nodes are outside the octree and add them
-	if (m_parent == NULL)
-	{
-		std::vector<PhysicsNode*> nodesOutside;
-		for (PhysicsNode* pNode : m_physicsNodes)
-		{
-			//If outside root octant
-			if (!(pNode->GetPosition().x + pNode->GetBoundingRadius() > m_region._min.x &&
-				pNode->GetPosition().x - pNode->GetBoundingRadius() < m_region._max.x &&
-				pNode->GetPosition().y + pNode->GetBoundingRadius() > m_region._min.y &&
-				pNode->GetPosition().y - pNode->GetBoundingRadius() < m_region._max.y &&
-				pNode->GetPosition().z + pNode->GetBoundingRadius() > m_region._min.z &&
-				pNode->GetPosition().z - pNode->GetBoundingRadius() < m_region._max.z))
-			{
-				nodesOutside.push_back(pNode);
-			}
-		}
-		m_physicsNodes = nodesOutside;
-	}
-	else
-	{
-		//Remove all the nodes from this octant because they've all been added to child octants
-		m_physicsNodes.clear();
-	}
+	
+	//Remove all the nodes from this octant because they've all been added to child octants
+	m_physicsNodes.clear();
 }
 
 void Octant::genPairs(std::vector<CollisionPair>& colPairs)
@@ -171,43 +149,6 @@ void Octant::genPairs(std::vector<CollisionPair>& colPairs)
 					if (!pairFound)
 					{
 						colPairs.push_back(cp);
-					}
-				}
-			}
-
-			int x = rootNodes.size();
-
-			//If this is not the root then check collisions with root nodes
-			if (m_parent != NULL)
-			{
-				for (size_t j = 0; j < rootNodes.size(); ++j)
-				{
-					pnodeA = m_physicsNodes[i];
-					pnodeB = m_physicsNodes[j];
-
-					//Check they both atleast have collision shapes
-					if (pnodeA->GetCollisionShape() != NULL
-						&& pnodeB->GetCollisionShape() != NULL)
-					{
-						CollisionPair cp;
-						cp.pObjectA = pnodeA;
-						cp.pObjectB = pnodeB;
-
-						bool pairFound = false;
-
-						//Only add if this pair hasn't been added previously
-						for (CollisionPair cp2 : colPairs)
-						{
-							if (cp == cp2)
-							{
-								pairFound = true;
-								continue;
-							}
-						}
-						if (!pairFound)
-						{
-							colPairs.push_back(cp);
-						}
 					}
 				}
 			}

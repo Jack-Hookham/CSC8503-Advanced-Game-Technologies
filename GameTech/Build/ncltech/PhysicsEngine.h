@@ -168,8 +168,8 @@ protected:
 
 	bool drawOctree = false;
 	Octree* m_octree;
-	const Vector3 octree_max = Vector3(16.0f, 16.0f, 16.0f);
-	const Vector3 octree_min = -Vector3(16.0f, 16.0f, 16.0f);
+	const Vector3 octree_max = Vector3(64.0f, 58.0f, 64.0f);
+	const Vector3 octree_min = -Vector3(64.0f, 70.0f, 64.0f);
 
 	bool useOctrees = true;
 	bool useSphereSphere = true;
