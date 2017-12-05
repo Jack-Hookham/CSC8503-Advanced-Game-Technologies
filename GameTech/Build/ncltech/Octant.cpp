@@ -130,7 +130,7 @@ void Octant::genPairs(std::vector<CollisionPair>& colPairs)
 				//if both objects are at rest then there is no need to check for collision
 				if (pnodeA->GetAtRest() && pnodeB->GetAtRest())
 				{
-					//continue;
+					continue;
 				}
 
 				//Check they both atleast have collision shapes

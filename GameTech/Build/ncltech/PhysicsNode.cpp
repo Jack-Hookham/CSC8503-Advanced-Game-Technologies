@@ -137,3 +137,12 @@ void PhysicsNode::DetermineRestState()
 	atRest = movement ? false : true;
 
 }
+
+void PhysicsNode::ResetVelocities()
+{
+	for (int i = 0; i < VELOCITY_FRAMES; ++i)
+	{
+		linVelocities[i] = Vector3(10.0f, 10.0f, 10.0f);
+		angVelocities[i] = Vector3(10.0f, 10.0f, 10.0f);
+	}
+}

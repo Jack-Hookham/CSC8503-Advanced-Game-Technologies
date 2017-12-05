@@ -194,6 +194,8 @@ public:
 	void UpdateVelocities();
 	//Determine the current rest state from the previous frame velocities
 	void DetermineRestState();
+	//Set the previous frame velocities to > 0 (used after dragging)
+	void ResetVelocities();
 
 protected:
 	//Useful parameters
