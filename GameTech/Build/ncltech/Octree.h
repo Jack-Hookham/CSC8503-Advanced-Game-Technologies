@@ -12,13 +12,9 @@ public:
 	Octree(BoundingBox region, std::vector<PhysicsNode*>& pNodes);
 	~Octree();
 
-	//Add and remove objects from the octree
-	void insertObject();
-	void removeObject(); 
 	void updateObjects(std::vector<PhysicsNode*>& pNodes);
 
 	void buildOctree();
-	void updateOctree();
 
 	void debugDraw();
 

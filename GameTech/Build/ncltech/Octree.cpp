@@ -15,15 +15,6 @@ Octree::~Octree()
 	SAFE_DELETE(m_root)
 }
 
-void Octree::insertObject()
-{
-
-}
-
-void Octree::removeObject()
-{
-}
-
 void Octree::updateObjects(std::vector<PhysicsNode*>& pNodes)
 {
 	m_pNodes = pNodes;
@@ -37,10 +28,6 @@ void Octree::buildOctree()
 	//These octants will then continue to be recursively divided until each octant contains a maximum 
 	//number of physics nodes
 	m_root->divideOctant();
-}
-
-void Octree::updateOctree()
-{
 }
 
 void Octree::debugDraw()

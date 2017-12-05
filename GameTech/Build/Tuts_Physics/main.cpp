@@ -213,7 +213,7 @@ void HandleKeyboardInputs()
 			* Matrix4::Rotation(GraphicsPipeline::Instance()->GetCamera()->GetPitch(), Vector3(1, 0, 0)) * Vector3(0, 0, -1);
 
 
-		Vector4 color = CommonUtils::GenColor(0.7f, 1.0f);
+		Vector4 color = CommonUtils::GenColor(RAND(), 1.0f);
 		GameObject* obj = CommonUtils::BuildSphereObject(
 			"",
 			Vector3(GraphicsPipeline::Instance()->GetCamera()->GetPosition()),
@@ -239,7 +239,7 @@ void HandleKeyboardInputs()
 		Vector3 direction = Matrix4::Rotation(GraphicsPipeline::Instance()->GetCamera()->GetYaw(), Vector3(0, 1, 0))
 			* Matrix4::Rotation(GraphicsPipeline::Instance()->GetCamera()->GetPitch(), Vector3(1, 0, 0)) * Vector3(0, 0, -1);
 
-		Vector4 color = CommonUtils::GenColor(0.7f, 1.0f);
+		Vector4 color = CommonUtils::GenColor(RAND(), 1.0f);
 		GameObject* obj = CommonUtils::BuildCuboidObject(
 			"",
 			Vector3(GraphicsPipeline::Instance()->GetCamera()->GetPosition()),
@@ -254,8 +254,6 @@ void HandleKeyboardInputs()
 		obj->Physics()->SetFriction(0.9f);
 		obj->Physics()->SetLinearVelocity(direction * projectTileSpeed);
 
-		//Initial push??
-		//cube->Physics()->SetLinearVelocity(Quaternion::AxisAngleToQuaterion(Vector3(0.0f, 0.0f, 1.0f), 20.0f).ToMatrix3() * Vector3(-1.f, 0.f, 0.f));
 		SceneManager::Instance()->GetCurrentScene()->AddGameObject(obj);
 	}
 

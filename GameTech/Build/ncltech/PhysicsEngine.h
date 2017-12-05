@@ -91,7 +91,8 @@ public:
 	//Debug draw all physics objects, manifolds and constraints
 	void DebugRender();
 
-
+	void FireSphere();
+	void FireCube();
 
 	//Getters / Setters 
 	inline bool IsPaused() const				{ return isPaused; }

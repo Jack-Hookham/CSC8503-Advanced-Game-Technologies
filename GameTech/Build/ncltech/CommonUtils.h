@@ -17,6 +17,8 @@ Description:
 
 #pragma once
 
+#define RAND() ((rand()%101)/100.0f)
+
 #include "GameObject.h"
 
 namespace CommonUtils
