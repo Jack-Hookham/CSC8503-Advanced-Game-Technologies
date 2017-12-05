@@ -1,4 +1,4 @@
-#include "TestScene.h"
+#include "SandboxScene.h"
 
 #include <nclgl\Vector4.h>
 #include <ncltech\GraphicsPipeline.h>
@@ -8,24 +8,21 @@
 #include <ncltech\CommonUtils.h>
 using namespace CommonUtils;
 
-TestScene::TestScene(const std::string& friendly_name)
+SandboxScene::SandboxScene(const std::string& friendly_name)
 	: Scene(friendly_name)
 	, m_AccumTime(0.0f)
 	, m_pPlayer(NULL)
 {
 }
 
-TestScene::~TestScene()
+SandboxScene::~SandboxScene()
 {
 
 }
 
 
-void TestScene::OnInitializeScene()
+void SandboxScene::OnInitializeScene()
 {
-	//Disable the physics engine (We will be starting this later!)
-	PhysicsEngine::Instance()->SetPaused(true);
-
 	//Set the camera position
 	GraphicsPipeline::Instance()->GetCamera()->SetPosition(Vector3(15.0f, 10.0f, -15.0f));
 	GraphicsPipeline::Instance()->GetCamera()->SetYaw(140.f);
@@ -123,14 +120,14 @@ void TestScene::OnInitializeScene()
 	create_ball_cube(Vector3(8.0f, 0.5f, -12.0f), Vector3(0.5f, 0.5f, 0.5f), 0.1f);
 }
 
-void TestScene::OnCleanupScene()
+void SandboxScene::OnCleanupScene()
 {
 	//Just delete all created game objects 
 	//  - this is the default command on any Scene instance so we don't really need to override this function here.
 	Scene::OnCleanupScene(); 
 }
 
-void TestScene::OnUpdateScene(float dt)
+void SandboxScene::OnUpdateScene(float dt)
 {
 	m_AccumTime += dt;
 

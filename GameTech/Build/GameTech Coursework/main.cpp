@@ -7,7 +7,8 @@
 #include <sstream> 
 #include <iomanip>
 
-#include "TestScene.h"
+#include "SandboxScene.h"
+#include "ScoreScene.h"
 #include "EmptyScene.h"
 
 const Vector4 status_colour = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -56,8 +57,8 @@ void Initialize()
 	PhysicsEngine::Instance();
 
 	//Enqueue All Scenes
-	SceneManager::Instance()->EnqueueScene(new TestScene("GameTech #1 - Framework Sandbox!"));
-	SceneManager::Instance()->EnqueueScene(new EmptyScene("GameTech #2 - Peace and quiet"));
+	//SceneManager::Instance()->EnqueueScene(new SandboxScene("GameTech #1 - Framework Sandbox!"));
+	SceneManager::Instance()->EnqueueScene(new ScoreScene("GameTech #2 - Projectile Game"));
 	SceneManager::Instance()->EnqueueScene(new EmptyScene("GameTech #3 - More peace and quiet"));
 }
 
@@ -185,7 +186,7 @@ void HandleKeyboardInputs()
 	//Fire sphere
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_J))
 	{
-		float projectTileSpeed = 20.0f;
+		float projectTileSpeed = 30.0f;
 
 		//Set direction to camera direction
 		Vector3 direction = Matrix4::Rotation(GraphicsPipeline::Instance()->GetCamera()->GetYaw(), Vector3(0, 1, 0))
@@ -198,7 +199,7 @@ void HandleKeyboardInputs()
 			Vector3(GraphicsPipeline::Instance()->GetCamera()->GetPosition()),
 			0.5f,
 			true,
-			1.0f,
+			1 / 10.0f,
 			true,
 			true,
 			color,
@@ -212,7 +213,7 @@ void HandleKeyboardInputs()
 	//Fire cube
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_K))
 	{
-		float projectTileSpeed = 20.0f;
+		float projectTileSpeed = 30.0f;
 
 		//Set direction to camera direction
 		Vector3 direction = Matrix4::Rotation(GraphicsPipeline::Instance()->GetCamera()->GetYaw(), Vector3(0, 1, 0))
@@ -224,7 +225,7 @@ void HandleKeyboardInputs()
 			Vector3(GraphicsPipeline::Instance()->GetCamera()->GetPosition()),
 			Vector3(0.5f, 0.5f, 0.5f),
 			true,
-			1.f,
+			1 / 10.0f,
 			true,
 			true,
 			color,

@@ -29,12 +29,14 @@ public:
 	//Draw the outline of the octant and its child octants
 	void debugDraw();
 
+	Octant* getRoot();
+
 	//inline void setPhysicsNodes(const std::vector<PhysicsNode> pNodes) { m_physicsNodes = pNodes; }
-	//inline std::vector<PhysicsNode> getPhysicsNodes() const { return m_physicsNodes; }
+	inline std::vector<PhysicsNode*> getPhysicsNodes() const { return m_physicsNodes; }
 
 private:
 	BoundingBox m_region;							//The OctTree's bounding region
 	std::vector<PhysicsNode*> m_physicsNodes;		//The physics objects contained within the OctTree
 	Octant* m_parent = NULL;
-	Octant* m_octants[NUM_OCTANTS] = { NULL };	//8 children
+	Octant* m_octants[NUM_OCTANTS] = { NULL };		//8 children
 };

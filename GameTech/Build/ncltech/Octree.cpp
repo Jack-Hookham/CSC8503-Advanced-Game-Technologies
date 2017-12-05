@@ -7,7 +7,7 @@ Octree::Octree()
 
 Octree::Octree(BoundingBox region, std::vector<PhysicsNode*>& pNodes)
 {
-	m_root = new Octant(region, pNodes);
+	m_root = new Octant(region, pNodes, NULL);
 }
 
 Octree::~Octree()

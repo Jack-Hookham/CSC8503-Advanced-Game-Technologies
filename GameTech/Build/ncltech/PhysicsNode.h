@@ -192,7 +192,6 @@ protected:
 	
 	float					boundingRadius;		//Bounding radius used for broadphase collision checks
 
-
 //Added in Tutorial 2
 	//<---------LINEAR-------------->
 	Vector3		position;

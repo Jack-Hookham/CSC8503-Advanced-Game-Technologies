@@ -73,7 +73,6 @@ void Octant::divideOctant()
 	//Divide the octree into its 8 octants
 	BoundingBox regions[NUM_OCTANTS] = { BoundingBox() };
 	std::vector<PhysicsNode*> pNodeLists[NUM_OCTANTS];
-	std::vector<PhysicsNode*> deleteList;
 
 	for (int i = 0; i < NUM_OCTANTS; ++i)
 	{
@@ -86,7 +85,7 @@ void Octant::divideOctant()
 		regions[i]._min = newCentre - halfDims * 0.5f;
 		regions[i]._max = newCentre + halfDims * 0.5f;
 
-		//Add the physicsNodes to each new octree if any point on the node's bounding radius is inside the octant
+		//Add the physicsNodes to each new octant if any point on the node's bounding radius is inside the octant
 		for (PhysicsNode* pNode : m_physicsNodes)
 		{
 			if (pNode->GetPosition().x + pNode->GetBoundingRadius() > regions[i]._min.x &&
@@ -107,8 +106,30 @@ void Octant::divideOctant()
 		m_octants[i]->divideOctant();
 	}
 
-	//Remove all the nodes from this octant because they've all been added to child octants
-	m_physicsNodes.clear();
+	//If this is the parent then check if any nodes are outside the octree and add them
+	if (m_parent == NULL)
+	{
+		std::vector<PhysicsNode*> nodesOutside;
+		for (PhysicsNode* pNode : m_physicsNodes)
+		{
+			//If outside root octant
+			if (!(pNode->GetPosition().x + pNode->GetBoundingRadius() > m_region._min.x &&
+				pNode->GetPosition().x - pNode->GetBoundingRadius() < m_region._max.x &&
+				pNode->GetPosition().y + pNode->GetBoundingRadius() > m_region._min.y &&
+				pNode->GetPosition().y - pNode->GetBoundingRadius() < m_region._max.y &&
+				pNode->GetPosition().z + pNode->GetBoundingRadius() > m_region._min.z &&
+				pNode->GetPosition().z - pNode->GetBoundingRadius() < m_region._max.z))
+			{
+				nodesOutside.push_back(pNode);
+			}
+		}
+		m_physicsNodes = nodesOutside;
+	}
+	else
+	{
+		//Remove all the nodes from this octant because they've all been added to child octants
+		m_physicsNodes.clear();
+	}
 }
 
 void Octant::genPairs(std::vector<CollisionPair>& colPairs)
@@ -117,6 +138,8 @@ void Octant::genPairs(std::vector<CollisionPair>& colPairs)
 	if (m_physicsNodes.size() > 0)
 	{
 		PhysicsNode *pnodeA, *pnodeB;
+
+		std::vector<PhysicsNode*> rootNodes = getRoot()->getPhysicsNodes();
 
 		//Calculate octree collision pairs
 		for (size_t i = 0; i < m_physicsNodes.size() - 1; ++i)
@@ -148,6 +171,43 @@ void Octant::genPairs(std::vector<CollisionPair>& colPairs)
 					if (!pairFound)
 					{
 						colPairs.push_back(cp);
+					}
+				}
+			}
+
+			int x = rootNodes.size();
+
+			//If this is not the root then check collisions with root nodes
+			if (m_parent != NULL)
+			{
+				for (size_t j = 0; j < rootNodes.size(); ++j)
+				{
+					pnodeA = m_physicsNodes[i];
+					pnodeB = m_physicsNodes[j];
+
+					//Check they both atleast have collision shapes
+					if (pnodeA->GetCollisionShape() != NULL
+						&& pnodeB->GetCollisionShape() != NULL)
+					{
+						CollisionPair cp;
+						cp.pObjectA = pnodeA;
+						cp.pObjectB = pnodeB;
+
+						bool pairFound = false;
+
+						//Only add if this pair hasn't been added previously
+						for (CollisionPair cp2 : colPairs)
+						{
+							if (cp == cp2)
+							{
+								pairFound = true;
+								continue;
+							}
+						}
+						if (!pairFound)
+						{
+							colPairs.push_back(cp);
+						}
 					}
 				}
 			}
@@ -210,5 +270,17 @@ void Octant::debugDraw()
 		{
 			m_octants[i]->debugDraw();
 		}
+	}
+}
+
+Octant* Octant::getRoot()
+{
+	if (m_parent == NULL)
+	{
+		return this;
+	}
+	else
+	{
+		return m_parent->getRoot();
 	}
 }

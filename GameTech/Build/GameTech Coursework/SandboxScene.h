@@ -2,11 +2,11 @@
 
 #include <ncltech\Scene.h>
 
-class TestScene : public Scene
+class SandboxScene : public Scene
 {
 public:
-	TestScene(const std::string& friendly_name);
-	virtual ~TestScene();
+	SandboxScene(const std::string& friendly_name);
+	virtual ~SandboxScene();
 
 	virtual void OnInitializeScene()	 override;
 	virtual void OnCleanupScene()		 override;

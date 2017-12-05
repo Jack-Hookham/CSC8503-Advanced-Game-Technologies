@@ -17,14 +17,27 @@ void PhysicsEngine::SetDefaults()
 	dampingFactor = 0.999f;
 }
 
+void PhysicsEngine::ToggleOctrees()
+{
+	useOctrees = !useOctrees;
+	if (!useOctrees)
+	{
+		delete m_octree;
+		m_octree = NULL;
+	}
+	else
+	{
+		CreateOctree();
+	}
+}
+
 PhysicsEngine::PhysicsEngine()
 {
 	//Variables set here will /not/ be reset with each scene
 	isPaused = false;  
 	debugDrawFlags = DEBUGDRAW_FLAGS_MANIFOLD | DEBUGDRAW_FLAGS_CONSTRAINT | DEBUGDRAW_FLAGS_OCTREE;
 
-	Vector3 max = Vector3(30.0f, 30.0f, 30.0f);
-	m_octree = new Octree(BoundingBox(-max, max), physicsNodes);
+	CreateOctree();
 	SetDefaults();
 }
 

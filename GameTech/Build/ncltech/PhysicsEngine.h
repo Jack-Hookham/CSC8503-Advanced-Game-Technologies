@@ -91,9 +91,6 @@ public:
 	//Debug draw all physics objects, manifolds and constraints
 	void DebugRender();
 
-	void FireSphere();
-	void FireCube();
-
 	//Getters / Setters 
 	inline bool IsPaused() const				{ return isPaused; }
 	inline void SetPaused(bool paused)			{ isPaused = paused; }
@@ -125,20 +122,7 @@ public:
 	inline Octree* GetOctree() const { return m_octree; }
 	inline const int GetNumSphereSphereChecks() const { return numSphereSphereChecks; }
 
-	inline void ToggleOctrees()
-	{
-		useOctrees = !useOctrees;
-		if (!useOctrees)
-		{
-			delete m_octree;
-			m_octree = NULL;
-		}
-		else
-		{
-			Vector3 max = Vector3(30.0f, 30.0f, 30.0f);
-			m_octree = new Octree(BoundingBox(-max, max), physicsNodes);
-		}
-	}
+	void ToggleOctrees();
 	inline void ToggleSphereSphere() { useSphereSphere = !useSphereSphere; }
 
 	inline const bool UsingOctrees() { return useOctrees; }
@@ -180,8 +164,12 @@ protected:
 	PerfTimer perfNarrowphase;
 	PerfTimer perfSolver;
 
+	inline void CreateOctree() { m_octree = new Octree(BoundingBox(octree_min, octree_max), physicsNodes); }
+
 	bool drawOctree = false;
 	Octree* m_octree;
+	const Vector3 octree_max = Vector3(16.0f, 16.0f, 16.0f);
+	const Vector3 octree_min = -Vector3(16.0f, 16.0f, 16.0f);
 
 	bool useOctrees = true;
 	bool useSphereSphere = true;

@@ -1,59 +1,283 @@
-[15:37:34] Loading Shader:
-[15:37:34]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexBasic.glsl
-[15:37:34]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragSuperSample.glsl
-[15:37:34]     -> Linking Shader: Success!
-[15:37:34] 
-[15:37:34] Loading Shader:
-[15:37:34]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexShadow.glsl
-[15:37:34]     -> Compiling Shader: ../../Data/Shaders/Common/EmptyFragment.glsl
-[15:37:34]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechGeomShadow.glsl
-[15:37:34]     -> Linking Shader: Success!
-[15:37:34] 
-[15:37:34] Loading Shader:
-[15:37:34]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexFull.glsl
-[15:37:34]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragForwardRender.glsl
-[15:37:34]     -> Linking Shader: Success!
-[15:37:34] 
-[15:37:34] Loading Shader:
-[15:37:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointVertex.glsl
-[15:37:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointFragment.glsl
-[15:37:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointGeometry.glsl
-[15:37:34]     -> Linking Shader: Success!
-[15:37:34] 
-[15:37:34] Loading Shader:
-[15:37:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Vertex.glsl
-[15:37:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Fragment.glsl
-[15:37:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/LineGeometry.glsl
-[15:37:34]     -> Linking Shader: Success!
-[15:37:34] 
-[15:37:34] Loading Shader:
-[15:37:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/VertexColOnly.glsl
-[15:37:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Fragment.glsl
-[15:37:34]     -> Linking Shader: Success!
-[15:37:34] 
-[15:37:34] Loading Shader:
-[15:37:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextVertex.glsl
-[15:37:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextFragment.glsl
-[15:37:34]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextGeometry.glsl
-[15:37:34]     -> Linking Shader: Success!
-[15:37:34] 
-[15:37:34] Loading Shader:
-[15:37:34]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexPicker.glsl
-[15:37:34]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragScreenPicker_nsightfix.glsl
-[15:37:34]     -> Linking Shader: Success!
-[15:37:34] 
-[15:37:35] Loading Mesh: ../../Data/Meshes/cube.obj
-[15:37:35] 
-[15:37:35] Loading Mesh: ../../Data/Meshes/sphere.obj
-[15:37:35] 
-[15:37:35] [SceneManager] - Enqueued scene: "GameLogic Example #1 - Path Following"
-[15:37:35] 
-[15:37:35] [SceneManager] - Scene switched to: "GameLogic Example #1 - Path Following"
-[15:37:35] [SceneManager] - Enqueued scene: "GameLogic Example #2 - Angle Computation"
-[15:37:35] Loading Mesh: ../../Data/Meshes/raptor.obj
-[15:37:35]     -> Loading Texture: ../../Data/Textures/raptor.jpg
-[15:37:35] 
-[15:37:35] [SceneManager] - Enqueued scene: "GameLogic Example #3 - Finite State Machine"
-[15:37:35] Loading Mesh: ../../Data/Meshes/cube.obj
-[15:37:35] 
-[15:37:35] [SceneManager] - Enqueued scene: "GameLogic Example #4 - Path Finding"
+[12:14:16] Loading Shader:
+[12:14:16]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexBasic.glsl
+[12:14:16]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragSuperSample.glsl
+[12:14:16]     -> Linking Shader: Success!
+[12:14:16] 
+[12:14:16] Loading Shader:
+[12:14:16]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexShadow.glsl
+[12:14:16]     -> Compiling Shader: ../../Data/Shaders/Common/EmptyFragment.glsl
+[12:14:16]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechGeomShadow.glsl
+[12:14:16]     -> Linking Shader: Success!
+[12:14:16] 
+[12:14:16] Loading Shader:
+[12:14:16]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexFull.glsl
+[12:14:16]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragForwardRender.glsl
+[12:14:16]     -> Linking Shader: Success!
+[12:14:16] 
+[12:14:16] Loading Shader:
+[12:14:16]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointVertex.glsl
+[12:14:16]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointFragment.glsl
+[12:14:16]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/PointGeometry.glsl
+[12:14:16]     -> Linking Shader: Success!
+[12:14:16] 
+[12:14:16] Loading Shader:
+[12:14:16]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Vertex.glsl
+[12:14:16]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Fragment.glsl
+[12:14:16]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/LineGeometry.glsl
+[12:14:16]     -> Linking Shader: Success!
+[12:14:16] 
+[12:14:16] Loading Shader:
+[12:14:16]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/VertexColOnly.glsl
+[12:14:16]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/Fragment.glsl
+[12:14:16]     -> Linking Shader: Success!
+[12:14:16] 
+[12:14:16] Loading Shader:
+[12:14:16]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextVertex.glsl
+[12:14:16]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextFragment.glsl
+[12:14:16]     -> Compiling Shader: ../../Data/Shaders/DebugShaders/TextGeometry.glsl
+[12:14:16]     -> Linking Shader: Success!
+[12:14:16] 
+[12:14:16] Loading Shader:
+[12:14:16]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechVertexPicker.glsl
+[12:14:16]     -> Compiling Shader: ../../Data/Shaders/SceneRenderer/TechFragScreenPicker_nsightfix.glsl
+[12:14:17]     -> Linking Shader: Success!
+[12:14:17] 
+[12:14:17] Loading Mesh: ../../Data/Meshes/cube.obj
+[12:14:17] 
+[12:14:17] Loading Mesh: ../../Data/Meshes/sphere.obj
+[12:14:17] 
+[12:14:17] [SceneManager] - Enqueued scene: "GameLogic Example #1 - Path Following"
+[12:14:17] 
+[12:14:17] [SceneManager] - Scene switched to: "GameLogic Example #1 - Path Following"
+[12:14:17] [SceneManager] - Enqueued scene: "GameLogic Example #2 - Angle Computation"
+[12:14:17] Loading Mesh: ../../Data/Meshes/raptor.obj
+[12:14:17]     -> Loading Texture: ../../Data/Textures/raptor.jpg
+[12:14:17] 
+[12:14:17] [SceneManager] - Enqueued scene: "GameLogic Example #3 - Finite State Machine"
+[12:14:17] Loading Mesh: ../../Data/Meshes/cube.obj
+[12:14:17] 
+[12:14:17] [SceneManager] - Enqueued scene: "GameLogic Example #4 - Path Finding"
+[12:14:17] Physics too slow to run in real time!
+[12:14:29] [SceneManager] - Exiting scene -
+[12:14:29] 
+[12:14:29] [SceneManager] - Scene switched to: "GameLogic Example #2 - Angle Computation"
+[12:14:29] Physics too slow to run in real time!
+[12:14:29] Physics too slow to run in real time!
+[12:14:30] Physics too slow to run in real time!
+[12:14:33] Physics too slow to run in real time!
+[12:14:36] Physics too slow to run in real time!
+[12:14:39] Physics too slow to run in real time!
+[12:14:40] Physics too slow to run in real time!
+[12:14:42] Physics too slow to run in real time!
+[12:14:43] Physics too slow to run in real time!
+[12:14:45] Physics too slow to run in real time!
+[12:14:48] Physics too slow to run in real time!
+[12:14:48] [SceneManager] - Exiting scene -
+[12:14:48] 
+[12:14:48] [SceneManager] - Scene switched to: "GameLogic Example #3 - Finite State Machine"
+[12:14:49] Physics too slow to run in real time!
+[12:15:05] Physics too slow to run in real time!
+[12:15:09] Physics too slow to run in real time!
+[12:15:11] Physics too slow to run in real time!
+[12:15:15] Physics too slow to run in real time!
+[12:15:15] Physics too slow to run in real time!
+[12:15:16] Physics too slow to run in real time!
+[12:15:17] Physics too slow to run in real time!
+[12:15:18] Physics too slow to run in real time!
+[12:15:24] Physics too slow to run in real time!
+[12:15:27] Physics too slow to run in real time!
+[12:15:30] Physics too slow to run in real time!
+[12:15:32] Physics too slow to run in real time!
+[12:15:39] Physics too slow to run in real time!
+[12:15:41] Physics too slow to run in real time!
+[12:15:42] Physics too slow to run in real time!
+[12:15:56] Physics too slow to run in real time!
+[12:16:23] Physics too slow to run in real time!
+[12:16:25] Physics too slow to run in real time!
+[12:16:27] Physics too slow to run in real time!
+[12:16:28] Physics too slow to run in real time!
+[12:16:34] Physics too slow to run in real time!
+[12:16:36] Physics too slow to run in real time!
+[12:16:39] Physics too slow to run in real time!
+[12:16:39] Physics too slow to run in real time!
+[12:16:45] Physics too slow to run in real time!
+[12:16:45] Physics too slow to run in real time!
+[12:16:46] Physics too slow to run in real time!
+[12:16:49] Physics too slow to run in real time!
+[12:16:50] Physics too slow to run in real time!
+[12:16:50] Physics too slow to run in real time!
+[12:16:51] Physics too slow to run in real time!
+[12:16:52] [SceneManager] - Exiting scene -
+[12:16:52] 
+[12:16:52] [SceneManager] - Scene switched to: "GameLogic Example #4 - Path Finding"
+[12:16:52] Physics too slow to run in real time!
+[12:16:52] Physics too slow to run in real time!
+[12:16:52] Physics too slow to run in real time!
+[12:17:04] Physics too slow to run in real time!
+[12:17:05] Physics too slow to run in real time!
+[12:17:06] Physics too slow to run in real time!
+[12:18:04] Physics too slow to run in real time!
+[12:18:04] Physics too slow to run in real time!
+[12:18:04] Physics too slow to run in real time!
+[12:18:04] Physics too slow to run in real time!
+[12:18:04] Physics too slow to run in real time!
+[12:18:04] Physics too slow to run in real time!
+[12:18:05] Physics too slow to run in real time!
+[12:18:05] Physics too slow to run in real time!
+[12:18:06] Physics too slow to run in real time!
+[12:18:08] Physics too slow to run in real time!
+[12:18:08] Physics too slow to run in real time!
+[12:18:08] Physics too slow to run in real time!
+[12:18:12] Physics too slow to run in real time!
+[12:18:14] Physics too slow to run in real time!
+[12:18:17] Physics too slow to run in real time!
+[12:18:19] Physics too slow to run in real time!
+[12:18:21] Physics too slow to run in real time!
+[12:18:21] Physics too slow to run in real time!
+[12:18:22] Physics too slow to run in real time!
+[12:18:22] Physics too slow to run in real time!
+[12:18:30] Physics too slow to run in real time!
+[12:18:31] Physics too slow to run in real time!
+[12:18:35] Physics too slow to run in real time!
+[12:18:36] Physics too slow to run in real time!
+[12:18:39] Physics too slow to run in real time!
+[12:18:40] Physics too slow to run in real time!
+[12:18:47] Physics too slow to run in real time!
+[12:18:47] Physics too slow to run in real time!
+[12:18:51] Physics too slow to run in real time!
+[12:18:52] Physics too slow to run in real time!
+[12:18:53] Physics too slow to run in real time!
+[12:18:53] Physics too slow to run in real time!
+[12:18:54] Physics too slow to run in real time!
+[12:18:54] Physics too slow to run in real time!
+[12:18:55] Physics too slow to run in real time!
+[12:18:55] Physics too slow to run in real time!
+[12:18:56] Physics too slow to run in real time!
+[12:18:57] Physics too slow to run in real time!
+[12:18:57] Physics too slow to run in real time!
+[12:18:57] Physics too slow to run in real time!
+[12:18:58] Physics too slow to run in real time!
+[12:19:00] Physics too slow to run in real time!
+[12:19:01] Physics too slow to run in real time!
+[12:19:01] Physics too slow to run in real time!
+[12:19:02] Physics too slow to run in real time!
+[12:19:02] Physics too slow to run in real time!
+[12:19:03] Physics too slow to run in real time!
+[12:19:05] Physics too slow to run in real time!
+[12:19:06] Physics too slow to run in real time!
+[12:19:06] Physics too slow to run in real time!
+[12:19:07] Physics too slow to run in real time!
+[12:19:07] Physics too slow to run in real time!
+[12:19:07] [SceneManager] - Exiting scene -
+[12:19:07] 
+[12:19:07] [SceneManager] - Scene switched to: "GameLogic Example #1 - Path Following"
+[12:19:07] Physics too slow to run in real time!
+[12:19:07] Physics too slow to run in real time!
+[12:19:08] Physics too slow to run in real time!
+[12:19:08] Physics too slow to run in real time!
+[12:19:09] Physics too slow to run in real time!
+[12:19:09] Physics too slow to run in real time!
+[12:19:09] Physics too slow to run in real time!
+[12:19:09] Physics too slow to run in real time!
+[12:19:10] Physics too slow to run in real time!
+[12:19:11] Physics too slow to run in real time!
+[12:19:12] Physics too slow to run in real time!
+[12:19:13] Physics too slow to run in real time!
+[12:19:15] Physics too slow to run in real time!
+[12:19:15] Physics too slow to run in real time!
+[12:19:16] Physics too slow to run in real time!
+[12:19:29] Physics too slow to run in real time!
+[12:19:30] Physics too slow to run in real time!
+[12:19:32] Physics too slow to run in real time!
+[12:19:34] Physics too slow to run in real time!
+[12:19:35] Physics too slow to run in real time!
+[12:19:35] Physics too slow to run in real time!
+[12:19:35] Physics too slow to run in real time!
+[12:19:36] Physics too slow to run in real time!
+[12:19:36] Physics too slow to run in real time!
+[12:19:36] Physics too slow to run in real time!
+[12:19:38] Physics too slow to run in real time!
+[12:19:39] Physics too slow to run in real time!
+[12:19:41] Physics too slow to run in real time!
+[12:19:41] Physics too slow to run in real time!
+[12:19:41] Physics too slow to run in real time!
+[12:19:42] Physics too slow to run in real time!
+[12:19:43] Physics too slow to run in real time!
+[12:19:48] Physics too slow to run in real time!
+[12:19:48] Physics too slow to run in real time!
+[12:19:49] Physics too slow to run in real time!
+[12:19:50] Physics too slow to run in real time!
+[12:19:52] Physics too slow to run in real time!
+[12:19:52] Physics too slow to run in real time!
+[12:19:53] Physics too slow to run in real time!
+[12:19:55] Physics too slow to run in real time!
+[12:19:55] Physics too slow to run in real time!
+[12:19:56] Physics too slow to run in real time!
+[12:19:56] Physics too slow to run in real time!
+[12:19:58] Physics too slow to run in real time!
+[12:19:59] Physics too slow to run in real time!
+[12:19:59] Physics too slow to run in real time!
+[12:20:03] Physics too slow to run in real time!
+[12:20:03] Physics too slow to run in real time!
+[12:20:06] Physics too slow to run in real time!
+[12:20:07] Physics too slow to run in real time!
+[12:20:07] Physics too slow to run in real time!
+[12:20:08] Physics too slow to run in real time!
+[12:20:14] Physics too slow to run in real time!
+[12:20:14] Physics too slow to run in real time!
+[12:20:14] Physics too slow to run in real time!
+[12:20:15] Physics too slow to run in real time!
+[12:20:16] Physics too slow to run in real time!
+[12:20:19] Physics too slow to run in real time!
+[12:20:21] Physics too slow to run in real time!
+[12:20:22] Physics too slow to run in real time!
+[12:20:24] Physics too slow to run in real time!
+[12:20:24] Physics too slow to run in real time!
+[12:20:24] Physics too slow to run in real time!
+[12:20:25] Physics too slow to run in real time!
+[12:20:26] Physics too slow to run in real time!
+[12:20:26] Physics too slow to run in real time!
+[12:20:29] Physics too slow to run in real time!
+[12:20:32] Physics too slow to run in real time!
+[12:20:35] Physics too slow to run in real time!
+[12:20:40] Physics too slow to run in real time!
+[12:20:42] Physics too slow to run in real time!
+[12:20:43] Physics too slow to run in real time!
+[12:20:43] Physics too slow to run in real time!
+[12:20:44] Physics too slow to run in real time!
+[12:20:44] Physics too slow to run in real time!
+[12:20:46] Physics too slow to run in real time!
+[12:20:47] Physics too slow to run in real time!
+[12:20:47] Physics too slow to run in real time!
+[12:20:49] Physics too slow to run in real time!
+[12:20:54] Physics too slow to run in real time!
+[12:20:55] Physics too slow to run in real time!
+[12:20:56] Physics too slow to run in real time!
+[12:20:57] Physics too slow to run in real time!
+[12:21:02] Physics too slow to run in real time!
+[12:21:04] Physics too slow to run in real time!
+[12:21:06] Physics too slow to run in real time!
+[12:21:07] Physics too slow to run in real time!
+[12:21:09] Physics too slow to run in real time!
+[12:21:09] Physics too slow to run in real time!
+[12:21:14] Physics too slow to run in real time!
+[12:21:19] Physics too slow to run in real time!
+[12:21:19] Physics too slow to run in real time!
+[12:21:23] Physics too slow to run in real time!
+[12:21:25] Physics too slow to run in real time!
+[12:21:27] Physics too slow to run in real time!
+[12:21:29] Physics too slow to run in real time!
+[12:21:31] Physics too slow to run in real time!
+[12:21:31] Physics too slow to run in real time!
+[12:21:33] Physics too slow to run in real time!
+[12:21:33] Physics too slow to run in real time!
+[12:21:37] Physics too slow to run in real time!
+[12:21:37] Physics too slow to run in real time!
+[12:21:38] Physics too slow to run in real time!
+[12:21:48] Physics too slow to run in real time!
+[12:21:48] Physics too slow to run in real time!
+[12:21:49] Physics too slow to run in real time!
+[12:21:51] Physics too slow to run in real time!
+[12:21:52] Physics too slow to run in real time!
+[12:21:53] Physics too slow to run in real time!
+[12:22:01] [SceneManager] Closing scene manager
