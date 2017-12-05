@@ -9,6 +9,7 @@
 
 #include "SandboxScene.h"
 #include "ScoreScene.h"
+#include "MazeScene.h"
 #include "EmptyScene.h"
 
 const Vector4 status_colour = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -57,9 +58,10 @@ void Initialize()
 	PhysicsEngine::Instance();
 
 	//Enqueue All Scenes
-	//SceneManager::Instance()->EnqueueScene(new SandboxScene("GameTech #1 - Framework Sandbox!"));
+	SceneManager::Instance()->EnqueueScene(new SandboxScene("GameTech #1 - Framework Sandbox!"));
 	SceneManager::Instance()->EnqueueScene(new ScoreScene("GameTech #2 - Projectile Game"));
-	SceneManager::Instance()->EnqueueScene(new EmptyScene("GameTech #3 - More peace and quiet"));
+	SceneManager::Instance()->EnqueueScene(new MazeScene("GameTech #3 - Maze"));
+	SceneManager::Instance()->EnqueueScene(new EmptyScene("GameTech #X - More peace and quiet"));
 }
 
 // Print Debug Info

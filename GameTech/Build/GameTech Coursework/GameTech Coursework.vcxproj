@@ -135,13 +135,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MazeGenerator.cpp" />
+    <ClCompile Include="MazeRenderer.cpp" />
+    <ClCompile Include="MazeScene.cpp" />
     <ClCompile Include="ScoreScene.cpp" />
     <ClCompile Include="SandboxScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EmptyScene.h" />
+    <ClInclude Include="MazeGenerator.h" />
+    <ClInclude Include="MazeRenderer.h" />
+    <ClInclude Include="MazeScene.h" />
     <ClInclude Include="ScoreScene.h" />
     <ClInclude Include="SandboxScene.h" />
+    <ClInclude Include="SearchAlgorithm.h" />
+    <ClInclude Include="SearchAStar.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
