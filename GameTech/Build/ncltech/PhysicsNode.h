@@ -90,6 +90,7 @@ public:
 		, collisionShape(NULL)
 		, friction(0.5f)
 		, elasticity(0.9f)
+		, atRest(false)
 	{
 	}
 
@@ -236,5 +237,5 @@ protected:
 	float minZ;
 	float maxZ;
 
-	bool atRest = false;
+	bool atRest;
 };
