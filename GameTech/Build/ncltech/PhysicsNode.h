@@ -79,10 +79,12 @@ public:
 	PhysicsNode()
 		: position(0.0f, 0.0f, 0.0f)
 		, linVelocity(0.0f, 0.0f, 0.0f)
+		, linVelocities{Vector3(10.0f, 10.0f, 10.0f)}
 		, force(0.0f, 0.0f, 0.0f)
 		, invMass(0.0f)
 		, orientation(0.0f, 0.0f, 0.0f, 1.0f)
 		, angVelocity(0.0f, 0.0f, 0.0f)
+		, angVelocities{ Vector3(10.0f, 10.0f, 10.0f) }
 		, torque(0.0f, 0.0f, 0.0f)
 		, invInertia(Matrix3::ZeroMatrix)
 		, collisionShape(NULL)
@@ -204,14 +206,16 @@ protected:
 	//<---------LINEAR-------------->
 	Vector3		position;
 	Vector3		linVelocity;
-	Vector3		linVelocities[VELOCITY_FRAMES];		//Track previous frame linVelocities for determining rest state
+	//Track previous frame linVelocities for determining rest state - initialise to value > 0
+	Vector3		linVelocities[VELOCITY_FRAMES];		
 	Vector3		force;
 	float		invMass;
 
 	//<----------ANGULAR-------------->
 	Quaternion  orientation;
 	Vector3		angVelocity;
-	Vector3		angVelocities[VELOCITY_FRAMES];		//Track previous frame angVelocities for determining rest state
+	//Track previous frame angVelocities for determining rest state  - initialise to value > 0
+	Vector3		angVelocities[VELOCITY_FRAMES];
 	Vector3		torque;
 	Matrix3     invInertia;
 
