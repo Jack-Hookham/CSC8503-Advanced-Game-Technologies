@@ -138,6 +138,7 @@
     <ClCompile Include="MazeGenerator.cpp" />
     <ClCompile Include="MazeRenderer.cpp" />
     <ClCompile Include="MazeScene.cpp" />
+    <ClCompile Include="NetClient.cpp" />
     <ClCompile Include="ScoreScene.cpp" />
     <ClCompile Include="SandboxScene.cpp" />
   </ItemGroup>
@@ -146,6 +147,7 @@
     <ClInclude Include="MazeGenerator.h" />
     <ClInclude Include="MazeRenderer.h" />
     <ClInclude Include="MazeScene.h" />
+    <ClInclude Include="NetClient.h" />
     <ClInclude Include="ScoreScene.h" />
     <ClInclude Include="SandboxScene.h" />
     <ClInclude Include="SearchAlgorithm.h" />
