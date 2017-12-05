@@ -173,7 +173,7 @@ void PhysicsEngine::UpdatePhysics()
 
 //4. Update Velocities
 	perfUpdate.BeginTimingSection();
-	for (PhysicsNode* obj : physicsNodes) obj->IntegrateForVelocity(updateTimestep);
+	for (PhysicsNode* obj : physicsNodes) if (!obj->GetAtRest()) obj->IntegrateForVelocity(updateTimestep);
 	perfUpdate.EndTimingSection();
 
 //5. Constraint Solver
@@ -196,7 +196,7 @@ void PhysicsEngine::UpdatePhysics()
 
 //6. Update Positions (with final 'real' velocities)
 	perfUpdate.BeginTimingSection();
-	for (PhysicsNode* obj : physicsNodes) obj->IntegrateForPosition(updateTimestep);
+	for (PhysicsNode* obj : physicsNodes) if (!obj->GetAtRest()) obj->IntegrateForPosition(updateTimestep);
 	perfUpdate.EndTimingSection();
 }
 
@@ -234,8 +234,6 @@ bool PhysicsEngine::SweepSortFunc(PhysicsNode* nodeA, PhysicsNode* nodeB)
 
 			return zMinA.z < zMinB.z;
 		}
-
-		
 	}
 	return true;
 }
@@ -248,6 +246,12 @@ void PhysicsEngine::BroadPhaseCollisions()
 	numSphereSphereChecks = 0;
 	broadphaseColPairs.clear();
 
+	//Update rest states
+	for (PhysicsNode* pnode : physicsNodes)
+	{
+		pnode->UpdateVelocities();
+		pnode->DetermineRestState();
+	}
 
 	PhysicsNode *pnodeA, *pnodeB;
 	//	The broadphase needs to build a list of all potentially colliding objects in the world,
@@ -292,37 +296,6 @@ void PhysicsEngine::BroadPhaseCollisions()
 		{
 			SphereSphereCheck();
 		}
-		//std::vector<CollisionPair> newPairs;
-		////Sort the remaining pairs
-		//sort(broadphaseColPairs.begin(), broadphaseColPairs.end(), SweepSortFunc);
-
-		//for (size_t i = 0; i < physicsNodes.size() - 1; ++i)
-		//{
-		//	for (size_t j = i + 1; j < physicsNodes.size(); ++j)
-		//	{
-		//		pnodeA = physicsNodes[i];
-		//		pnodeB = physicsNodes[j];
-
-		//		//Check they both atleast have collision shapes
-		//		if (pnodeA->GetCollisionShape() != NULL && pnodeB->GetCollisionShape() != NULL)
-		//		{
-		//			//Sweep
-		//			//Check based on sort
-		//			if (pnodeA->GetMaxZ() < pnodeB->GetMinZ()) {
-		//				break;
-		//			}
-
-		//			//Also check X axis
-		//			if (pnodeA->GetMaxX() > pnodeB->GetMinX()) {
-		//				CollisionPair cp;
-		//				cp.pObjectA = pnodeA;
-		//				cp.pObjectB = pnodeB;
-		//				newPairs.push_back(cp);
-		//			}
-		//		}
-		//	}
-		//}
-		//broadphaseColPairs = newPairs;
 	}
 }
 
@@ -341,12 +314,18 @@ void PhysicsEngine::SphereSphereCheck()
 			pnodeA = cp.pObjectA;
 			pnodeB = cp.pObjectB;
 
-			numSphereSphereChecks++;
+			//if both objects are at rest then there is no need to check for collision
+			if (pnodeA->GetAtRest() && pnodeB->GetAtRest())
+			{
+				continue;
+			}
 
 			//Check they both atleast have collision shapes
 			if (pnodeA->GetCollisionShape() != NULL
 				&& pnodeB->GetCollisionShape() != NULL)
 			{
+				numSphereSphereChecks++;
+
 				Vector3 dist = pnodeA->GetPosition() - pnodeB->GetPosition();
 				//if distance between the two objects is less than the sum of their bounding radii then they might be colliding
 				if (dist.Length() <= pnodeA->GetBoundingRadius() + pnodeB->GetBoundingRadius())
@@ -409,6 +388,10 @@ void PhysicsEngine::NarrowPhaseCollisions()
 
 				if (okA && okB)
 				{
+					//Wake up from rest if collision detected
+					if (cp.pObjectA->GetAtRest()) cp.pObjectA->SetAtRest(false);
+					if (cp.pObjectB->GetAtRest()) cp.pObjectB->SetAtRest(false);
+
 					/* TUTORIAL 5 CODE */
 					//Build full collision manifold that will also handle the
 					//collision response between the two objects in the solver

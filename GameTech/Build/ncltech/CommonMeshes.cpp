@@ -13,6 +13,7 @@ void CommonMeshes::InitializeMeshes()
 	if (m_pCube == NULL)
 	{
 		m_pCheckerboardTex = SOIL_load_OGL_texture(TEXTUREDIR"checkerboard.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
+		//m_pCheckerboardTex = SOIL_load_OGL_texture(TEXTUREDIR"portal_cube.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
 
 		if (m_pCheckerboardTex)
 		{

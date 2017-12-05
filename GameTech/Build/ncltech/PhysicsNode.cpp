@@ -109,3 +109,38 @@ void PhysicsNode::DrawBoundingRadius()
 		lastZ = newZ;
 	}
 }
+
+void PhysicsNode::UpdateVelocities()
+{
+	for (int i = 1; i < VELOCITY_FRAMES; ++i)
+	{
+		linVelocities[i] = linVelocities[i - 1];
+		angVelocities[i] = angVelocities[i - 1];
+	}
+	linVelocities[0] = linVelocity;
+	angVelocities[0] = angVelocity;
+}
+
+void PhysicsNode::DetermineRestState()
+{
+	//Whether any of the previous frames had any movement
+	bool movement = false;
+
+	//for (int i = 0; i < VELOCITY_FRAMES; ++i)
+	{
+		//If any of the previous <VELOCITY_FRAMES> frames velocities are greater than small value then the node is not a rest 
+		if (linVelocity.Length() > 0.01f || angVelocity.Length() > 0.01f)
+		{
+			movement = true;
+		}
+	}
+	if (!movement)
+	{
+		atRest = true;
+	}
+	else
+	{
+		atRest = false;
+	}
+
+}

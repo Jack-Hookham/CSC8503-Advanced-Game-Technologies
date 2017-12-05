@@ -29,6 +29,8 @@ Description:
 
 *//////////////////////////////////////////////////////////////////////////////
 
+#define VELOCITY_FRAMES 10		//Number of frames used to calculate rest state
+
 #pragma once
 #include <nclgl\Quaternion.h>
 #include <nclgl\Matrix3.h>
@@ -123,7 +125,7 @@ public:
 	inline const Matrix4&		GetWorldSpaceTransform()    const { return worldTransform; }
 
 	inline const float			GetBoundingRadius()			const { return boundingRadius; }
-
+	inline const bool			GetAtRest()					const { return atRest; }
 
 
 
@@ -151,6 +153,7 @@ public:
 	}
 
 	inline void SetBoundingRadius(const float radius) { boundingRadius = radius; }
+	inline void SetAtRest(const bool rest) { atRest = rest; }
 
 
 	//<---------- CALLBACKS ------------>
@@ -184,6 +187,11 @@ public:
 	void SetMinZ(float z) { minZ = z; }
 	void SetMaxZ(float z) { maxZ = z; }
 
+	//Update the velocity arrays for the previous frames
+	void UpdateVelocities();
+	//Determine the current rest state from the previous frame velocities
+	void DetermineRestState();
+
 protected:
 	//Useful parameters
 	GameObject*				parent;
@@ -196,12 +204,14 @@ protected:
 	//<---------LINEAR-------------->
 	Vector3		position;
 	Vector3		linVelocity;
+	Vector3		linVelocities[VELOCITY_FRAMES];		//Track previous frame linVelocities for determining rest state
 	Vector3		force;
 	float		invMass;
 
 	//<----------ANGULAR-------------->
 	Quaternion  orientation;
 	Vector3		angVelocity;
+	Vector3		angVelocities[VELOCITY_FRAMES];		//Track previous frame angVelocities for determining rest state
 	Vector3		torque;
 	Matrix3     invInertia;
 
@@ -221,4 +231,6 @@ protected:
 	float maxX;
 	float minZ;
 	float maxZ;
+
+	bool atRest = false;
 };
