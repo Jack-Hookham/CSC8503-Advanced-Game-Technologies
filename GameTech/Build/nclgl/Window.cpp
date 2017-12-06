@@ -223,8 +223,6 @@ bool	Window::UpdateWindow() {
 	return !forceQuit;
 }
 
-
-
 void Window::CheckMessages(MSG &msg) {
 	switch (msg.message) {	// Is There A Message Waiting?		
 	case (WM_QUIT):

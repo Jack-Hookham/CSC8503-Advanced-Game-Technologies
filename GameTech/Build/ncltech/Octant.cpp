@@ -133,6 +133,8 @@ void Octant::genPairs(std::vector<CollisionPair>& colPairs)
 					continue;
 				}
 
+				//pnodeA->SetTimeSinceRestCheck()
+
 				//Check they both atleast have collision shapes
 				if (pnodeA->GetCollisionShape() != NULL
 					&& pnodeB->GetCollisionShape() != NULL)

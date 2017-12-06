@@ -137,7 +137,6 @@ void PhysicsNode::DetermineRestState()
 	{
 		//Whether the node moved in any of the previous frames
 		bool movement = false;
-
 		for (int i = 0; i < VELOCITY_FRAMES; ++i)
 		{
 			//If any of the previous <VELOCITY_FRAMES> frames velocities are greater than <small value> then the node is not at rest 
@@ -148,6 +147,7 @@ void PhysicsNode::DetermineRestState()
 		}
 		atRest = movement ? false : true;
 	}
+
 	if (!atRest)
 	{
 		timeSinceRestCheck = 0.0f;
