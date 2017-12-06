@@ -389,8 +389,8 @@ void PhysicsEngine::NarrowPhaseCollisions()
 				if (okA && okB)
 				{
 					//Wake up from rest if collision detected
-					if (cp.pObjectA->GetAtRest()) cp.pObjectA->SetAtRest(false);
-					if (cp.pObjectB->GetAtRest()) cp.pObjectB->SetAtRest(false);
+					//if (cp.pObjectA->GetAtRest()) cp.pObjectA->SetAtRest(false);
+					//if (cp.pObjectB->GetAtRest()) cp.pObjectB->SetAtRest(false);
 
 					/* TUTORIAL 5 CODE */
 					//Build full collision manifold that will also handle the
