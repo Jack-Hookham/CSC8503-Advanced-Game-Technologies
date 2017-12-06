@@ -122,7 +122,11 @@ void PhysicsEngine::Update(float deltaTime)
 		}
 	}
 
-	timeSinceRestCheck += deltaTime;
+	for (PhysicsNode* pnode : physicsNodes)
+	{
+		pnode->UpdateRestTimer(deltaTime);
+	}
+	//timeSinceRestCheck += deltaTime;
 }
 
 
