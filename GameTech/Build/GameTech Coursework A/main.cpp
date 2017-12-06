@@ -1,5 +1,6 @@
 #include <ncltech\PhysicsEngine.h>
 #include <ncltech\SceneManager.h>
+#include <ncltech\CommonUtils.h>
 #include <nclgl\Window.h>
 #include <nclgl\NCLDebug.h>
 #include <nclgl\PerfTimer.h>
@@ -9,7 +10,6 @@
 
 #include "SandboxScene.h"
 #include "ScoreScene.h"
-#include "MazeScene.h"
 #include "EmptyScene.h"
 
 const Vector4 status_colour = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -58,10 +58,10 @@ void Initialize()
 	PhysicsEngine::Instance();
 
 	//Enqueue All Scenes
-	//SceneManager::Instance()->EnqueueScene(new SandboxScene("GameTech #1 - Framework Sandbox!"));
-	SceneManager::Instance()->EnqueueScene(new ScoreScene("GameTech #2 - Projectile Game"));
-	SceneManager::Instance()->EnqueueScene(new MazeScene("GameTech #3 - Maze"));
 	SceneManager::Instance()->EnqueueScene(new EmptyScene("GameTech #X - More peace and quiet"));
+	SceneManager::Instance()->EnqueueScene(new SandboxScene("GameTech #1 - Framework Sandbox!"));
+	SceneManager::Instance()->EnqueueScene(new ScoreScene("GameTech #2 - Projectile Game"));
+	SceneManager::Instance()->EnqueueScene(new ScoreScene("GameTech #3 - Projectile Game"));
 }
 
 // Print Debug Info

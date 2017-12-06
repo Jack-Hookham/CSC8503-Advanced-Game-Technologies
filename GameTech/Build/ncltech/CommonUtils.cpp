@@ -46,10 +46,9 @@ void CommonUtils::DragableObjectCallback(GameObject* obj, float dt, const Vector
 
 			obj->Physics()->SetInverseInertia(dragDataInertia);
 			obj->Physics()->SetInverseMass(dragDataMass);
-			//Ensure that all previous frame velocities are > 0 to avoid the object getting stuck in the ground
-			//After being dragged
-			obj->Physics()->ResetVelocities();		
-			
+			//Ensure that all previous frame velocities are > 0 to avoid the object getting stuck in
+			//other objects after being dragged
+			obj->Physics()->ResetVelocities();
 		}
 		else if(!dragDataSet)
 		{

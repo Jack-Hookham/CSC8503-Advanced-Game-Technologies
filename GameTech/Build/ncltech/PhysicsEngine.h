@@ -175,4 +175,6 @@ protected:
 	bool useSphereSphere = true;
 
 	int numSphereSphereChecks = 0;
+
+	float timeSinceRestCheck = 0.0f;
 };

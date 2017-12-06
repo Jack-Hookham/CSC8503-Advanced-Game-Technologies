@@ -121,6 +121,8 @@ void PhysicsEngine::Update(float deltaTime)
 			updateRealTimeAccum = 0.0f;
 		}
 	}
+
+	timeSinceRestCheck += deltaTime;
 }
 
 
@@ -173,7 +175,13 @@ void PhysicsEngine::UpdatePhysics()
 
 //4. Update Velocities
 	perfUpdate.BeginTimingSection();
-	for (PhysicsNode* obj : physicsNodes) if (!obj->GetAtRest()) obj->IntegrateForVelocity(updateTimestep);
+	for (PhysicsNode* obj : physicsNodes)
+	{
+		if (!obj->GetAtRest())
+		{
+			obj->IntegrateForVelocity(updateTimestep);
+		}
+	}
 	perfUpdate.EndTimingSection();
 
 //5. Constraint Solver
@@ -196,7 +204,13 @@ void PhysicsEngine::UpdatePhysics()
 
 //6. Update Positions (with final 'real' velocities)
 	perfUpdate.BeginTimingSection();
-	for (PhysicsNode* obj : physicsNodes) if (!obj->GetAtRest()) obj->IntegrateForPosition(updateTimestep);
+	for (PhysicsNode* obj : physicsNodes)
+	{
+		if (!obj->GetAtRest())
+		{
+			obj->IntegrateForPosition(updateTimestep);
+		}
+	}
 	perfUpdate.EndTimingSection();
 }
 
@@ -262,6 +276,7 @@ void PhysicsEngine::BroadPhaseCollisions()
 	{
 		if (useOctrees)
 		{
+			//Build the octree then generate collision pairs from it
 			m_octree->updateObjects(physicsNodes);
 			m_octree->buildOctree();
 			m_octree->getRoot()->genPairs(broadphaseColPairs);
@@ -294,6 +309,7 @@ void PhysicsEngine::BroadPhaseCollisions()
 
 		if (useSphereSphere)
 		{
+			//Cull collision pairs using sphere sphere bounding radius collision check
 			SphereSphereCheck();
 		}
 	}
@@ -388,10 +404,6 @@ void PhysicsEngine::NarrowPhaseCollisions()
 
 				if (okA && okB)
 				{
-					//Wake up from rest if collision detected
-					//if (cp.pObjectA->GetAtRest()) cp.pObjectA->SetAtRest(false);
-					//if (cp.pObjectB->GetAtRest()) cp.pObjectB->SetAtRest(false);
-
 					/* TUTORIAL 5 CODE */
 					//Build full collision manifold that will also handle the
 					//collision response between the two objects in the solver
