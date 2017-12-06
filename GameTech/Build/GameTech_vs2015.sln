@@ -42,6 +42,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tuts_GameLogic", "Tuts_Game
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameTech Coursework A", "GameTech Coursework A\GameTech Coursework A.vcxproj", "{1A5C2647-CADD-49B7-861E-4B1339EDCD84}"
+	ProjectSection(ProjectDependencies) = postProject
+		{98D6B51B-CB0A-4389-ADC6-24082B967C3F} = {98D6B51B-CB0A-4389-ADC6-24082B967C3F}
+		{AB4196E5-2488-4514-B4C2-00EAFC468A1D} = {AB4196E5-2488-4514-B4C2-00EAFC468A1D}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameTech Coursework B", "GameTech Coursework B\GameTech Coursework B.vcxproj", "{DF89E5E3-D66A-471F-85FD-8C960F2AA8B9}"
 EndProject

@@ -106,6 +106,7 @@ public:
 	//<-- Between calling these two functions the physics engine will solve velocity to get 'true' final velocity -->
 	void IntegrateForPosition(float dt);
 
+	inline void UpdateRestTimer(float dt) { timeSinceRestCheck += dt; }
 
 	//<--------- GETTERS ------------->
 	inline GameObject*			GetParent()					const { return parent; }
@@ -129,7 +130,7 @@ public:
 
 	inline const float			GetBoundingRadius()			const { return boundingRadius; }
 	inline const bool			GetAtRest()					const { return atRest; }
-
+	inline const float			GetTimeSinceRestCheck()		const { return timeSinceRestCheck; }
 
 
 	//<--------- SETTERS ------------->
@@ -157,7 +158,7 @@ public:
 
 	inline void SetBoundingRadius(const float radius) { boundingRadius = radius; }
 	inline void SetAtRest(const bool rest) { atRest = rest; }
-
+	inline void SetTimeSinceRestCheck(const float time) { timeSinceRestCheck = time; }
 
 	//<---------- CALLBACKS ------------>
 	inline void SetOnCollisionCallback(PhysicsCollisionCallback callback) { onCollisionCallback = callback; }
@@ -240,4 +241,11 @@ protected:
 	float maxZ;
 
 	bool atRest;
+
+	//Track the time since the object was last checked to be at rest.
+	//Sometimes objects will have another object moved from underneath it
+	//without a collision happening so the top object will think that
+	//it should still be at rest, when really it should start to fall.
+	//To fix this I occasionally stop all resting objects from resting
+	float timeSinceRestCheck = 0.0f;
 };

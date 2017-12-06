@@ -123,19 +123,35 @@ void PhysicsNode::UpdateVelocities()
 
 void PhysicsNode::DetermineRestState()
 {
-	//Whether the node moved in any of the previous frames
-	bool movement = false;
-
-	for (int i = 0; i < VELOCITY_FRAMES; ++i)
+	//Every 1 second wake up from rest
+	//This accounts for any error in rest calculation
+	//Sometimes objects will have another object moved from underneath it
+	//without a collision happening so the top object will think that
+	//it should still be at rest, when really it should start to fall.
+	//To fix this I occasionally stop all resting objects from resting
+	if (timeSinceRestCheck > 1.0f)
 	{
-		//If any of the previous <VELOCITY_FRAMES> frames velocities are greater than <small value> then the node is not at rest 
-		if (linVelocities[i].Length() > 0.05f || angVelocities[i].Length() > 0.01f)
-		{
-			movement = true;
-		}
+		atRest = false;
 	}
-	atRest = movement ? false : true;
+	else
+	{
+		//Whether the node moved in any of the previous frames
+		bool movement = false;
 
+		for (int i = 0; i < VELOCITY_FRAMES; ++i)
+		{
+			//If any of the previous <VELOCITY_FRAMES> frames velocities are greater than <small value> then the node is not at rest 
+			if (linVelocities[i].Length() > 0.05f || angVelocities[i].Length() > 0.01f)
+			{
+				movement = true;
+			}
+		}
+		atRest = movement ? false : true;
+	}
+	if (!atRest)
+	{
+		timeSinceRestCheck = 0.0f;
+	}
 }
 
 void PhysicsNode::ResetVelocities()
