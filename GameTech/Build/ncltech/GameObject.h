@@ -139,7 +139,6 @@ public:
 	}
 
 	bool scoreUpdating = false;
-	bool scoreUpdated = true;
 	bool targetOn = true;
 	float targetTimer = 0.0f;
 	float updateTimer = 0.0f;

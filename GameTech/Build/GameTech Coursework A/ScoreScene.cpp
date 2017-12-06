@@ -7,10 +7,6 @@
 #include <ncltech\SceneManager.h>
 #include <ncltech\CommonUtils.h>
 
-int totalScore = 0;
-static int badScore = -50;
-static Vector4 badColour = Vector4(1.0f, 0.1f, 0.1f, 1.0f);
-
 ScoreScene::ScoreScene(const std::string& friendly_name)
 	: Scene(friendly_name)
 	, m_AccumTime(0.0f)
@@ -31,7 +27,6 @@ ScoreScene::ScoreScene(const std::string& friendly_name)
 
 ScoreScene::~ScoreScene()
 {
-
 }
 
 
@@ -47,14 +42,15 @@ void ScoreScene::OnInitializeScene()
 	//<--- SCENE CREATION --->
 
 	float startX = -20.0f;
-	float increment = 40.0f / NUM_TARGETS;
+	float incrementWidth = 40.0f / TARGET_ROWS;
+	float incrementHeight = 40.0f / TARGET_COLUMNS;
 
 	for (size_t i = 0; i < NUM_TARGETS; ++i)
 	{
 		std::string targetID = "Target " + i;
 		targets[i] = CommonUtils::BuildCuboidObject(
 			targetID,
-			Vector3(startX + i * increment, 10.0f, -40.0f),
+			Vector3(startX + i / TARGET_COLUMNS * incrementWidth, 10.0f + i % TARGET_COLUMNS* incrementHeight, -40.0f),
 			Vector3(1.0f, 1.0f, 1.0f),
 			true,
 			0.0f,
@@ -83,6 +79,31 @@ void ScoreScene::OnUpdateScene(float dt)
 	m_AccumTime += dt;
 
 	//Update target data
+	UpdateTargetStates(dt);
+
+
+	// You can print text using 'printf' formatting
+	bool donkeys = false;
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.4f, 0.4f, 1.0f), "   - Left click to move");
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.4f, 0.4f, 1.0f), "   - Right click to rotate (They will be more spinnable after tutorial 2)");
+
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.4f, 0.4f, 1.0f), "Score: " + std::to_string(totalScore));
+}
+
+bool ScoreScene::TargetOnHitCallBack(PhysicsNode* self, PhysicsNode* collidingObject)
+{
+	GameObject* obj = self->GetParent();
+	//int targetID = GetTargetID(self->GetParent());
+	//targets[targetID]
+	//totalScore += self->GetParent()->GetScore();
+
+	obj->scoreUpdating = true;
+
+	return true;
+}
+
+void ScoreScene::UpdateTargetStates(float dt)
+{
 	for (size_t i = 0; i < NUM_TARGETS; ++i)
 	{
 		//Update the score if needed
@@ -104,7 +125,6 @@ void ScoreScene::OnUpdateScene(float dt)
 				targets[i]->updateTimer = 0.0f;
 			}
 
-
 			if (targets[i]->targetOn)
 			{
 				targets[i]->SetScore(badScore);
@@ -123,28 +143,9 @@ void ScoreScene::OnUpdateScene(float dt)
 				targets[i]->SetScore(goodScore);
 				targets[i]->targetTimer = 0.0f;
 			}
+
+			targets[i]->targetTimer += dt;
 		}
 
-		targets[i]->targetTimer += dt;
 	}
-
-	// You can print text using 'printf' formatting
-	bool donkeys = false;
-	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.4f, 0.4f, 1.0f), "   - Left click to move");
-	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.4f, 0.4f, 1.0f), "   - Right click to rotate (They will be more spinnable after tutorial 2)");
-
-	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.4f, 0.4f, 1.0f), "Score: " + std::to_string(totalScore));
-}
-
-bool ScoreScene::TargetOnHitCallBack(PhysicsNode* self, PhysicsNode* collidingObject)
-{
-	GameObject* obj = self->GetParent();
-	//int targetID = GetTargetID(self->GetParent());
-	//targets[targetID]
-	//totalScore += self->GetParent()->GetScore();
-
-	obj->scoreUpdating = true;
-	obj->scoreUpdated = false;
-
-	return true;
 }

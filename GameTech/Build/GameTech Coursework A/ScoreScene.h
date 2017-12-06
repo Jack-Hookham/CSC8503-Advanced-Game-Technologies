@@ -9,7 +9,10 @@
 #include <ncltech\SceneManager.h>
 #include <ncltech\CommonUtils.h>
 
-#define NUM_TARGETS 10
+#define TARGET_ROWS 9
+#define TARGET_COLUMNS 3
+#define NUM_TARGETS TARGET_ROWS * TARGET_COLUMNS
+//#define NUM_TARGETS 9
 
 class ScoreScene : public Scene
 {
@@ -24,13 +27,16 @@ public:
 protected:
 	static bool TargetOnHitCallBack(PhysicsNode* self, PhysicsNode* collidingObject);
 
+	void UpdateTargetStates(float dt);
+
 	float m_AccumTime;
 
 	GLuint m_targetTexture;
-	Vector4 goodColour = Vector4(0.1f, 1.0f, 0.1f, 1.0f);
+	int totalScore = 0;
 	int goodScore = 100;
-	float targetTimers[NUM_TARGETS] = { 0.0f };
-	bool targetsOn[NUM_TARGETS] = { true };		//True - Green target, False - Red target
+	int badScore = -50;
+	Vector4 goodColour = Vector4(0.1f, 1.0f, 0.1f, 1.0f);
+	Vector4 badColour = Vector4(1.0f, 0.1f, 0.1f, 1.0f);
 
 	GameObject* targets[NUM_TARGETS];
 };
