@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{6E6C4E29-F7BA-4182-A199-257ABDA3E9C3}</ProjectGuid>
+    <ProjectGuid>{DF89E5E3-D66A-471F-85FD-8C960F2AA8B9}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Tuts_Network_Server</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>

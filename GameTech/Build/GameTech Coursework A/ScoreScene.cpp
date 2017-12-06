@@ -88,12 +88,23 @@ void ScoreScene::OnUpdateScene(float dt)
 		//Update the score if needed
 		if (targets[i]->scoreUpdating)
 		{
-			if (targets[i]->updateTimer > 0.5f)
+			if (targets[i]->updateTimer < 1e-5f)
 			{
+				//only update score once per collision
 				totalScore += targets[i]->GetScore();
+			}
+
+			targets[i]->updateTimer += dt;
+
+			if (targets[i]->updateTimer > 0.1f)
+			{
+				//Reset variables once a small amount of time passes to ensure one collision 
+				//doesn't cause the score to update more than once
 				targets[i]->scoreUpdating = false;
 				targets[i]->updateTimer = 0.0f;
 			}
+
+
 			if (targets[i]->targetOn)
 			{
 				targets[i]->SetScore(badScore);
@@ -115,7 +126,6 @@ void ScoreScene::OnUpdateScene(float dt)
 		}
 
 		targets[i]->targetTimer += dt;
-		targets[i]->updateTimer += dt;
 	}
 
 	// You can print text using 'printf' formatting
@@ -134,6 +144,7 @@ bool ScoreScene::TargetOnHitCallBack(PhysicsNode* self, PhysicsNode* collidingOb
 	//totalScore += self->GetParent()->GetScore();
 
 	obj->scoreUpdating = true;
+	obj->scoreUpdated = false;
 
 	return true;
 }
