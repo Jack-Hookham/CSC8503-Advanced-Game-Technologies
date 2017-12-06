@@ -7,12 +7,13 @@
 #include <ncltech\SceneManager.h>
 #include <ncltech\CommonUtils.h>
 
-GameObject* targets[NUM_TARGETS];
+int totalScore = 0;
+static int badScore = -50;
+static Vector4 badColour = Vector4(1.0f, 0.1f, 0.1f, 1.0f);
 
 ScoreScene::ScoreScene(const std::string& friendly_name)
 	: Scene(friendly_name)
 	, m_AccumTime(0.0f)
-	, m_pPlayer(NULL)
 {
 	m_targetTexture = SOIL_load_OGL_texture(
 		TEXTUREDIR"target.tga",
@@ -48,12 +49,11 @@ void ScoreScene::OnInitializeScene()
 	float startX = -20.0f;
 	float increment = 40.0f / NUM_TARGETS;
 
-	Vector4 goodColour = Vector4(0.1f, 1.0f, 0.1f, 1.0f);
-
 	for (size_t i = 0; i < NUM_TARGETS; ++i)
 	{
+		std::string targetID = "Target " + i;
 		targets[i] = CommonUtils::BuildCuboidObject(
-			"",
+			targetID,
 			Vector3(startX + i * increment, 10.0f, -40.0f),
 			Vector3(1.0f, 1.0f, 1.0f),
 			true,
@@ -61,7 +61,7 @@ void ScoreScene::OnInitializeScene()
 			true,
 			false,
 			goodColour);
-		targets[i]->SetScore(100);
+		targets[i]->SetScore(goodScore);
 		targets[i]->Physics()->SetOnCollisionCallback(TargetOnHitCallBack);
 		this->AddGameObject(targets[i]);
 	}
@@ -82,17 +82,58 @@ void ScoreScene::OnUpdateScene(float dt)
 {
 	m_AccumTime += dt;
 
+	//Update target data
+	for (size_t i = 0; i < NUM_TARGETS; ++i)
+	{
+		//Update the score if needed
+		if (targets[i]->scoreUpdating)
+		{
+			if (targets[i]->updateTimer > 0.5f)
+			{
+				totalScore += targets[i]->GetScore();
+				targets[i]->scoreUpdating = false;
+				targets[i]->updateTimer = 0.0f;
+			}
+			if (targets[i]->targetOn)
+			{
+				targets[i]->SetScore(badScore);
+				targets[i]->Render()->SetColorRecursive(badColour);
+				targets[i]->targetOn = false;
+			}
+		}
+
+		if (!targets[i]->targetOn)
+		{
+			//if the target is off (red)
+			if (targets[i]->targetTimer > 5.0f)
+			{
+				targets[i]->targetOn = true;
+				targets[i]->Render()->SetColorRecursive(goodColour);
+				targets[i]->SetScore(goodScore);
+				targets[i]->targetTimer = 0.0f;
+			}
+		}
+
+		targets[i]->targetTimer += dt;
+		targets[i]->updateTimer += dt;
+	}
+
 	// You can print text using 'printf' formatting
 	bool donkeys = false;
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.4f, 0.4f, 1.0f), "   - Left click to move");
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.4f, 0.4f, 1.0f), "   - Right click to rotate (They will be more spinnable after tutorial 2)");
+
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.4f, 0.4f, 1.0f), "Score: " + std::to_string(totalScore));
 }
 
 bool ScoreScene::TargetOnHitCallBack(PhysicsNode* self, PhysicsNode* collidingObject)
 {
+	GameObject* obj = self->GetParent();
+	//int targetID = GetTargetID(self->GetParent());
+	//targets[targetID]
+	//totalScore += self->GetParent()->GetScore();
 
-	self->GetParent()->Render()->SetColorRecursive(Vector4(1.0f, 0.1f, 0.1f, 1.0f));
-	self->GetParent()->SetScore(-50);
+	obj->scoreUpdating = true;
 
 	return true;
 }

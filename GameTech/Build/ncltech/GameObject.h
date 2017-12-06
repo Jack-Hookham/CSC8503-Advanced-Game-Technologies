@@ -138,8 +138,10 @@ public:
 		}
 	}
 
-public:
-	
+	bool scoreUpdating = false;
+	bool targetOn = true;
+	float targetTimer = 0.0f;
+	float updateTimer = 0.0f;
 
 protected:
 	//Scene  
@@ -150,5 +152,6 @@ protected:
 	RenderNode*					renderNode;
 	PhysicsNode*				physicsNode;
 
+	//Target stuff
 	int score = 0;
 };
