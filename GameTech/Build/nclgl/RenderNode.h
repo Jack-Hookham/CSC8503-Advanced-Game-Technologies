@@ -69,6 +69,8 @@ public:
 	std::vector<RenderNode*>::const_iterator GetChildIteratorStart()	{return children.begin();}
 	std::vector<RenderNode*>::const_iterator GetChildIteratorEnd()	{return children.end();}
 
+	std::vector<RenderNode*> GetChildren() { return children; }
+
 	static bool		CompareByCameraDistance(RenderNode*a,RenderNode*b) ;
 	static bool		CompareByZ(RenderNode*a,RenderNode*b) ;
 

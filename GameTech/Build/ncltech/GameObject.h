@@ -65,6 +65,9 @@ public:
 	inline const Scene* GetScene() const	{ return scene; }
 	inline		 Scene* GetScene()			{ return scene; }
 
+	inline int GetScore() const { return score; }
+	inline void SetScore(const int s) { score = s; }
+
 
 	//<---------- PHYSICS ------------>
 	inline bool  HasPhysics() const					{ return (physicsNode != NULL); }
@@ -135,7 +138,6 @@ public:
 		}
 	}
 
-
 public:
 	
 
@@ -147,4 +149,6 @@ protected:
 	//Components
 	RenderNode*					renderNode;
 	PhysicsNode*				physicsNode;
+
+	int score = 0;
 };
