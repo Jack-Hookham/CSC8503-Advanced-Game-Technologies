@@ -480,7 +480,7 @@ void GraphicsPipeline::BuildShadowTransforms()
 
 void GraphicsPipeline::ResetCamera()
 {
-	camera->SetPosition(Vector3(0.0f, 10.0f, 0.0f));
+	camera->SetPosition(Vector3(-1.0f, 10.0f, 15.0f));
 	camera->SetYaw(0.f);
 	camera->SetPitch(-20.f);
 }

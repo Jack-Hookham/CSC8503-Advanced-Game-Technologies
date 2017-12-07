@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClInclude Include="BallPoolScene.h" />
     <ClInclude Include="EmptyScene.h" />
+    <ClInclude Include="PyramidScene.h" />
     <ClInclude Include="ScoreScene.h" />
     <ClInclude Include="SandboxScene.h" />
     <ClInclude Include="SoftBodyScene.h" />

@@ -9,6 +9,7 @@
 #include <iomanip>
 
 #include "SandboxScene.h"
+#include "PyramidScene.h"
 #include "ScoreScene.h"
 #include "EmptyScene.h"
 #include "BallPoolScene.h"
@@ -61,8 +62,9 @@ void Initialize()
 	//Enqueue All Scenes
 	//SceneManager::Instance()->EnqueueScene(new EmptyScene("GameTech #X - More peace and quiet"));
 	//SceneManager::Instance()->EnqueueScene(new SandboxScene("GameTech #1 - Sandbox!"));
-	SceneManager::Instance()->EnqueueScene(new ScoreScene("GameTech #2 - Projectile Game"));
-	SceneManager::Instance()->EnqueueScene(new BallPoolScene("GameTech #3 - Ball Pool"));
+	SceneManager::Instance()->EnqueueScene(new PyramidScene("GameTech #2 - Sandbox!"));
+	SceneManager::Instance()->EnqueueScene(new ScoreScene("GameTech #3 - Projectile Game"));
+	SceneManager::Instance()->EnqueueScene(new BallPoolScene("GameTech #4 - Ball Pool"));
 }
 
 // Print Debug Info
@@ -232,7 +234,8 @@ void HandleKeyboardInputs()
 			true,
 			true,
 			color,
-			false);
+			false,
+			CommonMeshes::MeshType::PORTAL_CUBE);
 		obj->Physics()->SetElasticity(0.1f);
 		obj->Physics()->SetFriction(0.9f);
 		obj->Physics()->SetLinearVelocity(direction * projectTileSpeed);

@@ -29,7 +29,7 @@ public:
 		glGenerateMipmap(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		Mesh* cube = CommonMeshes::Cube();
+		Mesh* cube = CommonMeshes::Meshes()[CommonMeshes::MeshType::DEFAULT_CUBE];
 		m_TargetMesh = new Mesh(*cube);
 		m_TargetMesh->SetTexture(tex);
 		//SetWorldRadius(10.0f);
@@ -74,7 +74,7 @@ public:
 
 	//Create a projectile
 		RenderNode* sphereRender = new RenderNode();
-		sphereRender->SetMesh(CommonMeshes::Sphere());
+		sphereRender->SetMesh(CommonMeshes::Meshes()[CommonMeshes::MeshType::DEFAULT_SPHERE]);
 		sphereRender->SetTransform(Matrix4::Scale(Vector3(0.5f, 0.5f, 0.5f))); //No position! That is now all handled in PhysicsNode
 		sphereRender->SetColor(Vector4(1.0f, 0.2f, 0.5f, 1.0f));
 		sphereRender->SetBoundingRadius(1.0f);
@@ -97,7 +97,7 @@ public:
 		//Sphere 2
 		//Create a projectile
 		RenderNode* sphereRender2 = new RenderNode();
-		sphereRender2->SetMesh(CommonMeshes::Sphere());
+		sphereRender2->SetMesh(CommonMeshes::Meshes()[CommonMeshes::MeshType::DEFAULT_SPHERE]);
 		sphereRender2->SetTransform(Matrix4::Scale(Vector3(1.0f, 0.5f, 0.5f))); //No position! That is now all handled in PhysicsNode
 		sphereRender2->SetColor(Vector4(0.2f, 0.2f, 0.9f, 1.0f));
 		sphereRender2->SetBoundingRadius(1.0f);

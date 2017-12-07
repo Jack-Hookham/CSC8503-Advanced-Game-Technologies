@@ -33,7 +33,7 @@ void CommonMeshes::InitializeMeshes()
 			NCLERROR("Unable to load checkerboard texture!");
 		}
 
-		m_pTargetTex = SOIL_load_OGL_texture(TEXTUREDIR"target.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
+		m_pTargetTex = SOIL_load_OGL_texture(TEXTUREDIR"targettextureblack.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
 		if (m_pTargetTex)
 		{
 			glBindTexture(GL_TEXTURE_2D, m_pTargetTex);

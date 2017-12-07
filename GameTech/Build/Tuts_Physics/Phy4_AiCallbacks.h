@@ -172,7 +172,7 @@ public:
 				float color_hue = col_range_start + (rand() % 100) / 100.0f * (col_range_end - col_range_start);
 
 				RenderNode* node = new RenderNode();
-				node->SetMesh(CommonMeshes::Cube());
+				node->SetMesh(CommonMeshes::Meshes()[CommonMeshes::MeshType::DEFAULT_CUBE]);
 				node->SetTransform(
 					Matrix4::Translation(Vector3(
 						-1.f + x*spacing + x * divisor + hdivisor,

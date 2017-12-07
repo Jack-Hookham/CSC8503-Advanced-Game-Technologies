@@ -7,10 +7,10 @@
 #include <ncltech\CommonUtils.h>
 #include <ncltech\PhysicsEngine.h>
 
-class Phy7_Solver : public Scene
+class PyramidScene : public Scene
 {
 public:
-	Phy7_Solver(const std::string& friendly_name)
+	PyramidScene(const std::string& friendly_name)
 		: Scene(friendly_name)
 		, m_StackHeight(6)
 	{}
@@ -33,8 +33,8 @@ public:
 		// Note: Also, i've just noticed we have only ever done cube's not cuboids.. 
 		//       so, to prove to any non-believes, try turning the pyramid of cubes
 		//       into rectangles :)
-		const float width_scalar = 1.0f; 
-		const float height_scalar = 1.0f; 
+		const float width_scalar = 1.0f;
+		const float height_scalar = 1.0f;
 
 		for (int y = 0; y < m_StackHeight; ++y)
 		{
@@ -49,7 +49,7 @@ public:
 					1.f,
 					true,
 					true,
-					color,
+					Vector4(1.0f, 1.0f, 1.0f, 1.0f),
 					false,
 					CommonMeshes::MeshType::PORTAL_CUBE);
 				cube->Physics()->SetElasticity(0.0f); //No elasticity (Little cheaty)
@@ -58,8 +58,6 @@ public:
 				this->AddGameObject(cube);
 			}
 		}
-		
-
 	}
 
 

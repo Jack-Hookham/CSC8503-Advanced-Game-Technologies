@@ -206,7 +206,7 @@ void HandleKeyboardInputs()
 	//Fire sphere
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_J))
 	{
-		float projectTileSpeed = 30.0f;
+		float projectTileSpeed = 50.0f;
 
 		//Set direction to camera direction
 		Vector3 direction = Matrix4::Rotation(GraphicsPipeline::Instance()->GetCamera()->GetYaw(), Vector3(0, 1, 0))
@@ -233,7 +233,7 @@ void HandleKeyboardInputs()
 	//Fire cube
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_K))
 	{
-		float projectTileSpeed = 30.0f;
+		float projectTileSpeed = 50.0f;
 
 		//Set direction to camera direction
 		Vector3 direction = Matrix4::Rotation(GraphicsPipeline::Instance()->GetCamera()->GetYaw(), Vector3(0, 1, 0))
@@ -249,7 +249,8 @@ void HandleKeyboardInputs()
 			true,
 			true,
 			color,
-			false);
+			false,
+			CommonMeshes::MeshType::PORTAL_CUBE);
 		obj->Physics()->SetElasticity(0.1f);
 		obj->Physics()->SetFriction(0.9f);
 		obj->Physics()->SetLinearVelocity(direction * projectTileSpeed);

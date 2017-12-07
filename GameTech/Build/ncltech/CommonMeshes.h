@@ -37,16 +37,8 @@ public:
 	//To use these resources, just make a copy of the rendernode structure as required
 	// e.g RenderNode* cube_copy = new RenderNode(*CommonMeshes::Cube());
 
-	//Cube
+	//Mesh Array
 	static Mesh** Meshes()		{ return m_pMeshes; }
-	//static Mesh* Cube()			{ return m_pCube; }
-	//static Mesh* TargetCube()	{ return m_pTargetCube; }
-	//static Mesh* PortalCube()	{ return m_pPortalCube; }
-
-	//Sphere
-	//static Mesh* Sphere()		{ return m_pSphere; }
-
-
 
 	//PhysicsEngine Checkerboard - Hidden here for reasons of laziness
 	static const GLuint CheckerboardTex()   { return m_pCheckerboardTex; }
@@ -58,10 +50,6 @@ protected:
 	static void ReleaseMeshes();
 
 	static Mesh* m_pMeshes[NUM_MESHES];
-	//static Mesh* m_pCube;
-	//static Mesh* m_pTargetCube;
-	//static Mesh* m_pPortalCube;
-	//static Mesh* m_pSphere;
 
 	static GLuint m_pCheckerboardTex;
 	static GLuint m_pTargetTex;
