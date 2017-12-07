@@ -43,24 +43,16 @@ void ScoreScene::OnInitializeScene()
 		float zPos = startZ - ((i % TARGET_COLUMNS) * incrementZ);
 
 		std::string targetID = "Target " + i;
-		targets[i] = CommonUtils::BuildCuboidObject(
+		targets[i] = new TargetObj(
 			targetID,
-			Vector3(xPos, yPos, zPos),
-			Vector3(1.0f, 1.0f, 1.0f),
-			true,
-			0.0f,
-			true,
-			false,
-			goodColour,
-			false,
-			CommonMeshes::MeshType::TARGET_CUBE);
+			Vector3(xPos, yPos, zPos));
 		targets[i]->SetScore(goodScore);
-		targets[i]->Physics()->SetOnCollisionCallback(TargetOnHitCallBack);
-		//targets[i]->Physics()->SetOnCollisionCallback(
-		//	std::bind(&ScoreScene::TargetOnHitCallBack2, this,
-		//		targets[i],
-		//		std::placeholders::_1,
-		//		std::placeholders::_2));
+		//targets[i]->Physics()->SetOnCollisionCallback(TargetOnHitCallBack);
+		targets[i]->Physics()->SetOnCollisionCallback(
+			std::bind(&ScoreScene::TargetOnHitCallBack2, this,
+				targets[i],
+				std::placeholders::_1,
+				std::placeholders::_2));
 
 		this->AddGameObject(targets[i]);
 	}
@@ -89,16 +81,16 @@ void ScoreScene::OnUpdateScene(float dt)
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.4f, 0.4f, 1.0f), "Score: " + std::to_string(totalScore));
 }
 
-bool ScoreScene::TargetOnHitCallBack(PhysicsNode* self, PhysicsNode* collidingObject)
-{
-	self->GetParent()->SetScoreUpdating(true);
+//bool ScoreScene::TargetOnHitCallBack(PhysicsNode* self, PhysicsNode* collidingObject)
+//{
+//	self->GetParent()->SetScoreUpdating(true);
+//
+//	return true;
+//}
 
-	return true;
-}
-
-bool ScoreScene::TargetOnHitCallBack2(GameObject* self_ga, PhysicsNode* self, PhysicsNode* collidingObject)
+bool ScoreScene::TargetOnHitCallBack2(TargetObj* target, PhysicsNode* self, PhysicsNode* collidingObject)
 {
-	self->GetParent()->SetScoreUpdating(true);
+	target->SetScoreUpdating(true);
 
 	return true;
 }

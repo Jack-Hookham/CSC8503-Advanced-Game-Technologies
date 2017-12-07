@@ -65,6 +65,8 @@ void Initialize()
 	SceneManager::Instance()->EnqueueScene(new PyramidScene("GameTech #2 - Sandbox!"));
 	SceneManager::Instance()->EnqueueScene(new ScoreScene("GameTech #3 - Projectile Game"));
 	SceneManager::Instance()->EnqueueScene(new BallPoolScene("GameTech #4 - Ball Pool"));
+
+	GraphicsPipeline::Instance()->SetVsyncEnabled(true);
 }
 
 // Print Debug Info

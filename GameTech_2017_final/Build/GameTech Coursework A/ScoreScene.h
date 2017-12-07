@@ -9,6 +9,8 @@
 #include <ncltech\SceneManager.h>
 #include <ncltech\CommonUtils.h>
 
+#include "TargetObj.h"
+
 #define TARGET_ROWS 9
 #define TARGET_COLUMNS 5
 #define NUM_TARGETS TARGET_ROWS * TARGET_COLUMNS
@@ -25,8 +27,8 @@ public:
 	virtual void OnUpdateScene(float dt) override;
 
 protected:
-	static bool TargetOnHitCallBack(PhysicsNode* self, PhysicsNode* collidingObject);
-	bool TargetOnHitCallBack2(GameObject* self_ga, PhysicsNode* self, PhysicsNode* collidingObject);
+	//static bool TargetOnHitCallBack(PhysicsNode* self, PhysicsNode* collidingObject);
+	bool TargetOnHitCallBack2(TargetObj* target, PhysicsNode* self, PhysicsNode* collidingObject);
 
 	void UpdateTargetStates(float dt);
 
@@ -38,5 +40,5 @@ protected:
 	Vector4 goodColour = Vector4(0.1f, 1.0f, 0.1f, 1.0f);
 	Vector4 badColour = Vector4(1.0f, 0.1f, 0.1f, 1.0f);
 
-	GameObject* targets[NUM_TARGETS];
+	TargetObj* targets[NUM_TARGETS];
 };

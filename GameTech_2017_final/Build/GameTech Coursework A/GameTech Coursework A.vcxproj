@@ -149,6 +149,7 @@
     <ClInclude Include="ScoreScene.h" />
     <ClInclude Include="SandboxScene.h" />
     <ClInclude Include="SoftBodyScene.h" />
+    <ClInclude Include="TargetObj.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

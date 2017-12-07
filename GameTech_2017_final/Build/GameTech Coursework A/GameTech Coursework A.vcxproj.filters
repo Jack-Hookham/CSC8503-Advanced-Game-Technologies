@@ -53,5 +53,8 @@
     <ClInclude Include="PyramidScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TargetObj.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

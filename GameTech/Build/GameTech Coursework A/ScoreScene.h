@@ -26,6 +26,7 @@ public:
 
 protected:
 	static bool TargetOnHitCallBack(PhysicsNode* self, PhysicsNode* collidingObject);
+	bool TargetOnHitCallBack2(GameObject* self_ga, PhysicsNode* self, PhysicsNode* collidingObject);
 
 	void UpdateTargetStates(float dt);
 
