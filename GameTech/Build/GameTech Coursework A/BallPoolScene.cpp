@@ -1,4 +1,4 @@
-#include "EmptyScene.h"
+#include "BallPoolScene.h"
 
 #include <nclgl\Vector4.h>
 #include <ncltech\GraphicsPipeline.h>
@@ -7,20 +7,20 @@
 #include <ncltech\SceneManager.h>
 #include <ncltech\CommonUtils.h>
 
-EmptyScene::EmptyScene(const std::string& friendly_name)
+BallPoolScene::BallPoolScene(const std::string& friendly_name)
 	: Scene(friendly_name)
 	, m_AccumTime(0.0f)
 	, m_pPlayer(NULL)
 {
 }
 
-EmptyScene::~EmptyScene()
+BallPoolScene::~BallPoolScene()
 {
 
 }
 
 
-void EmptyScene::OnInitializeScene()
+void BallPoolScene::OnInitializeScene()
 {
 	//Set the camera position
 	GraphicsPipeline::Instance()->GetCamera()->SetPosition(Vector3(15.0f, 10.0f, -15.0f));
@@ -96,14 +96,14 @@ void EmptyScene::OnInitializeScene()
 	//create_ball_cube(Vector3(8.0f, 0.5f, -12.0f), Vector3(0.5f, 0.5f, 0.5f), 0.1f);
 }
 
-void EmptyScene::OnCleanupScene()
+void BallPoolScene::OnCleanupScene()
 {
 	//Just delete all created game objects 
 	//  - this is the default command on any Scene instance so we don't really need to override this function here.
 	Scene::OnCleanupScene();
 }
 
-void EmptyScene::OnUpdateScene(float dt)
+void BallPoolScene::OnUpdateScene(float dt)
 {
 	m_AccumTime += dt;
 

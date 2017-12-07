@@ -28,17 +28,25 @@ void ScoreScene::OnInitializeScene()
 	m_AccumTime = 0.0f;
 
 	//<--- SCENE CREATION --->
-
+	//Set up targets
 	float startX = -20.0f;
-	float incrementWidth = 40.0f / TARGET_ROWS;
-	float incrementHeight = 40.0f / TARGET_COLUMNS;
+	float startY = 5.0f;
+	float startZ = -30.0f;
+	float incrementX = 40.0f / TARGET_ROWS;
+	float incrementY = 20.0f / TARGET_COLUMNS;
+	float incrementZ = 40.0f / TARGET_ROWS;
+
 
 	for (size_t i = 0; i < NUM_TARGETS; ++i)
 	{
+		float xPos = startX + i / TARGET_COLUMNS * incrementX;
+		float yPos = startY + i % TARGET_COLUMNS * incrementY;
+		float zPos = startZ - ((i % TARGET_COLUMNS) * incrementZ);
+
 		std::string targetID = "Target " + i;
 		targets[i] = CommonUtils::BuildCuboidObject(
 			targetID,
-			Vector3(startX + i / TARGET_COLUMNS * incrementWidth, 10.0f + i % TARGET_COLUMNS* incrementHeight, -40.0f),
+			Vector3(xPos, yPos, zPos),
 			Vector3(1.0f, 1.0f, 1.0f),
 			true,
 			0.0f,
@@ -133,7 +141,7 @@ void ScoreScene::UpdateTargetStates(float dt)
 		if (!targets[i]->GetTargetOn())
 		{
 			//if the target is off (red)
-			if (targets[i]->GetTargetTimer() > 5.0f)
+			if (targets[i]->GetTargetTimer() > 20.0f)
 			{
 				targets[i]->SetTargetOn(true);
 				targets[i]->Render()->SetColorRecursive(goodColour);

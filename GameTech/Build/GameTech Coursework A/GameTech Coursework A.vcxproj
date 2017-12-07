@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BallPoolScene.cpp" />
     <ClCompile Include="EmptyScene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ScoreScene.cpp" />
@@ -142,6 +143,7 @@
     <ClCompile Include="SoftBodyScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BallPoolScene.h" />
     <ClInclude Include="EmptyScene.h" />
     <ClInclude Include="ScoreScene.h" />
     <ClInclude Include="SandboxScene.h" />

@@ -10,7 +10,7 @@
 #include <ncltech\CommonUtils.h>
 
 #define TARGET_ROWS 9
-#define TARGET_COLUMNS 3
+#define TARGET_COLUMNS 5
 #define NUM_TARGETS TARGET_ROWS * TARGET_COLUMNS
 //#define NUM_TARGETS 9
 
