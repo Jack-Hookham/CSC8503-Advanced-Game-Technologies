@@ -65,10 +65,6 @@ public:
 	inline const Scene* GetScene() const	{ return scene; }
 	inline		 Scene* GetScene()			{ return scene; }
 
-	inline int GetScore() const { return score; }
-	inline void SetScore(const int s) { score = s; }
-
-
 	//<---------- PHYSICS ------------>
 	inline bool  HasPhysics() const					{ return (physicsNode != NULL); }
 	inline const PhysicsNode*	Physics() const		{ return physicsNode; }
@@ -138,10 +134,22 @@ public:
 		}
 	}
 
-	bool scoreUpdating = false;
-	bool targetOn = true;
-	float targetTimer = 0.0f;
-	float updateTimer = 0.0f;
+	//Score access
+	inline void SetScore(const int value) { score = value; }
+	inline void SetScoreUpdating(const bool value) { scoreUpdating = value; }
+	inline void SetTargetOn(const bool value) { targetOn = value; }
+
+	inline const int GetScore() const { return score; }
+	inline const bool GetScoreUpdating() const { return scoreUpdating; }
+	inline const bool GetTargetOn() const { return targetOn; }
+	inline const float GetTargetTimer() const { return targetTimer; }
+	inline const float GetUpdateTimer() const { return updateTimer; }
+
+	inline void ResetTargetTimer() { targetTimer = 0.0f; }
+	inline void ResetUpdateTimer() { updateTimer = 0.0f; }
+
+	inline void UpdateTargetTimer(const float dt) { targetTimer += dt; }
+	inline void UpdateUpdateTimer(const float dt) { updateTimer += dt; }
 
 protected:
 	//Scene  
@@ -154,4 +162,9 @@ protected:
 
 	//Target stuff
 	int score = 0;
+
+	bool scoreUpdating = false;
+	bool targetOn = true;
+	float targetTimer = 0.0f;
+	float updateTimer = 0.0f;
 };

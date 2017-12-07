@@ -11,18 +11,6 @@ ScoreScene::ScoreScene(const std::string& friendly_name)
 	: Scene(friendly_name)
 	, m_AccumTime(0.0f)
 {
-	m_targetTexture = SOIL_load_OGL_texture(
-		TEXTUREDIR"target.tga",
-		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
-		SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT);
-
-	glBindTexture(GL_TEXTURE_2D, m_targetTexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 ScoreScene::~ScoreScene()
@@ -62,6 +50,20 @@ void ScoreScene::OnInitializeScene()
 		this->AddGameObject(targets[i]);
 	}
 
+	//Create the target texture
+	m_targetTexture = SOIL_load_OGL_texture(
+		TEXTUREDIR"target.tga",
+		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
+		SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT);
+
+	glBindTexture(GL_TEXTURE_2D, m_targetTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
 	//This overrides the default checkerboard texture, setting all cubes to have the target texture
 	CommonMeshes::Cube()->SetTexture(m_targetTexture);
 }
@@ -92,12 +94,7 @@ void ScoreScene::OnUpdateScene(float dt)
 
 bool ScoreScene::TargetOnHitCallBack(PhysicsNode* self, PhysicsNode* collidingObject)
 {
-	GameObject* obj = self->GetParent();
-	//int targetID = GetTargetID(self->GetParent());
-	//targets[targetID]
-	//totalScore += self->GetParent()->GetScore();
-
-	obj->scoreUpdating = true;
+	self->GetParent()->SetScoreUpdating(true);
 
 	return true;
 }
@@ -107,45 +104,44 @@ void ScoreScene::UpdateTargetStates(float dt)
 	for (size_t i = 0; i < NUM_TARGETS; ++i)
 	{
 		//Update the score if needed
-		if (targets[i]->scoreUpdating)
+		if (targets[i]->GetScoreUpdating())
 		{
-			if (targets[i]->updateTimer < 1e-5f)
+			if (targets[i]->GetUpdateTimer() < 1e-5f)
 			{
 				//only update score once per collision
 				totalScore += targets[i]->GetScore();
 			}
 
-			targets[i]->updateTimer += dt;
+			targets[i]->UpdateUpdateTimer(dt);
 
-			if (targets[i]->updateTimer > 0.1f)
+			if (targets[i]->GetUpdateTimer() > 0.1f)
 			{
 				//Reset variables once a small amount of time passes to ensure one collision 
 				//doesn't cause the score to update more than once
-				targets[i]->scoreUpdating = false;
-				targets[i]->updateTimer = 0.0f;
+				targets[i]->SetScoreUpdating(false);
+				targets[i]->ResetUpdateTimer();
 			}
 
-			if (targets[i]->targetOn)
+			if (targets[i]->GetTargetOn())
 			{
 				targets[i]->SetScore(badScore);
 				targets[i]->Render()->SetColorRecursive(badColour);
-				targets[i]->targetOn = false;
+				targets[i]->SetTargetOn(false);
 			}
 		}
 
-		if (!targets[i]->targetOn)
+		if (!targets[i]->GetTargetOn())
 		{
 			//if the target is off (red)
-			if (targets[i]->targetTimer > 5.0f)
+			if (targets[i]->GetTargetTimer() > 5.0f)
 			{
-				targets[i]->targetOn = true;
+				targets[i]->SetTargetOn(true);
 				targets[i]->Render()->SetColorRecursive(goodColour);
 				targets[i]->SetScore(goodScore);
-				targets[i]->targetTimer = 0.0f;
+				targets[i]->ResetTargetTimer();
 			}
 
-			targets[i]->targetTimer += dt;
+			targets[i]->UpdateTargetTimer(dt);
 		}
-
 	}
 }
