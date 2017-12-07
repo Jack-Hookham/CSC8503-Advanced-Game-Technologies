@@ -19,6 +19,7 @@ Description:
 
 #define RAND() ((rand()%101)/100.0f)
 
+#include "CommonMeshes.h"
 #include "GameObject.h"
 
 namespace CommonUtils
@@ -43,7 +44,8 @@ namespace CommonUtils
 		bool collidable = true,				//requires physics_enabled = true
 		bool dragable = true,
 		const Vector4& color = Vector4(1.0f, 1.0f, 1.0f, 1.0f),
-		bool rest = false);
+		bool rest = false,
+		CommonMeshes::MeshType meshType = CommonMeshes::MeshType::DEFAULT_SPHERE);
 
 	//Generates a default Cuboid object with the parameters specified
 	GameObject* BuildCuboidObject(
@@ -55,5 +57,6 @@ namespace CommonUtils
 		bool collidable = true,				//requires physics_enabled = true
 		bool dragable = true,
 		const Vector4& color = Vector4(1.0f, 1.0f, 1.0f, 1.0f),
-		bool rest = false);
+		bool rest = false,
+		CommonMeshes::MeshType meshType = CommonMeshes::MeshType::DEFAULT_CUBE);
 };

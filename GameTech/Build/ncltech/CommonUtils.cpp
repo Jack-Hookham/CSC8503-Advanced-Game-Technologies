@@ -109,13 +109,14 @@ GameObject* CommonUtils::BuildSphereObject(
 	bool collidable,
 	bool dragable,
 	const Vector4& color,
-	const bool rest)
+	const bool rest,
+	CommonMeshes::MeshType meshType)
 {
 	//Due to the way SceneNode/RenderNode's were setup, we have to make a dummy node which has the mesh and scaling transform
 	// and a parent node that will contain the world transform/physics transform
 	RenderNode* rnode = new RenderNode();
 
-	RenderNode* dummy = new RenderNode(CommonMeshes::Sphere(), color);
+	RenderNode* dummy = new RenderNode(CommonMeshes::Meshes()[meshType], color);
 	dummy->SetTransform(Matrix4::Scale(Vector3(radius, radius, radius)));
 	rnode->AddChild(dummy);
 
@@ -165,13 +166,14 @@ GameObject* CommonUtils::BuildCuboidObject(
 	bool collidable,
 	bool dragable,
 	const Vector4& color,
-	bool rest)
+	bool rest, 
+	CommonMeshes::MeshType meshType)
 {
 	//Due to the way SceneNode/RenderNode's were setup, we have to make a dummy node which has the mesh and scaling transform
 	// and a parent node that will contain the world transform/physics transform
 	RenderNode* rnode = new RenderNode();
 
-	RenderNode* dummy = new RenderNode(CommonMeshes::Cube(), color);
+	RenderNode* dummy = new RenderNode(CommonMeshes::Meshes()[meshType], color);
 	dummy->SetTransform(Matrix4::Scale(halfdims));
 	rnode->AddChild(dummy);
 

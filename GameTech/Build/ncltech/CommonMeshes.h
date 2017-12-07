@@ -22,14 +22,29 @@ class CommonMeshes
 	friend class SceneManager; //Initializes/Destroys the given meshes within it's own lifecycle
 
 public:
+	enum MeshType
+	{
+		//Cubes
+		DEFAULT_CUBE,
+		TARGET_CUBE,
+		PORTAL_CUBE,
+
+		//Spheres
+		DEFAULT_SPHERE,
+
+		NUM_MESHES
+	};
 	//To use these resources, just make a copy of the rendernode structure as required
 	// e.g RenderNode* cube_copy = new RenderNode(*CommonMeshes::Cube());
 
 	//Cube
-	static Mesh* Cube()			{ return m_pCube; }
+	static Mesh** Meshes()		{ return m_pMeshes; }
+	//static Mesh* Cube()			{ return m_pCube; }
+	//static Mesh* TargetCube()	{ return m_pTargetCube; }
+	//static Mesh* PortalCube()	{ return m_pPortalCube; }
 
 	//Sphere
-	static Mesh* Sphere()		{ return m_pSphere; }
+	//static Mesh* Sphere()		{ return m_pSphere; }
 
 
 
@@ -42,9 +57,13 @@ protected:
 	static void InitializeMeshes();
 	static void ReleaseMeshes();
 
-protected:
-	static Mesh* m_pCube;
-	static Mesh* m_pSphere;
+	static Mesh* m_pMeshes[NUM_MESHES];
+	//static Mesh* m_pCube;
+	//static Mesh* m_pTargetCube;
+	//static Mesh* m_pPortalCube;
+	//static Mesh* m_pSphere;
 
 	static GLuint m_pCheckerboardTex;
+	static GLuint m_pTargetTex;
+	static GLuint m_pPortalTex;
 };

@@ -31,7 +31,6 @@ protected:
 
 	float m_AccumTime;
 
-	GLuint m_targetTexture;
 	int totalScore = 0;
 	int goodScore = 100;
 	int badScore = -50;

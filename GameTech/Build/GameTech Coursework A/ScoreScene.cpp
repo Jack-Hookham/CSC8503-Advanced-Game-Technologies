@@ -17,7 +17,6 @@ ScoreScene::~ScoreScene()
 {
 }
 
-
 void ScoreScene::OnInitializeScene()
 {
 	//Set the camera position
@@ -52,35 +51,19 @@ void ScoreScene::OnInitializeScene()
 			0.0f,
 			true,
 			false,
-			goodColour);
+			goodColour,
+			false,
+			CommonMeshes::MeshType::TARGET_CUBE);
 		targets[i]->SetScore(goodScore);
 		targets[i]->Physics()->SetOnCollisionCallback(TargetOnHitCallBack);
 		this->AddGameObject(targets[i]);
 	}
 
-	//Create the target texture
-	m_targetTexture = SOIL_load_OGL_texture(
-		TEXTUREDIR"target.tga",
-		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
-		SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT);
-
-	glBindTexture(GL_TEXTURE_2D, m_targetTexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	//This overrides the default checkerboard texture, setting all cubes to have the target texture
-	CommonMeshes::Cube()->SetTexture(m_targetTexture);
+	totalScore = 0;
 }
 
 void ScoreScene::OnCleanupScene()
 {
-	//Reset the cube texture to the checkerboard texture for other scenes
-	CommonMeshes::Cube()->SetTexture(CommonMeshes::CheckerboardTex());
-
 	Scene::OnCleanupScene();
 }
 
