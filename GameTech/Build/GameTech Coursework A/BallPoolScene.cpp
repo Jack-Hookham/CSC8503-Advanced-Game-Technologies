@@ -19,7 +19,6 @@ BallPoolScene::~BallPoolScene()
 
 }
 
-
 void BallPoolScene::OnInitializeScene()
 {
 	//Set the camera position
@@ -31,15 +30,76 @@ void BallPoolScene::OnInitializeScene()
 
 	//<--- SCENE CREATION --->
 	//Create Ground
-	this->AddGameObject(CommonUtils::BuildCuboidObject("Ground", Vector3(0.0f, -1.0f, 0.0f), Vector3(20.0f, 1.0f, 20.0f), true, 0.0f, true, false, Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
+	this->AddGameObject(CommonUtils::BuildCuboidObject(
+		"Ground", 
+		Vector3(0.0f, -1.0f, 0.0f),
+		Vector3(POOL_X, 1.0f, POOL_Z), 
+		true, 0.0f, 
+		true, 
+		false, 
+		Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
 	
 	//Walls
-	this->AddGameObject(CommonUtils::BuildCuboidObject("Ground", Vector3(0.0f, -1.0f, 0.0f), Vector3(20.0f, 1.0f, 20.0f), true, 0.0f, true, false, Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
-	this->AddGameObject(CommonUtils::BuildCuboidObject("Ground", Vector3(0.0f, -1.0f, 0.0f), Vector3(20.0f, 1.0f, 20.0f), true, 0.0f, true, false, Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
-	this->AddGameObject(CommonUtils::BuildCuboidObject("Ground", Vector3(0.0f, -1.0f, 0.0f), Vector3(20.0f, 1.0f, 20.0f), true, 0.0f, true, false, Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
-	this->AddGameObject(CommonUtils::BuildCuboidObject("Ground", Vector3(0.0f, -1.0f, 0.0f), Vector3(20.0f, 1.0f, 20.0f), true, 0.0f, true, false, Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
+	this->AddGameObject(CommonUtils::BuildCuboidObject(
+		"Wall1", 
+		Vector3(POOL_X + 1.0f, 3.0f, 0.0f),
+		Vector3(1.0f, POOL_Y, POOL_Z),
+		true,
+		0.0f,
+		true, 
+		false, 
+		Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
 
+	this->AddGameObject(CommonUtils::BuildCuboidObject(
+		"Wall2",
+		Vector3(-POOL_X - 1.0f, 3.0f, 0.0f),
+		Vector3(1.0f, POOL_Y, POOL_Z),
+		true,
+		0.0f,
+		true,
+		false,
+		Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
+
+	this->AddGameObject(CommonUtils::BuildCuboidObject(
+		"Wall3",
+		Vector3(0.0f, 3.0f, POOL_Z + 1.0f),
+		Vector3(POOL_X, POOL_Y, 1.0f),
+		true,
+		0.0f,
+		true,
+		false,
+		Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
+
+	this->AddGameObject(CommonUtils::BuildCuboidObject(
+		"Wall4",
+		Vector3(0.0f, 3.0f, -POOL_Z - 1.0f),
+		Vector3(POOL_X, POOL_Y, 1.0f),
+		true,
+		0.0f,
+		true,
+		false,
+		Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
 	
+	for (size_t i = 0; i < NUM_BALLS; ++i)
+	{
+		Vector3 position = Vector3(-POOL_X + 1.0f + RAND() * (POOL_X - 1.0f) * 2.0f, 
+			POOL_Y + RAND() * POOL_Y + 1.0f * 2.0f, 
+			-POOL_Z + 1.0f + RAND() * (POOL_Z - 1.0f) * 2.0f);
+		Vector4 color = CommonUtils::GenColor(RAND(), 1.0f);
+		GameObject* obj = CommonUtils::BuildSphereObject(
+			"",
+			position,
+			0.5f,
+			true,
+			1 / 10.0f,
+			true,
+			true,
+			color,
+			false);
+		obj->Physics()->SetElasticity(0.2f);
+		obj->Physics()->SetFriction(0.9f);
+		SceneManager::Instance()->GetCurrentScene()->AddGameObject(obj);
+	}
 }
 
 void BallPoolScene::OnCleanupScene()

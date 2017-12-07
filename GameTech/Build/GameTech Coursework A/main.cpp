@@ -209,8 +209,8 @@ void HandleKeyboardInputs()
 			true,
 			color,
 			false);
-		obj->Physics()->SetFriction(0.5f);
-		obj->Physics()->SetElasticity(0.5f);
+		obj->Physics()->SetElasticity(0.1f);
+		obj->Physics()->SetFriction(0.9f);
 		obj->Physics()->SetLinearVelocity(direction * projectTileSpeed);
 		SceneManager::Instance()->GetCurrentScene()->AddGameObject(obj);
 	}
@@ -236,7 +236,7 @@ void HandleKeyboardInputs()
 			color,
 			false,
 			CommonMeshes::MeshType::PORTAL_CUBE);
-		obj->Physics()->SetElasticity(0.1f);
+		obj->Physics()->SetElasticity(0.2f);
 		obj->Physics()->SetFriction(0.9f);
 		obj->Physics()->SetLinearVelocity(direction * projectTileSpeed);
 

@@ -18,6 +18,9 @@ public:
 	int m_StackHeight;
 	virtual void OnInitializeScene() override
 	{
+
+		GraphicsPipeline::Instance()->ResetCamera();
+
 		//Create Ground
 		this->AddGameObject(CommonUtils::BuildCuboidObject(
 			"Ground",
