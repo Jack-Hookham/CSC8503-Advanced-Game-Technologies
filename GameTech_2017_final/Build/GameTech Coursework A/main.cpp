@@ -61,8 +61,8 @@ void Initialize()
 
 	//Enqueue All Scenes
 	//SceneManager::Instance()->EnqueueScene(new EmptyScene("GameTech #X - More peace and quiet"));
-	//SceneManager::Instance()->EnqueueScene(new SandboxScene("GameTech #1 - Sandbox!"));
-	SceneManager::Instance()->EnqueueScene(new PyramidScene("GameTech #2 - Sandbox!"));
+	//SceneManager::Instance()->EnqueueScene(new SandboxScene("GameTech #1 - Sandbox"));
+	SceneManager::Instance()->EnqueueScene(new PyramidScene("GameTech #2 - Pyramid"));
 	SceneManager::Instance()->EnqueueScene(new ScoreScene("GameTech #3 - Projectile Game"));
 	SceneManager::Instance()->EnqueueScene(new BallPoolScene("GameTech #4 - Ball Pool"));
 
@@ -184,16 +184,10 @@ void HandleKeyboardInputs()
 		GraphicsPipeline::Instance()->ResetCamera();
 	}
 
-	//Toggle vsync
-	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_N))
-	{
-		GraphicsPipeline::Instance()->SetVsyncEnabled(!GraphicsPipeline::Instance()->GetVsyncEnabled());
-	}
-
 	//Fire sphere
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_J))
 	{
-		float projectTileSpeed = 50.0f;
+		float projectTileSpeed = 30.0f;
 
 		//Set direction to camera direction
 		Vector3 direction = Matrix4::Rotation(GraphicsPipeline::Instance()->GetCamera()->GetYaw(), Vector3(0, 1, 0))
@@ -220,7 +214,7 @@ void HandleKeyboardInputs()
 	//Fire cube
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_K))
 	{
-		float projectTileSpeed = 50.0f;
+		float projectTileSpeed = 30.0f;
 
 		//Set direction to camera direction
 		Vector3 direction = Matrix4::Rotation(GraphicsPipeline::Instance()->GetCamera()->GetYaw(), Vector3(0, 1, 0))
@@ -256,7 +250,6 @@ int main()
 {
 	//Initialize our Window, Physics, Scenes etc
 	Initialize();
-	GraphicsPipeline::Instance()->SetVsyncEnabled(false);
 
 	Window::GetWindow().GetTimer()->GetTimedMS();
 

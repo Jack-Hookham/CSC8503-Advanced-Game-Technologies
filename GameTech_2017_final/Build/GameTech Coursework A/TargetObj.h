@@ -7,13 +7,22 @@
 class TargetObj : public GameObject
 {
 public:
-	TargetObj(const std::string& name, const Vector3 pos)
+	TargetObj(
+		const std::string& name,
+		const Vector3& pos,
+		const Vector3& halfdims,
+		bool physics_enabled = false,
+		float inverse_mass = 0.0f,
+		bool collidable = true,				
+		bool dragable = true,
+		const Vector4& color = Vector4(1.0f, 1.0f, 1.0f, 1.0f),
+		bool rest = false,
+		CommonMeshes::MeshType meshType = CommonMeshes::MeshType::TARGET_CUBE)
 		: GameObject(name)
 	{
 		RenderNode* rnode = new RenderNode();
 
-		Vector3 halfdims = (Vector3(0.5f, 0.5f, 0.5f));
-		RenderNode* dummy = new RenderNode(CommonMeshes::Meshes()[CommonMeshes::MeshType::TARGET_CUBE], Vector4(0.1f, 1.0f, 0.1f, 1.0f));
+		RenderNode* dummy = new RenderNode(CommonMeshes::Meshes()[meshType], Vector4(0.1f, 1.0f, 0.1f, 1.0f));
 		dummy->SetTransform(Matrix4::Scale(halfdims));
 		rnode->AddChild(dummy);
 
@@ -22,18 +31,26 @@ public:
 		rnode->SetBoundingRadius(radius);
 
 		PhysicsNode* pnode = NULL;
+		if (physics_enabled)
 		{
 			pnode = new PhysicsNode();
 			pnode->SetPosition(pos);
-			pnode->SetInverseMass(0.0f);
+			pnode->SetInverseMass(inverse_mass);
 			pnode->SetBoundingRadius(radius);
 
+			if (!collidable)
+			{
+				//Even without a collision shape, the inertia matrix for rotation has to be derived from the objects shape
+				pnode->SetInverseInertia(CuboidCollisionShape(halfdims).BuildInverseInertia(inverse_mass));
+			}
+			else
 			{
 				CollisionShape* pColshape = new CuboidCollisionShape(halfdims);
 				pnode->SetCollisionShape(pColshape);
-				pnode->SetInverseInertia(pColshape->BuildInverseInertia(0.0f));
+				pnode->SetInverseInertia(pColshape->BuildInverseInertia(inverse_mass));
 			}
 		}
+
 		SetRender(rnode);
 		SetPhysics(pnode);
 	}

@@ -45,11 +45,19 @@ void ScoreScene::OnInitializeScene()
 		std::string targetID = "Target " + i;
 		targets[i] = new TargetObj(
 			targetID,
-			Vector3(xPos, yPos, zPos));
-		targets[i]->SetScore(goodScore);
-		//targets[i]->Physics()->SetOnCollisionCallback(TargetOnHitCallBack);
+			Vector3(xPos, yPos, zPos),
+			Vector3(1.0f, 1.0f, 1.0f),
+			true,
+			0.0f,
+			true,
+			false,
+			goodColour,
+			false,
+			CommonMeshes::MeshType::TARGET_CUBE);
+
+		//targets[i]->SetScore(goodScore);
 		targets[i]->Physics()->SetOnCollisionCallback(
-			std::bind(&ScoreScene::TargetOnHitCallBack2, this,
+			std::bind(&ScoreScene::TargetOnHitCallBack, this,
 				targets[i],
 				std::placeholders::_1,
 				std::placeholders::_2));
@@ -81,14 +89,7 @@ void ScoreScene::OnUpdateScene(float dt)
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.4f, 0.4f, 1.0f), "Score: " + std::to_string(totalScore));
 }
 
-//bool ScoreScene::TargetOnHitCallBack(PhysicsNode* self, PhysicsNode* collidingObject)
-//{
-//	self->GetParent()->SetScoreUpdating(true);
-//
-//	return true;
-//}
-
-bool ScoreScene::TargetOnHitCallBack2(TargetObj* target, PhysicsNode* self, PhysicsNode* collidingObject)
+bool ScoreScene::TargetOnHitCallBack(TargetObj* target, PhysicsNode* self, PhysicsNode* collidingObject)
 {
 	target->SetScoreUpdating(true);
 

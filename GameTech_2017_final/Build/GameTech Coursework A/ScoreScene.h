@@ -27,8 +27,7 @@ public:
 	virtual void OnUpdateScene(float dt) override;
 
 protected:
-	//static bool TargetOnHitCallBack(PhysicsNode* self, PhysicsNode* collidingObject);
-	bool TargetOnHitCallBack2(TargetObj* target, PhysicsNode* self, PhysicsNode* collidingObject);
+	bool TargetOnHitCallBack(TargetObj* target, PhysicsNode* self, PhysicsNode* collidingObject);
 
 	void UpdateTargetStates(float dt);
 
