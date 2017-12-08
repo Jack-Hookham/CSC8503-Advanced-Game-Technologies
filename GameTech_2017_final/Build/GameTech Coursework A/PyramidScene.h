@@ -30,7 +30,7 @@ public:
 			0.0f,
 			true,
 			false,
-			Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
+			Vector4(1.0f, 1.0f, 1.0f, 1.0f)));
 
 		//SOLVER EXAMPLE -> Pyramid of cubes stacked on top of eachother
 		// Note: Also, i've just noticed we have only ever done cube's not cuboids.. 

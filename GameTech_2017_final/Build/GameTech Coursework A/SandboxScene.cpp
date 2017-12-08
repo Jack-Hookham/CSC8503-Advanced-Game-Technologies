@@ -42,7 +42,7 @@ void SandboxScene::OnInitializeScene()
 
 //<--- SCENE CREATION --->
 	//Create Ground
-	this->AddGameObject(BuildCuboidObject("Ground", Vector3(0.0f, -1.0f, 0.0f), Vector3(20.0f, 1.0f, 20.0f), true, 0.0f, true, false, Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
+	this->AddGameObject(BuildCuboidObject("Ground", Vector3(0.0f, -1.0f, 0.0f), Vector3(20.0f, 1.0f, 20.0f), true, 0.0f, true, false, Vector4(1.0f, 1.0f, 1.0f, 1.0f)));
 
 	//Create Player (See OnUpdateScene)
 	m_pPlayer = BuildCuboidObject(

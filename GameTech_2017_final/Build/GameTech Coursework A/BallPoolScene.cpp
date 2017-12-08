@@ -37,7 +37,7 @@ void BallPoolScene::OnInitializeScene()
 		true, 0.0f, 
 		true, 
 		false, 
-		Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
+		Vector4(0.5f, 0.5f, 0.5f, 1.0f)));
 	
 	//Walls
 	this->AddGameObject(CommonUtils::BuildCuboidObject(
@@ -48,7 +48,7 @@ void BallPoolScene::OnInitializeScene()
 		0.0f,
 		true, 
 		false, 
-		Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
+		Vector4(0.5f, 0.5f, 0.5f, 1.0f)));
 
 	this->AddGameObject(CommonUtils::BuildCuboidObject(
 		"Wall2",
@@ -58,7 +58,7 @@ void BallPoolScene::OnInitializeScene()
 		0.0f,
 		true,
 		false,
-		Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
+		Vector4(0.5f, 0.5f, 0.5f, 1.0f)));
 
 	this->AddGameObject(CommonUtils::BuildCuboidObject(
 		"Wall3",
@@ -68,7 +68,7 @@ void BallPoolScene::OnInitializeScene()
 		0.0f,
 		true,
 		false,
-		Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
+		Vector4(0.5f, 0.5f, 0.5f, 1.0f)));
 
 	this->AddGameObject(CommonUtils::BuildCuboidObject(
 		"Wall4",
@@ -78,7 +78,7 @@ void BallPoolScene::OnInitializeScene()
 		0.0f,
 		true,
 		false,
-		Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
+		Vector4(1.0f, 1.0f, 1.0f, 1.0f)));
 	
 	for (size_t i = 0; i < NUM_BALLS; ++i)
 	{

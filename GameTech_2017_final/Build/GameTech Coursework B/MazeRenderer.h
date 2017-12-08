@@ -16,7 +16,6 @@ struct WallDescriptor
 
 typedef std::vector<WallDescriptor> WallDescriptorVec;
 
-
 class MazeRenderer : public GameObject
 {
 public:
