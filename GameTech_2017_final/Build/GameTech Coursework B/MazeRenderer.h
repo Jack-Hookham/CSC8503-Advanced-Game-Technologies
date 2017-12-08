@@ -20,7 +20,7 @@ typedef std::vector<WallDescriptor> WallDescriptorVec;
 class MazeRenderer : public GameObject
 {
 public:
-	MazeRenderer(MazeGenerator* gen, Mesh* wallmesh = CommonMeshes::Cube());
+	MazeRenderer(MazeGenerator* gen, Mesh* wallmesh = CommonMeshes::Meshes()[CommonMeshes::MeshType::DEFAULT_CUBE]);
 	virtual ~MazeRenderer();
 
 	//The search history draws from edges because they already store the 'to'

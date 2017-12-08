@@ -7,7 +7,7 @@ Octant::Octant()
 	m_parent = NULL;
 }
 
-Octant::Octant(BoundingBox region, std::vector<PhysicsNode*>& pNodes, Octant* parent)
+Octant::Octant(const BoundingBox region, std::vector<PhysicsNode*>& pNodes, Octant* parent)
 {
 	m_region = region;
 	m_physicsNodes = pNodes;
@@ -16,19 +16,10 @@ Octant::Octant(BoundingBox region, std::vector<PhysicsNode*>& pNodes, Octant* pa
 
 Octant::~Octant()
 {
-	for (int i = 0; i < NUM_OCTANTS; ++i)
+	for (size_t i = 0; i < NUM_OCTANTS; ++i)
 	{
 		SAFE_DELETE(m_octants[i])
 	}
-}
-
-void Octant::insertObject()
-{
-
-}
-
-void Octant::removeObject()
-{
 }
 
 void Octant::updateObjects(std::vector<PhysicsNode*>& pNodes)

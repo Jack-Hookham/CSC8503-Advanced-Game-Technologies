@@ -17,9 +17,7 @@ public:
 	Octant(BoundingBox region, std::vector<PhysicsNode*>& pNodes, Octant* parent = NULL);
 	~Octant();
 
-	//Add and remove objects from the octree
-	void insertObject();
-	void removeObject();
+	//Update the nodes 
 	void updateObjects(std::vector<PhysicsNode*>& pNodes);
 
 	void divideOctant();
