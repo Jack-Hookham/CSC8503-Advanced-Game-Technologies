@@ -1,37 +1,3 @@
-
-/******************************************************************************
-Class: Net1_Client
-Implements:
-Author: Pieran Marris <p.marris@newcastle.ac.uk> and YOU!
-Description:
-
-:README:
-- In order to run this demo, we also need to run "Tuts_Network_Client" at the same time.
-- To do this:-
-	1. right click on the entire solution (top of the solution exporerer) and go to properties
-	2. Go to Common Properties -> Statup Project
-	3. Select Multiple Statup Projects
-	4. Select 'Start with Debugging' for both "Tuts_Network_Client" and "Tuts_Network_Server"
-
-- Now when you run the program it will build and run both projects at the same time. =]
-- You can also optionally spawn more instances by right clicking on the specific project
-and going to Debug->Start New Instance.
-
-
-
-
-FOR MORE NETWORKING INFORMATION SEE "Tuts_Network_Client -> Net1_Client.h"
-
-
-
-		(\_/)
-		( '_')
-	 /""""""""""""\=========     -----D
-	/"""""""""""""""""""""""\
-....\_@____@____@____@____@_/
-
-*//////////////////////////////////////////////////////////////////////////////
-
 #pragma once
 
 #include <enet\enet.h>
@@ -44,7 +10,6 @@ FOR MORE NETWORKING INFORMATION SEE "Tuts_Network_Client -> Net1_Client.h"
 #include <iphlpapi.h>
 #pragma comment(lib, "IPHLPAPI.lib")
 
-
 #define SERVER_PORT 1234
 #define UPDATE_TIMESTEP (1.0f / 30.0f) //send 30 position updates per second
 
@@ -53,8 +18,9 @@ GameTimer timer;
 float accum_time = 0.0f;
 float rotation = 0.0f;
 
-
 void Win32_PrintAllAdapterIPAddresses();
+
+bool serverRunning = false;
 
 int onExit(int exitcode)
 {
@@ -77,6 +43,8 @@ int main(int arcg, char** argv)
 		fprintf(stderr, "An error occurred while trying to create an ENet server host.\n");
 		onExit(EXIT_FAILURE);
 	}
+
+	serverRunning = true;
 
 	printf("Server Initiated\n");
 

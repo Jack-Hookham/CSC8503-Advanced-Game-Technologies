@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{DF89E5E3-D66A-471F-85FD-8C960F2AA8B9}</ProjectGuid>
+    <ProjectGuid>{57F3174E-9609-4C5C-B375-06398D20D448}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Tuts_Network_Server</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
@@ -85,16 +85,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MazeGenerator.cpp" />
-    <ClCompile Include="MazeRenderer.cpp" />
-    <ClCompile Include="MazeScene.cpp" />
+    <ClCompile Include="NetClient.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MazeGenerator.h" />
-    <ClInclude Include="MazeRenderer.h" />
-    <ClInclude Include="MazeScene.h" />
-    <ClInclude Include="SearchAlgorithm.h" />
-    <ClInclude Include="SearchAStar.h" />
+    <ClInclude Include="NetClient.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
