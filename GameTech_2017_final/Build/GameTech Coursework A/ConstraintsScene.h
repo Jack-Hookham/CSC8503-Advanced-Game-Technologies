@@ -2,11 +2,11 @@
 
 #include <ncltech\Scene.h>
 
-class SoftBodyScene : public Scene
+class ConstraintsScene : public Scene
 {
 public:
-	SoftBodyScene(const std::string& friendly_name);
-	virtual ~SoftBodyScene();
+	ConstraintsScene(const std::string& friendly_name);
+	virtual ~ConstraintsScene();
 
 	virtual void OnInitializeScene()	 override;
 	virtual void OnCleanupScene()		 override;

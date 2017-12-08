@@ -4,10 +4,6 @@
 #include <SOIL.h>
 
 Mesh* CommonMeshes::m_pMeshes[] = { NULL };
-//Mesh* CommonMeshes::m_pCube			= NULL;
-//Mesh* CommonMeshes::m_pTargetCube	= NULL;
-//Mesh* CommonMeshes::m_pPortalCube	= NULL;
-//Mesh* CommonMeshes::m_pSphere		= NULL;
 
 GLuint CommonMeshes::m_pCheckerboardTex = 0;
 GLuint CommonMeshes::m_pTargetTex = 0;

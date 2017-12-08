@@ -1,7 +1,4 @@
 #include "MazeScene.h"
-#include "../Build/GameTech Coursework B/MazeGenerator.h"
-#include "../Build/GameTech Coursework B/SearchAStar.h"
-#include "../Build/GameTech Coursework B/SearchAlgorithm.h"
 
 void MazeScene::UpdateAStarPreset()
 {

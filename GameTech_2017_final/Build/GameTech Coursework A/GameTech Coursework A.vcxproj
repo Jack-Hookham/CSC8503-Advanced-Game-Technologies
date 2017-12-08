@@ -137,6 +137,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BallPoolScene.cpp" />
+    <ClCompile Include="ConstraintsScene.cpp" />
     <ClCompile Include="EmptyScene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ScoreScene.cpp" />
@@ -145,6 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BallPoolScene.h" />
+    <ClInclude Include="ConstraintsScene.h" />
     <ClInclude Include="EmptyScene.h" />
     <ClInclude Include="PyramidScene.h" />
     <ClInclude Include="ScoreScene.h" />

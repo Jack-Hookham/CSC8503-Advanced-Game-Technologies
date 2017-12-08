@@ -2,8 +2,8 @@
 
 #include <ncltech\GameObject.h>
 #include <ncltech\CommonMeshes.h>
-#include "MazeGenerator.h"
-#include "SearchAlgorithm.h"
+#include "../Build/GameTech Coursework B Server/MazeGenerator.h"
+#include "../Build/GameTech Coursework B Server/SearchAlgorithm.h"
 
 
 struct WallDescriptor
@@ -15,7 +15,6 @@ struct WallDescriptor
 };
 
 typedef std::vector<WallDescriptor> WallDescriptorVec;
-
 
 class MazeRenderer : public GameObject
 {
@@ -33,7 +32,7 @@ protected:
 	// - True for wall
 	// - False for empty
 	//Returns uint: Guess at the number of walls required
-	uint Generate_FlatMaze(); 
+	uint Generate_FlatMaze();
 
 	//Construct a list of WallDescriptors from the flat 2D map generated above.
 	void Generate_ConstructWalls();

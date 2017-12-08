@@ -13,6 +13,8 @@
 #include "ScoreScene.h"
 #include "EmptyScene.h"
 #include "BallPoolScene.h"
+#include "ConstraintsScene.h"
+#include "SoftBodyScene.h"
 
 const Vector4 status_colour = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 const Vector4 status_colour_header = Vector4(0.8f, 0.9f, 1.0f, 1.0f);
@@ -62,6 +64,8 @@ void Initialize()
 	//Enqueue All Scenes
 	//SceneManager::Instance()->EnqueueScene(new EmptyScene("GameTech #X - More peace and quiet"));
 	//SceneManager::Instance()->EnqueueScene(new SandboxScene("GameTech #1 - Sandbox"));
+	//SceneManager::Instance()->EnqueueScene(new ConstraintsScene("GameTech #2 - Constraints"));
+	SceneManager::Instance()->EnqueueScene(new SoftBodyScene("GameTech #2 - Constraints"));
 	SceneManager::Instance()->EnqueueScene(new PyramidScene("GameTech #2 - Pyramid"));
 	SceneManager::Instance()->EnqueueScene(new ScoreScene("GameTech #3 - Projectile Game"));
 	SceneManager::Instance()->EnqueueScene(new BallPoolScene("GameTech #4 - Ball Pool"));
