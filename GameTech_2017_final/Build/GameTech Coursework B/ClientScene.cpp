@@ -1,5 +1,5 @@
 /******************************************************************************
-Class: NetClient
+Class: ClientScene
 Implements:
 Author: Pieran Marris <p.marris@newcastle.ac.uk> and YOU!
 Description:
@@ -80,7 +80,7 @@ the servers game simulation. This methodology is known as "Dead Reckoning".
 
 *//////////////////////////////////////////////////////////////////////////////
 
-#include "NetClient.h"
+#include "ClientScene.h"
 #include <ncltech\SceneManager.h>
 #include <ncltech\PhysicsEngine.h>
 #include <nclgl\NCLDebug.h>
@@ -90,14 +90,14 @@ the servers game simulation. This methodology is known as "Dead Reckoning".
 const Vector3 status_color3 = Vector3(1.0f, 0.6f, 0.6f);
 const Vector4 status_color = Vector4(status_color3.x, status_color3.y, status_color3.z, 1.0f);
 
-NetClient::NetClient(const std::string& friendly_name)
+ClientScene::ClientScene(const std::string& friendly_name)
 	: Scene(friendly_name)
 	, serverConnection(NULL)
 	, box(NULL)
 {
 }
 
-void NetClient::OnInitializeScene()
+void ClientScene::OnInitializeScene()
 {
 	//Initialize Client Network
 	if (network.Initialize(0))
@@ -122,7 +122,7 @@ void NetClient::OnInitializeScene()
 	this->AddGameObject(box);
 }
 
-void NetClient::OnCleanupScene()
+void ClientScene::OnCleanupScene()
 {
 	Scene::OnCleanupScene();
 	box = NULL; // Deleted in above function
@@ -137,14 +137,14 @@ void NetClient::OnCleanupScene()
 	serverConnection = NULL;
 }
 
-void NetClient::OnUpdateScene(float dt)
+void ClientScene::OnUpdateScene(float dt)
 {
 	Scene::OnUpdateScene(dt);
 
 
 	//Update Network
 	auto callback = std::bind(
-		&NetClient::ProcessNetworkEvent,	// Function to call
+		&ClientScene::ProcessNetworkEvent,	// Function to call
 		this,								// Associated class instance
 		std::placeholders::_1);				// Where to place the first parameter
 	network.ServiceNetwork(dt, callback);
@@ -166,7 +166,7 @@ void NetClient::OnUpdateScene(float dt)
 	NCLDebug::AddStatusEntry(status_color, "    Outgoing: %5.2fKbps", network.m_OutgoingKb);
 }
 
-void NetClient::ProcessNetworkEvent(const ENetEvent& evnt)
+void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 {
 	switch (evnt.type)
 	{

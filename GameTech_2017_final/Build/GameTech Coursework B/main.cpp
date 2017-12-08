@@ -4,8 +4,6 @@
 #include <nclgl\GameTimer.h>
 #include <nclgl\Vector3.h>
 #include <nclgl\common.h>
-#include <ncltech\NetworkBase.h>
-
 
 #include <nclgl\Window.h>
 #include <ncltech\PhysicsEngine.h>
@@ -13,7 +11,8 @@
 #include <nclgl\NCLDebug.h>
 #include <nclgl\PerfTimer.h>
 
-#include "NetClient.h"
+#include "ClientScene.h"
+#include "Server.h"
 
 //Needed to get computer adapter IPv4 addresses via windows
 #include <iphlpapi.h>
@@ -22,7 +21,7 @@
 #define SERVER_PORT 1234
 #define UPDATE_TIMESTEP (1.0f / 30.0f) //send 30 position updates per second
 
-NetworkBase server;
+Server server;
 GameTimer timer;
 float accum_time = 0.0f;
 float rotation = 0.0f;
@@ -147,6 +146,7 @@ int main(int arcg, char** argv)
 	//If the server initialises then this is a server
 	else
 	{
+		server = Server();
 		myType = SERVER;
 	}
 
@@ -278,7 +278,7 @@ void InitializeClient()
 
 								//Enqueue All Scenes
 								// - Add any new scenes you want here =D
-	SceneManager::Instance()->EnqueueScene(new NetClient("Network #1 - Example Client"));
+	SceneManager::Instance()->EnqueueScene(new ClientScene("Network #1 - Example Client"));
 }
 
 void Quit(bool error, const string &reason) {

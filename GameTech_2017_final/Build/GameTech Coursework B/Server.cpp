@@ -7,3 +7,7 @@ Server::Server()
 Server::~Server()
 {
 }
+
+void Server::ServerLoop()
+{
+}

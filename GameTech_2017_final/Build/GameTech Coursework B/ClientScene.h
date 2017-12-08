@@ -4,10 +4,10 @@
 #include <ncltech\Scene.h>
 #include <ncltech\NetworkBase.h>
 
-class NetClient : public Scene
+class ClientScene : public Scene
 {
 public:
-	NetClient(const std::string& friendly_name);
+	ClientScene(const std::string& friendly_name);
 
 	virtual void OnInitializeScene() override;
 	virtual void OnCleanupScene() override;
