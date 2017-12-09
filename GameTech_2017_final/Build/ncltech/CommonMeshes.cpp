@@ -2,12 +2,14 @@
 #include <nclgl\NCLDebug.h>
 #include <nclgl\OBJMesh.h>
 #include <SOIL.h>
+#include "GraphicsPipeline.h"
 
 Mesh* CommonMeshes::m_pMeshes[] = { NULL };
 
 GLuint CommonMeshes::m_pCheckerboardTex = 0;
 GLuint CommonMeshes::m_pTargetTex = 0;
-GLuint CommonMeshes::m_pPortalTex = 0;
+GLuint CommonMeshes::m_pPortalTex = 0; 
+GLuint CommonMeshes::m_pScifiTex = 0;
 
 void CommonMeshes::InitializeMeshes()
 {
@@ -59,6 +61,21 @@ void CommonMeshes::InitializeMeshes()
 			NCLERROR("Unable to load portal cube texture!");
 		}
 
+		m_pScifiTex = SOIL_load_OGL_texture(TEXTUREDIR"scifi1.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
+		if (m_pScifiTex)
+		{
+			glBindTexture(GL_TEXTURE_2D, m_pScifiTex);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+		else
+		{
+			NCLERROR("Unable to load scifi texture!");
+		}
+
 		//Initialise meshes
 		m_pMeshes[DEFAULT_CUBE] = new OBJMesh(MESHDIR"cube.obj");
 		m_pMeshes[DEFAULT_CUBE]->SetTexture(m_pCheckerboardTex);
@@ -68,6 +85,9 @@ void CommonMeshes::InitializeMeshes()
 
 		m_pMeshes[PORTAL_CUBE] = new OBJMesh(MESHDIR"cube.obj");
 		m_pMeshes[PORTAL_CUBE]->SetTexture(m_pPortalTex);
+
+		m_pMeshes[SCIFI_CUBE] = new OBJMesh(MESHDIR"cube.obj");
+		m_pMeshes[SCIFI_CUBE]->SetTexture(m_pScifiTex);
 
 		m_pMeshes[DEFAULT_SPHERE] = new OBJMesh(MESHDIR"sphere.obj");
 		m_pMeshes[DEFAULT_SPHERE]->SetTexture(m_pCheckerboardTex);
@@ -98,5 +118,11 @@ void CommonMeshes::ReleaseMeshes()
 	{
 		glDeleteTextures(1, &m_pPortalTex);
 		m_pPortalTex = 0;
+	}
+
+	if (m_pScifiTex)
+	{
+		glDeleteTextures(1, &m_pScifiTex);
+		m_pScifiTex = 0;
 	}
 }

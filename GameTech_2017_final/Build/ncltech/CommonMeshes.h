@@ -28,6 +28,7 @@ public:
 		DEFAULT_CUBE,
 		TARGET_CUBE,
 		PORTAL_CUBE,
+		SCIFI_CUBE,
 
 		//Spheres
 		DEFAULT_SPHERE,
@@ -54,4 +55,5 @@ protected:
 	static GLuint m_pCheckerboardTex;
 	static GLuint m_pTargetTex;
 	static GLuint m_pPortalTex;
+	static GLuint m_pScifiTex;
 };

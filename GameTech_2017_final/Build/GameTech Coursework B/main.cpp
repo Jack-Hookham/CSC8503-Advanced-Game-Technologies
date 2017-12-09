@@ -21,7 +21,7 @@
 #define SERVER_PORT 1234
 #define UPDATE_TIMESTEP (1.0f / 30.0f) //send 30 position updates per second
 
-Server server;
+NetworkBase server;
 GameTimer timer;
 float accum_time = 0.0f;
 float rotation = 0.0f;
@@ -146,7 +146,7 @@ int main(int arcg, char** argv)
 	//If the server initialises then this is a server
 	else
 	{
-		server = Server();
+		//server = Server();
 		myType = SERVER;
 	}
 
