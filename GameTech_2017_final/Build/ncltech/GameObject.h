@@ -126,7 +126,7 @@ public:
 		}
 	}
 
-	inline void UnregisterPhysicsToRenderTransformCallback()
+	virtual inline void UnregisterPhysicsToRenderTransformCallback()
 	{
 		if (physicsNode)
 		{

@@ -124,7 +124,7 @@ public:
 			if (objExtended->renderNode) GraphicsPipeline::Instance()->AddRenderNode(objExtended->renderNode);
 			for (int i = 0; i < objExtended->GetPhysicsNodes().size(); ++i)
 			{
-				if (objExtended->GetPhysicsNodes()[i]) PhysicsEngine::Instance()->AddPhysicsObject(objExtended->GetPhysicsNodes()[i]);
+				PhysicsEngine::Instance()->AddPhysicsObject(objExtended->GetPhysicsNodes()[i]);
 			}
 		}
 	}

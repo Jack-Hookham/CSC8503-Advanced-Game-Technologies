@@ -6,6 +6,7 @@ GameObjectExtended::GameObjectExtended(const std::string& name, RenderNode* rend
 	SetRender(renderNode);
 	SetPhysicsNodes(physicsNodes);
 
+	m_physicsNodes = physicsNodes;
 	RegisterPhysicsToRenderTransformCallback();
 }
 
