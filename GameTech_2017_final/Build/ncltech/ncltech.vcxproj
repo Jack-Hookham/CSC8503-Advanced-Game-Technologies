@@ -43,6 +43,7 @@
     <ClInclude Include="ScreenPicker.h" />
     <ClInclude Include="SoftBody.h" />
     <ClInclude Include="SphereCollisionShape.h" />
+    <ClInclude Include="SpringConstraint.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CollisionDetectionSAT.cpp" />

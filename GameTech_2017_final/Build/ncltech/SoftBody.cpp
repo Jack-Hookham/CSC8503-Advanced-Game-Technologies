@@ -150,7 +150,7 @@ void SoftBody::ConnectRight(const int x, const int y)
 	PhysicsNode* connectFrom = m_pnodes[x * m_numNodesX + y];
 	PhysicsNode* connectTo = m_pnodes[(x + 1) * m_numNodesX + y];		//pnode directly to the right
 
-	PhysicsEngine::Instance()->AddConstraint(new DistanceConstraint(
+	PhysicsEngine::Instance()->AddConstraint(new SpringConstraint(
 		connectFrom,													//Current pnode									
 		connectTo,
 		connectFrom->GetPosition(),
@@ -162,7 +162,7 @@ void SoftBody::ConnectUp(const int x, const int y)
 	PhysicsNode* connectFrom = m_pnodes[x * m_numNodesX + y];
 	PhysicsNode* connectTo = m_pnodes[x * m_numNodesX + y + 1];			//pnode directly up
 	
-	PhysicsEngine::Instance()->AddConstraint(new DistanceConstraint(
+	PhysicsEngine::Instance()->AddConstraint(new SpringConstraint(
 		connectFrom,
 		connectTo,
 		connectFrom->GetPosition(),
@@ -174,7 +174,7 @@ void SoftBody::ConnectRightUp(const int x, const int y)
 	PhysicsNode* connectFrom = m_pnodes[x * m_numNodesX + y];
 	PhysicsNode* connectTo = m_pnodes[(x + 1) * m_numNodesX + y + 1];	//pnode left and up
 	
-	PhysicsEngine::Instance()->AddConstraint(new DistanceConstraint(
+	PhysicsEngine::Instance()->AddConstraint(new SpringConstraint(
 		connectFrom,
 		connectTo,
 		connectFrom->GetPosition(),
@@ -186,7 +186,7 @@ void SoftBody::ConnectLeftUp(const int x, const int y)
 	PhysicsNode* connectFrom = m_pnodes[x * m_numNodesX + y];
 	PhysicsNode* connectTo = m_pnodes[(x - 1) * m_numNodesX + y + 1];	//pnode left and up
 	
-	PhysicsEngine::Instance()->AddConstraint(new DistanceConstraint(
+	PhysicsEngine::Instance()->AddConstraint(new SpringConstraint(
 		connectFrom,
 		connectTo,
 		connectFrom->GetPosition(),

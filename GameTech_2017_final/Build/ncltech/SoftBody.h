@@ -4,6 +4,7 @@
 #include "CommonUtils.h"
 #include "SphereCollisionShape.h"
 #include "DistanceConstraint.h"
+#include "SpringConstraint.h"
 #include "ScreenPicker.h"
 
 class SoftBody

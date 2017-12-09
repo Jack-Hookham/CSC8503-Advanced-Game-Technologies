@@ -96,6 +96,9 @@
     <ClInclude Include="SoftBody.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SpringConstraint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CollisionDetectionSAT.cpp">

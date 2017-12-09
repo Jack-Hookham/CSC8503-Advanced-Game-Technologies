@@ -5,8 +5,6 @@ GameObjectExtended::GameObjectExtended(const std::string& name, RenderNode* rend
 	friendlyName = name;
 	SetRender(renderNode);
 	SetPhysicsNodes(physicsNodes);
-
-	m_physicsNodes = physicsNodes;
 	RegisterPhysicsToRenderTransformCallback();
 }
 
@@ -29,6 +27,8 @@ void GameObjectExtended::SetPhysicsNodes(std::vector<PhysicsNode*>& physicsNodes
 		UnregisterPhysicsToRenderTransformCallback(); //Unregister old callback listener
 		physicsNode->SetParent(NULL);
 	}
+
+	m_physicsNodes = physicsNodes;
 
 	if (physicsNodes.size() > 0)
 	{
