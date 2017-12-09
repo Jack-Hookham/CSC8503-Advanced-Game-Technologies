@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ncltech\Scene.h>
+#include <ncltech\SoftBody.h>
 
 class SoftBodyScene : public Scene
 {

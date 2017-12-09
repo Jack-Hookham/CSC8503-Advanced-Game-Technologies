@@ -28,6 +28,7 @@
     <ClInclude Include="CuboidCollisionShape.h" />
     <ClInclude Include="DistanceConstraint.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="GameObjectExtended.h" />
     <ClInclude Include="GeometryUtils.h" />
     <ClInclude Include="GraphicsPipeline.h" />
     <ClInclude Include="Hull.h" />
@@ -40,6 +41,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="ScreenPicker.h" />
+    <ClInclude Include="SoftBody.h" />
     <ClInclude Include="SphereCollisionShape.h" />
   </ItemGroup>
   <ItemGroup>
@@ -47,6 +49,7 @@
     <ClCompile Include="CommonMeshes.cpp" />
     <ClCompile Include="CommonUtils.cpp" />
     <ClCompile Include="CuboidCollisionShape.cpp" />
+    <ClCompile Include="GameObjectExtended.cpp" />
     <ClCompile Include="GeometryUtils.cpp" />
     <ClCompile Include="GraphicsPipeline.cpp" />
     <ClCompile Include="Hull.cpp" />
@@ -58,6 +61,7 @@
     <ClCompile Include="PhysicsNode.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="ScreenPicker.cpp" />
+    <ClCompile Include="SoftBody.cpp" />
     <ClCompile Include="SphereCollisionShape.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
