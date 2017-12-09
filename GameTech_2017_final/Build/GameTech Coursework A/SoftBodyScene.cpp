@@ -16,7 +16,6 @@ SoftBodyScene::SoftBodyScene(const std::string& friendly_name)
 
 SoftBodyScene::~SoftBodyScene()
 {
-
 }
 
 
@@ -33,7 +32,21 @@ void SoftBodyScene::OnInitializeScene()
 	//Create Ground
 	this->AddGameObject(CommonUtils::BuildCuboidObject("Ground", Vector3(0.0f, -1.0f, 0.0f), Vector3(20.0f, 1.0f, 20.0f), true, 0.0f, true, false, Vector4(1.0f, 1.0f, 1.0f, 1.0f)));
 
+	SoftBody* softBody = new SoftBody(
+		"Soft Body",
+		5,
+		5,
+		2.0f,
+		Vector3(0.0f, 10.0f, 0.0f),
+		1.0f,
+		true,
+		true);
 
+	this->AddGameObjectExtended(softBody->SoftObject());
+
+	GraphicsPipeline::Instance()->GetCamera()->SetPosition(Vector3(5.0f, 15.0f, 20.0f));
+	GraphicsPipeline::Instance()->GetCamera()->SetPitch(0.0f);
+	GraphicsPipeline::Instance()->GetCamera()->SetYaw(0.0f);
 }
 
 void SoftBodyScene::OnCleanupScene()

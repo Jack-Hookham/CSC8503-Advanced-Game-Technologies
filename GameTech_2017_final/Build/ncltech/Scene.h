@@ -29,6 +29,7 @@ Description:
 #pragma once
 
 #include "GameObject.h"
+#include "GameObjectExtended.h"
 #include "PhysicsEngine.h"
 #include <nclgl\NCLDebug.h>
 #include <nclgl\TSingleton.h>
@@ -110,6 +111,24 @@ public:
 		}
 	}
 
+	void AddGameObjectExtended(GameObjectExtended* objExtended)
+	{
+		if (objExtended)
+		{
+			if (objExtended->scene) objExtended->scene->RemoveGameObject(objExtended);
+
+			m_vpObjects.push_back(objExtended);
+			objExtended->scene = this;
+			objExtended->OnAttachedToScene();
+
+			if (objExtended->renderNode) GraphicsPipeline::Instance()->AddRenderNode(objExtended->renderNode);
+			for (int i = 0; i < objExtended->GetPhysicsNodes().size(); ++i)
+			{
+				PhysicsEngine::Instance()->AddPhysicsObject(objExtended->GetPhysicsNodes()[i]);
+			}
+		}
+	}
+
 	// Remove GameObject from the scene list
 	//		- This will just remove it from the list of game objects,
 	//		  it will not call any delete functions.
@@ -126,6 +145,21 @@ public:
 		}
 	}
 
+	void RemoveGameObjectExtended(GameObjectExtended* objExtended)
+	{
+		if (objExtended && objExtended->scene == this)
+		{
+			if (objExtended->renderNode) GraphicsPipeline::Instance()->RemoveRenderNode(objExtended->renderNode);
+			for (int i = 0; i < objExtended->GetPhysicsNodes().size(); ++i)
+			{
+				if (objExtended->GetPhysicsNodes()[i]) PhysicsEngine::Instance()->RemovePhysicsObject(objExtended->GetPhysicsNodes()[i]);
+			}
+
+			m_vpObjects.erase(std::remove(m_vpObjects.begin(), m_vpObjects.end(), objExtended), m_vpObjects.end());
+			objExtended->OnDetachedFromScene();
+			objExtended->scene = NULL;
+		}
+	}
 
 	// Simple Iterative Search
 	//   - Searches all contained GameObject's and returns the first one with the name specified

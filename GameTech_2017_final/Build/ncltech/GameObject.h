@@ -113,7 +113,7 @@ public:
 
 
 	//<---------- UTILS ------------>
-	inline void RegisterPhysicsToRenderTransformCallback()
+	virtual inline void RegisterPhysicsToRenderTransformCallback()
 	{
 		if (physicsNode && renderNode)
 		{
@@ -126,7 +126,7 @@ public:
 		}
 	}
 
-	inline void UnregisterPhysicsToRenderTransformCallback()
+	virtual inline void UnregisterPhysicsToRenderTransformCallback()
 	{
 		if (physicsNode)
 		{
