@@ -20,6 +20,14 @@ public:
 
 	inline GameObjectExtended* SoftObject() { return softObject; }
 
+	//Create a spring constraint between the current node and the node 
+	//in the direction specified
+	//Pass in the x and y index of the current node
+	void ConnectRight(const int x, const int y);
+	void ConnectUp(const int x, const int y);
+	void ConnectRightUp(const int x, const int y);
+	void ConnectLeftUp(const int x, const int y);
+
 protected:
 	std::string m_name;
 	int m_numNodesX;

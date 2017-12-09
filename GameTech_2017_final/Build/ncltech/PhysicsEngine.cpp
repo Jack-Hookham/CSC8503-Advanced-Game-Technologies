@@ -35,7 +35,7 @@ PhysicsEngine::PhysicsEngine()
 {
 	//Variables set here will /not/ be reset with each scene
 	isPaused = false;  
-	debugDrawFlags = DEBUGDRAW_FLAGS_MANIFOLD | DEBUGDRAW_FLAGS_CONSTRAINT | DEBUGDRAW_FLAGS_OCTREE;
+	debugDrawFlags = DEBUGDRAW_FLAGS_CONSTRAINT;
 
 	CreateOctree();
 	SetDefaults();

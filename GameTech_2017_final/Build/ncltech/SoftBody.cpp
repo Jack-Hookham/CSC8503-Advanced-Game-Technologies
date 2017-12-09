@@ -117,97 +117,79 @@ void SoftBody::GeneratePhysicsConstraints()
 			//CASE 1: 3 constraints
 			if (x == 0 && y < m_numNodesY - 1)
 			{
-				//Right
-				connectTo = m_pnodes[(x + 1) * m_numNodesX + y];		//pnode directly to the right
-				PhysicsEngine::Instance()->AddConstraint(new DistanceConstraint(
-					connectFrom,											//Current pnode									
-					connectTo,								
-					connectFrom->GetPosition(),
-					connectTo->GetPosition()));
-
-				//Up
-				connectTo = m_pnodes[x * m_numNodesX + y + 1];			//pnode directly up
-				PhysicsEngine::Instance()->AddConstraint(new DistanceConstraint(
-					connectFrom,								
-					connectTo,
-					connectFrom->GetPosition(),
-					connectTo->GetPosition()));
-
-				//Right, Up
-				connectTo = m_pnodes[(x + 1) * m_numNodesX + y + 1];	//pnode right and up
-				PhysicsEngine::Instance()->AddConstraint(new DistanceConstraint(
-					connectFrom,
-					connectTo,
-					connectFrom->GetPosition(),
-					connectTo->GetPosition()));
+				ConnectRight(x, y);
+				ConnectUp(x, y);
+				ConnectRightUp(x, y);
 			}
 			//CASE 2: 4 constraints
 			else if (x > 0 && x < m_numNodesX - 1 && y < m_numNodesY - 1)
 			{
-				//Right
-				connectTo = m_pnodes[(x + 1) * m_numNodesX + y];		//pnode directly to the right
-				PhysicsEngine::Instance()->AddConstraint(new DistanceConstraint(
-					connectFrom,											//Current pnode									
-					connectTo,
-					connectFrom->GetPosition(),
-					connectTo->GetPosition()));
-
-				//Up
-				connectTo = m_pnodes[x * m_numNodesX + y + 1];			//pnode directly up
-				PhysicsEngine::Instance()->AddConstraint(new DistanceConstraint(
-					connectFrom,
-					connectTo,
-					connectFrom->GetPosition(),
-					connectTo->GetPosition()));
-
-				//Right, Up
-				connectTo = m_pnodes[(x + 1) * m_numNodesX + y + 1];	//pnode right and up
-				PhysicsEngine::Instance()->AddConstraint(new DistanceConstraint(
-					connectFrom,
-					connectTo,
-					connectFrom->GetPosition(),
-					connectTo->GetPosition()));
-
-				//Left, Up
-				connectTo = m_pnodes[(x - 1) * m_numNodesX + y + 1];	//pnode left and up
-				PhysicsEngine::Instance()->AddConstraint(new DistanceConstraint(
-					connectFrom,
-					connectTo,
-					connectFrom->GetPosition(),
-					connectTo->GetPosition()));
+				ConnectRight(x, y);
+				ConnectUp(x, y);
+				ConnectRightUp(x, y);
+				ConnectLeftUp(x, y);
 			}
 			//CASE 3: 2 constraints
 			else if (x == m_numNodesX - 1 && y < m_numNodesY - 1)
 			{
-				//Up
-				connectTo = m_pnodes[x * m_numNodesX + y + 1];			//pnode directly up
-				PhysicsEngine::Instance()->AddConstraint(new DistanceConstraint(
-					connectFrom,
-					connectTo,
-					connectFrom->GetPosition(),
-					connectTo->GetPosition()));
-
-				//Left, Up
-				connectTo = m_pnodes[(x - 1) * m_numNodesX + y + 1];	//pnode left and up
-				PhysicsEngine::Instance()->AddConstraint(new DistanceConstraint(
-					connectFrom,
-					connectTo,
-					connectFrom->GetPosition(),
-					connectTo->GetPosition()));
+				ConnectUp(x, y);
+				ConnectLeftUp(x, y);
 			}
 			//CASE 4: 1 constraint
 			else if (x < m_numNodesX - 1 && y == m_numNodesY - 1)
 			{
-				//Right
-				connectTo = m_pnodes[(x + 1) * m_numNodesX + y];		//pnode directly to the right
-				PhysicsEngine::Instance()->AddConstraint(new DistanceConstraint(
-					connectFrom,											//Current pnode									
-					connectTo,
-					connectFrom->GetPosition(),
-					connectTo->GetPosition()));
+				ConnectRight(x, y);
 			}
 			//CASE 5: 0 constraints (top right corner)
 		}
 	}
+}
+
+void SoftBody::ConnectRight(const int x, const int y)
+{
+	PhysicsNode* connectFrom = m_pnodes[x * m_numNodesX + y];
+	PhysicsNode* connectTo = m_pnodes[(x + 1) * m_numNodesX + y];		//pnode directly to the right
+
+	PhysicsEngine::Instance()->AddConstraint(new DistanceConstraint(
+		connectFrom,													//Current pnode									
+		connectTo,
+		connectFrom->GetPosition(),
+		connectTo->GetPosition()));
+}
+
+void SoftBody::ConnectUp(const int x, const int y)
+{
+	PhysicsNode* connectFrom = m_pnodes[x * m_numNodesX + y];
+	PhysicsNode* connectTo = m_pnodes[x * m_numNodesX + y + 1];			//pnode directly up
+	
+	PhysicsEngine::Instance()->AddConstraint(new DistanceConstraint(
+		connectFrom,
+		connectTo,
+		connectFrom->GetPosition(),
+		connectTo->GetPosition()));
+}
+
+void SoftBody::ConnectRightUp(const int x, const int y)
+{
+	PhysicsNode* connectFrom = m_pnodes[x * m_numNodesX + y];
+	PhysicsNode* connectTo = m_pnodes[(x + 1) * m_numNodesX + y + 1];	//pnode left and up
+	
+	PhysicsEngine::Instance()->AddConstraint(new DistanceConstraint(
+		connectFrom,
+		connectTo,
+		connectFrom->GetPosition(),
+		connectTo->GetPosition()));
+}
+
+void SoftBody::ConnectLeftUp(const int x, const int y)
+{
+	PhysicsNode* connectFrom = m_pnodes[x * m_numNodesX + y];
+	PhysicsNode* connectTo = m_pnodes[(x - 1) * m_numNodesX + y + 1];	//pnode left and up
+	
+	PhysicsEngine::Instance()->AddConstraint(new DistanceConstraint(
+		connectFrom,
+		connectTo,
+		connectFrom->GetPosition(),
+		connectTo->GetPosition()));
 }
 

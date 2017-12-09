@@ -3,7 +3,7 @@
 GameObjectExtended::GameObjectExtended(const std::string& name, RenderNode* renderNode, std::vector<PhysicsNode*>& physicsNodes)
 {
 	friendlyName = name;
-	//SetRender(renderNode);
+	SetRender(renderNode);
 	SetPhysicsNodes(physicsNodes);
 
 	m_physicsNodes = physicsNodes;
@@ -12,9 +12,9 @@ GameObjectExtended::GameObjectExtended(const std::string& name, RenderNode* rend
 
 GameObjectExtended::~GameObjectExtended()
 {
-	for (int i = 0; i < m_physicsNodes.size(); ++i)
+	for (int i = 1; i < m_physicsNodes.size(); ++i)
 	{
-		if (m_physicsNodes[i]) PhysicsEngine::Instance()->RemovePhysicsObject(physicsNode);
+		if (m_physicsNodes[i]) PhysicsEngine::Instance()->RemovePhysicsObject(m_physicsNodes[i]);
 		SAFE_DELETE(m_physicsNodes[i]);
 	}
 
