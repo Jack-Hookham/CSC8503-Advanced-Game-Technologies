@@ -3,7 +3,7 @@
 GameObjectExtended::GameObjectExtended(const std::string& name, RenderNode* renderNode, std::vector<PhysicsNode*>& physicsNodes)
 {
 	friendlyName = name;
-	SetRender(renderNode);
+	//SetRender(renderNode);
 	SetPhysicsNodes(physicsNodes);
 
 	m_physicsNodes = physicsNodes;

@@ -78,6 +78,9 @@ void SoftBody::GeneratePhysicsNodes()
 			m_pnodes.push_back(pnode);
 		}
 	}
+	//Top left and top right corners are stationary
+	m_pnodes[m_numNodesY - 1]->SetInverseMass(0.0f);
+	m_pnodes[m_pnodes.size() - 1]->SetInverseMass(0.0f);
 }
 
 void SoftBody::GeneratePhysicsConstraints()
