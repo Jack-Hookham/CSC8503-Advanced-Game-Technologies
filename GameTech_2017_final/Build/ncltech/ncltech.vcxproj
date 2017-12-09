@@ -19,6 +19,26 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CollisionDetectionSAT.cpp" />
+    <ClCompile Include="CommonMeshes.cpp" />
+    <ClCompile Include="CommonUtils.cpp" />
+    <ClCompile Include="CuboidCollisionShape.cpp" />
+    <ClCompile Include="GameObjectExtended.cpp" />
+    <ClCompile Include="GeometryUtils.cpp" />
+    <ClCompile Include="GraphicsPipeline.cpp" />
+    <ClCompile Include="Hull.cpp" />
+    <ClCompile Include="Manifold.cpp" />
+    <ClCompile Include="NetworkBase.cpp" />
+    <ClCompile Include="Octant.cpp" />
+    <ClCompile Include="Octree.cpp" />
+    <ClCompile Include="PhysicsEngine.cpp" />
+    <ClCompile Include="PhysicsNode.cpp" />
+    <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="ScreenPicker.cpp" />
+    <ClCompile Include="SoftBody.cpp" />
+    <ClCompile Include="SphereCollisionShape.cpp" />
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="BoundingBox.h" />
     <ClInclude Include="CollisionDetectionSAT.h" />
     <ClInclude Include="CollisionShape.h" />
@@ -44,26 +64,6 @@
     <ClInclude Include="SoftBody.h" />
     <ClInclude Include="SphereCollisionShape.h" />
     <ClInclude Include="SpringConstraint.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="CollisionDetectionSAT.cpp" />
-    <ClCompile Include="CommonMeshes.cpp" />
-    <ClCompile Include="CommonUtils.cpp" />
-    <ClCompile Include="CuboidCollisionShape.cpp" />
-    <ClCompile Include="GameObjectExtended.cpp" />
-    <ClCompile Include="GeometryUtils.cpp" />
-    <ClCompile Include="GraphicsPipeline.cpp" />
-    <ClCompile Include="Hull.cpp" />
-    <ClCompile Include="Manifold.cpp" />
-    <ClCompile Include="NetworkBase.cpp" />
-    <ClCompile Include="Octant.cpp" />
-    <ClCompile Include="Octree.cpp" />
-    <ClCompile Include="PhysicsEngine.cpp" />
-    <ClCompile Include="PhysicsNode.cpp" />
-    <ClCompile Include="SceneManager.cpp" />
-    <ClCompile Include="ScreenPicker.cpp" />
-    <ClCompile Include="SoftBody.cpp" />
-    <ClCompile Include="SphereCollisionShape.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{AB4196E5-2488-4514-B4C2-00EAFC468A1D}</ProjectGuid>
