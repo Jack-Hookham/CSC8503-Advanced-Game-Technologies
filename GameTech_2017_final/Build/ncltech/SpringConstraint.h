@@ -117,7 +117,10 @@ public:
 			//here, e.g. baumgarte (and later elasticity)
 
 			//This line is the only difference between DistanceConstraint and SpringConstraint
-			float jn = (distance_offset * 0.01f) / (constraintMass * PhysicsEngine::Instance()->GetDeltaTime()) - (0.01f * abnVel);
+			//https://www.gamedev.net/articles/programming/math-and-physics/towards-a-simpler-stiffer-and-more-stable-spring-r3227/
+			const float k = 0.01f;
+			const float c = 0.01f;
+			float jn = (distance_offset * k) / (constraintMass * PhysicsEngine::Instance()->GetDeltaTime()) - (c * abnVel);
 
 			//Apply linear velocity impulse
 

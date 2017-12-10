@@ -35,6 +35,7 @@ protected:
 
 	std::vector<PhysicsNode*> m_pnodes;
 	Mesh* m_mesh;
+	GLuint m_texture = 0;
 	GameObjectExtended* softObject;
 
 	void UpdateMeshVertices(const Matrix4& mat4);

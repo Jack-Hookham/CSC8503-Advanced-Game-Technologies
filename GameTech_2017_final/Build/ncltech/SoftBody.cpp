@@ -18,6 +18,13 @@ SoftBody::SoftBody(const std::string& name, const int nodesX, const int nodesY,
 
 SoftBody::~SoftBody()
 {
+	SAFE_DELETE(m_mesh);
+
+	if (m_texture)
+	{
+		glDeleteTextures(1, &m_texture);
+		m_texture = 0;
+	}
 }
 
 void SoftBody::GenerateBody()
@@ -29,15 +36,29 @@ void SoftBody::GenerateBody()
 	//Create the mesh for the whole 
 	m_mesh = GenerateMesh();
 
+	//Initialise textures
+	m_texture = SOIL_load_OGL_texture(TEXTUREDIR"MetalSheet.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
+	if (m_texture)
+	{
+		glBindTexture(GL_TEXTURE_2D, m_texture);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+	m_mesh->SetTexture(m_texture);
+
 	float radius = m_nodeSeparation * 0.5f;
 	RenderNode* rnode = new RenderNode();
-	
+
 	RenderNode* dummy = new RenderNode(m_mesh, Vector4(1.0f, 1.0f, 1.0f, 1.0f), false);
 	dummy->SetTransform(Matrix4::Scale(Vector3(radius, radius, radius)));
 	rnode->AddChild(dummy);
 
-	//rnode->SetTransform(Matrix4::Translation(m_position));
+	rnode->SetTransform(Matrix4::Translation(m_position));
 	rnode->SetBoundingRadius(radius);
+	rnode->SetColorRecursive(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	softObject = new GameObjectExtended(m_name, rnode, m_pnodes);
 
@@ -212,43 +233,21 @@ void SoftBody::UpdateMeshVertices(const Matrix4& mat4)
 			PhysicsNode* pnodeCurrent = m_pnodes[x * m_numNodesX + y];
 			int vertexIndex = (x * m_numNodesX + y) * 6;
 
-			//Vector3 objectPosition = m_pnodes[0]->GetPosition();
-			//Vector3 pnodePosition = pnodeCurrent->GetPosition() - objectPosition;
-
 			//Bottom triangle
-			//m_mesh->vertices[vertexIndex] = m_pnodes[0]->GetPosition() + Vector3(pnodeCurrent->GetPosition().x, 0.0f, pnodeCurrent->GetPosition().z);
-			//m_mesh->vertices[vertexIndex + 1] = m_pnodes[0]->GetPosition() + Vector3(GetRight(x, y)->GetPosition().x, 0.0f, GetRight(x, y)->GetPosition().z);
-			//m_mesh->vertices[vertexIndex + 2] = m_pnodes[0]->GetPosition() + Vector3(GetUp(x, y)->GetPosition().x, 0.0f, GetUp(x, y)->GetPosition().z);
-			//															   
-			////Top triangle												   
-			//m_mesh->vertices[vertexIndex + 3] = m_pnodes[0]->GetPosition() + Vector3(GetUp(x, y)->GetPosition().x, 0.0f, GetUp(x, y)->GetPosition().z);
-			//m_mesh->vertices[vertexIndex + 4] = m_pnodes[0]->GetPosition() + Vector3(GetRightUp(x, y)->GetPosition().x, 0.0f, GetRightUp(x, y)->GetPosition().z);
-			//m_mesh->vertices[vertexIndex + 5] = m_pnodes[0]->GetPosition() + Vector3(GetRight(x, y)->GetPosition().x, 0.0f, GetRight(x, y)->GetPosition().z);
-
-			////Bottom triangle
-			//m_mesh->vertices[vertexIndex] = m_pnodes[0]->GetPosition() - pnodeCurrent->GetPosition();
-			//m_mesh->vertices[vertexIndex + 1] = m_pnodes[0]->GetPosition() - GetRight(x, y)->GetPosition();
-			//m_mesh->vertices[vertexIndex + 2] = m_pnodes[0]->GetPosition() - GetUp(x, y)->GetPosition();
-
-			////Top triangle
-			//m_mesh->vertices[vertexIndex + 3] = m_pnodes[0]->GetPosition() - GetUp(x, y)->GetPosition();
-			//m_mesh->vertices[vertexIndex + 4] = m_pnodes[0]->GetPosition() - GetRightUp(x, y)->GetPosition();
-			//m_mesh->vertices[vertexIndex + 5] = m_pnodes[0]->GetPosition() - GetRight(x, y)->GetPosition();
-
-			//Bottom triangle
-			m_mesh->vertices[vertexIndex] = pnodeCurrent->GetPosition();
-			m_mesh->vertices[vertexIndex + 1] = GetRight(x, y)->GetPosition();
-			m_mesh->vertices[vertexIndex + 2] = GetUp(x, y)->GetPosition();
+			m_mesh->vertices[vertexIndex] = pnodeCurrent->GetPosition() - m_position;
+			m_mesh->vertices[vertexIndex + 1] = GetRight(x, y)->GetPosition() - m_position;
+			m_mesh->vertices[vertexIndex + 2] = GetUp(x, y)->GetPosition() - m_position;
 
 			//Top triangle
-			m_mesh->vertices[vertexIndex + 3] = GetUp(x, y)->GetPosition();
-			m_mesh->vertices[vertexIndex + 4] = GetRightUp(x, y)->GetPosition();
-			m_mesh->vertices[vertexIndex + 5] = GetRight(x, y)->GetPosition();
+			m_mesh->vertices[vertexIndex + 3] = GetRight(x, y)->GetPosition() - m_position;
+			m_mesh->vertices[vertexIndex + 4] = GetRightUp(x, y)->GetPosition() - m_position;
+			m_mesh->vertices[vertexIndex + 5] = GetUp(x, y)->GetPosition() - m_position;
 		}
 	}
 
 	m_mesh->GenerateNormals();
 	m_mesh->GenerateTangents();
+	m_mesh->DeleteVBO();			//Cleans up the VBO before rebuffering data
 	m_mesh->BufferData();
 }
 

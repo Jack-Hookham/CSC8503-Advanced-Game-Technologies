@@ -70,6 +70,7 @@ public:
 
 	//Buffers all VBO data into graphics memory. Required before drawing!
 	void	BufferData();
+	void	DeleteVBO();
 
 
 	//Generates normals for all facets. Assumes geometry type is GL_TRIANGLES...

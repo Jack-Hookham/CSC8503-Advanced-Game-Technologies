@@ -8,14 +8,7 @@ RenderNode::RenderNode(Mesh*mesh, Vector4 colour, const bool cullFace)	{
 	boundingRadius		= 100.0f;
 	distanceFromCamera	= 0.0f;
 	
-	if (cullFace)
-	{
-		glEnable(GL_CULL_FACE);
-	}
-	else
-	{
-		glDisable(GL_CULL_FACE);
-	}
+	this->cullFace = cullFace;
 
 	modelScale			= Vector3(1,1,1);
 }

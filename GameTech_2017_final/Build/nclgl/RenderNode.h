@@ -94,6 +94,8 @@ public:
 	static bool		CompareByCameraDistance(RenderNode*a,RenderNode*b) ;
 	static bool		CompareByZ(RenderNode*a,RenderNode*b) ;
 
+	const bool GetCullFace() const { return cullFace; }
+
 protected:
 	Matrix4		worldTransform;
 	Matrix4		transform;
@@ -105,5 +107,7 @@ protected:
 	Mesh*		mesh;
 	bool		awake;
 	std::vector<RenderNode*>		children;
+
+	bool cullFace;
 };
 

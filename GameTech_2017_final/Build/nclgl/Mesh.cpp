@@ -410,6 +410,11 @@ void	Mesh::BufferData()	{
 	glBindVertexArray(0);
 }
 
+void Mesh::DeleteVBO()
+{
+	glDeleteBuffers(MAX_BUFFER, bufferObject);
+}
+
 /*
 Stuff for later tutorials...
 */
