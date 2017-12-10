@@ -16,6 +16,7 @@ void CommonUtils::DragableObjectCallback(GameObject* obj, float dt, const Vector
 {
 	if (obj->HasPhysics())
 	{
+		obj->Physics()->SetAtRest(false);
 		if (Window::GetMouse()->ButtonDown(MOUSE_LEFT))
 		{
 			//Position

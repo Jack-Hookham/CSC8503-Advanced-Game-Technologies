@@ -29,7 +29,7 @@ void Initialize()
 
 								//Enqueue All Scenes
 								// - Add any new scenes you want here =D
-	SceneManager::Instance()->EnqueueScene(new Scene_Particles("Cuda Particle - Test/Example"));
+	//SceneManager::Instance()->EnqueueScene(new Scene_Particles("Cuda Particle - Test/Example"));
 	SceneManager::Instance()->EnqueueScene(new Scene_CollisionHandling("Cuda Collision - Test/Example"));
 }
 

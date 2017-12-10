@@ -12,6 +12,7 @@ SoftBody::SoftBody(const std::string& name, const int nodesX, const int nodesY,
 	m_invNodeMass = invNodeMass;
 	m_collidable = collidable;
 	m_draggable = draggable;
+	m_nodeRadius = separation * 0.5f;
 
 	GenerateBody();
 }
@@ -49,15 +50,14 @@ void SoftBody::GenerateBody()
 	}
 	m_mesh->SetTexture(m_texture);
 
-	float radius = m_nodeSeparation * 0.5f;
 	RenderNode* rnode = new RenderNode();
 
 	RenderNode* dummy = new RenderNode(m_mesh, Vector4(1.0f, 1.0f, 1.0f, 1.0f), false);
-	dummy->SetTransform(Matrix4::Scale(Vector3(radius, radius, radius)));
+	dummy->SetTransform(Matrix4::Scale(Vector3(m_nodeRadius, m_nodeRadius, m_nodeRadius)));
 	rnode->AddChild(dummy);
 
 	rnode->SetTransform(Matrix4::Translation(m_position));
-	rnode->SetBoundingRadius(radius);
+	rnode->SetBoundingRadius(m_nodeRadius);
 	rnode->SetColorRecursive(Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	softObject = new GameObjectExtended(m_name, rnode, m_pnodes);
@@ -78,7 +78,6 @@ void SoftBody::GenerateBody()
 
 void SoftBody::GeneratePhysicsNodes()
 {
-	float radius = m_nodeSeparation * 0.5f;
 	for (int x = 0; x < m_numNodesX; ++x)
 	{
 		for (int y = 0; y < m_numNodesY; ++y)
@@ -90,15 +89,15 @@ void SoftBody::GeneratePhysicsNodes()
 			PhysicsNode* pnode = new PhysicsNode();
 			pnode->SetPosition(position);
 			pnode->SetInverseMass(m_invNodeMass);
-			pnode->SetBoundingRadius(radius);
+			pnode->SetBoundingRadius(m_nodeRadius);
 
 			if (!m_collidable)
 			{
-				pnode->SetInverseInertia(SphereCollisionShape(radius).BuildInverseInertia(m_invNodeMass));
+				pnode->SetInverseInertia(SphereCollisionShape(m_nodeRadius).BuildInverseInertia(m_invNodeMass));
 			}
 			else
 			{
-				CollisionShape* pColshape = new SphereCollisionShape(radius);
+				CollisionShape* pColshape = new SphereCollisionShape(m_nodeRadius);
 				pnode->SetCollisionShape(pColshape);
 				pnode->SetInverseInertia(pColshape->BuildInverseInertia(m_invNodeMass));
 			}
@@ -189,27 +188,27 @@ Mesh* SoftBody::GenerateMesh()
 	{
 		for (int y = 0; y < m_numNodesY - 1; ++y)
 		{
-			int startIndex = (x * m_numNodesX + y) * 6;
-			Vector3 nodeOffset = Vector3(x * m_nodeSeparation, y * m_nodeSeparation, 0.0f);
+			PhysicsNode* pnodeCurrent = m_pnodes[x * m_numNodesX + y];
+			int vertexIndex = (x * m_numNodesX + y) * 6;
 
 			//Bottom triangle
-			m->vertices[startIndex] = Vector3(nodeOffset.x, nodeOffset.y, 0.0f);
-			m->vertices[startIndex + 1] = Vector3(nodeOffset.x, nodeOffset.y + m_nodeSeparation, 0.0f);
-			m->vertices[startIndex + 2] = Vector3(nodeOffset.x + m_nodeSeparation, nodeOffset.y, 0.0f);
+			m->vertices[vertexIndex] = pnodeCurrent->GetPosition() - m_position;
+			m->vertices[vertexIndex + 1] = GetRight(x, y)->GetPosition() - m_position;
+			m->vertices[vertexIndex + 2] = GetUp(x, y)->GetPosition() - m_position;
 
 			//Top triangle
-			m->vertices[startIndex + 3] = Vector3(nodeOffset.x, nodeOffset.y + m_nodeSeparation, 0.0f);
-			m->vertices[startIndex + 4] = Vector3(nodeOffset.x + m_nodeSeparation, nodeOffset.y + m_nodeSeparation, 0.0f);
-			m->vertices[startIndex + 5] = Vector3(nodeOffset.x + m_nodeSeparation, nodeOffset.y, 0.0f);
+			m->vertices[vertexIndex + 3] = GetRight(x, y)->GetPosition() - m_position;
+			m->vertices[vertexIndex + 4] = GetRightUp(x, y)->GetPosition() - m_position;
+			m->vertices[vertexIndex + 5] = GetUp(x, y)->GetPosition() - m_position;
 
-			m->textureCoords[startIndex] = Vector2(0.0f, 0.0f);
-			m->textureCoords[startIndex + 1] = Vector2(0.0f, 1.0f);
-			m->textureCoords[startIndex + 2] = Vector2(1.0f, 0.0f);
-			m->textureCoords[startIndex + 3] = Vector2(0.0f, 1.0f);
-			m->textureCoords[startIndex + 4] = Vector2(1.0f, 1.0f);
-			m->textureCoords[startIndex + 5] = Vector2(1.0f, 0.0f);
+			m->textureCoords[vertexIndex] = Vector2(0.0f, 0.0f);
+			m->textureCoords[vertexIndex + 1] = Vector2(0.0f, 1.0f);
+			m->textureCoords[vertexIndex + 2] = Vector2(1.0f, 0.0f);
+			m->textureCoords[vertexIndex + 3] = Vector2(0.0f, 1.0f);
+			m->textureCoords[vertexIndex + 4] = Vector2(1.0f, 1.0f);
+			m->textureCoords[vertexIndex + 5] = Vector2(1.0f, 0.0f);
 
-			for (int i = startIndex; i < startIndex + 6; ++i)
+			for (int i = vertexIndex; i < vertexIndex + 6; ++i)
 			{
 				m->colours[i] = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 				m->normals[i] = Vector3(0.0f, 0.0f, -1.0f);
@@ -224,8 +223,6 @@ Mesh* SoftBody::GenerateMesh()
 
 void SoftBody::UpdateMeshVertices(const Matrix4& mat4)
 {
-	float halfDims = m_nodeSeparation * 0.5f;
-
 	for (int x = 0; x < m_numNodesX - 1; ++x)
 	{
 		for (int y = 0; y < m_numNodesY - 1; ++y)

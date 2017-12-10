@@ -31,7 +31,8 @@ protected:
 	Vector3 m_position;
 	float m_invNodeMass;
 	bool m_collidable;
-	bool m_draggable;
+	bool m_draggable; 
+	float m_nodeRadius;
 
 	std::vector<PhysicsNode*> m_pnodes;
 	Mesh* m_mesh;

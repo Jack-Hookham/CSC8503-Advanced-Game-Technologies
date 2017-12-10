@@ -139,7 +139,7 @@ void PhysicsNode::DetermineRestState()
 		bool movement = false;
 		for (int i = 0; i < VELOCITY_FRAMES; ++i)
 		{
-			//If any of the previous <VELOCITY_FRAMES> frames velocities are greater than <small value> then the node is not at rest 
+			//If any of the previous frames velocities are greater than <small value> then the node is not at rest 
 			if (linVelocities[i].Length() > 0.05f || angVelocities[i].Length() > 0.01f)
 			{
 				movement = true;

@@ -35,7 +35,7 @@ void SoftBodyScene::OnInitializeScene()
 		"Soft Body",
 		10,
 		10,
-		2.0f,
+		1.0f,
 		Vector3(0.0f, 10.0f, 0.0f),
 		1.0f,
 		true,

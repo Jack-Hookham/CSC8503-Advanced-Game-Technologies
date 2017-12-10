@@ -30,6 +30,15 @@ public:
 		//<--- SCENE CREATION --->
 		//Create Ground
 		this->AddGameObject(BuildCuboidObject("Ground", Vector3(0.0f, -1.0f, 0.0f), Vector3(20.0f, 1.0f, 20.0f), true, 0.0f, true, false, Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
+		GameObject* sphere1 = BuildSphereObject("Sphere1",
+			Vector3(0.0f, 20.0f, 0.0f),
+			0.5f,
+			true,
+			1.0f,
+			true,
+			true,
+			Vector4(1.0f, 0.5f, 0.5f, 1.0f));
+		this->AddGameObject(sphere1);
 
 		cudaParticleProg = new CudaCollidingParticles();
 

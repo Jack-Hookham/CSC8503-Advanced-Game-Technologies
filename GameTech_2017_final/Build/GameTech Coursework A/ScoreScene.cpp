@@ -55,6 +55,7 @@ void ScoreScene::OnInitializeScene()
 			false,
 			CommonMeshes::MeshType::TARGET_CUBE);
 
+		targets[i]->SetScore(goodScore);
 		targets[i]->Physics()->SetOnCollisionCallback(
 			std::bind(&ScoreScene::TargetOnHitCallBack, this,
 				targets[i],
