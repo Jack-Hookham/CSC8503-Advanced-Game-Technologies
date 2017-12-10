@@ -13,6 +13,8 @@ public:
 
 	void SetPhysicsNodes(std::vector<PhysicsNode*>& physicsNodes); 
 
+	void GenerateMesh();
+
 	//inline void RegisterPhysicsToRenderTransformCallback()
 	//{
 	//	for (int i = 0; i < m_physicsNodes.size(); ++i)
@@ -42,5 +44,6 @@ public:
 
 protected:
 	std::vector<PhysicsNode*> m_physicsNodes;
+	Mesh* mesh;
 };
 

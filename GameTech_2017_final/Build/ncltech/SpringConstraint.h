@@ -116,7 +116,8 @@ public:
 			//Note: We also add in any extra energy to the system
 			//here, e.g. baumgarte (and later elasticity)
 
-			float jn = -(abnVel + b) / constraintMass;
+			//This line is the only difference between DistanceConstraint and SpringConstraint
+			float jn = (distance_offset * 0.01f) / (constraintMass * PhysicsEngine::Instance()->GetDeltaTime()) - (0.01f * abnVel);
 
 			//Apply linear velocity impulse
 

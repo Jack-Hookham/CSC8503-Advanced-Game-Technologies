@@ -26,7 +26,7 @@ _-_-_-_-_-_-_-""  ""
 
 class RenderNode	{
 public:
-	 RenderNode(Mesh*m = NULL, Vector4 colour = Vector4(1,1,1,1));
+	 RenderNode(Mesh*m = NULL, Vector4 colour = Vector4(1,1,1,1), const bool cullFace = true);
 	virtual ~RenderNode(void);
 
 	virtual bool IsRenderable()
@@ -74,6 +74,15 @@ public:
 
 	void			SetMesh(Mesh*m)				{mesh = m;}
 	Mesh*			GetMesh()					{return mesh;}
+	void SetMeshRecursive(Mesh* m)
+	{
+		SetMesh(m);
+		for (RenderNode* child : children)
+		{
+			if (child)
+				child->SetMeshRecursive(m);
+		}
+	}
 
 	bool	IsAwake()	{return awake;}
 	void	Wake()		{awake = true;}

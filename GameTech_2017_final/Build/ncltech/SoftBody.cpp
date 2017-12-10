@@ -26,18 +26,25 @@ void SoftBody::GenerateBody()
 	GeneratePhysicsNodes();
 	//Create the contraints connecting the nodes together
 	GeneratePhysicsConstraints();
+	//Create the mesh for the whole 
+	m_mesh = GenerateMesh();
 
 	float radius = m_nodeSeparation * 0.5f;
 	RenderNode* rnode = new RenderNode();
 	
-	RenderNode* dummy = new RenderNode(CommonMeshes::Meshes()[CommonMeshes::MeshType::DEFAULT_SPHERE], Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+	RenderNode* dummy = new RenderNode(m_mesh, Vector4(1.0f, 1.0f, 1.0f, 1.0f), false);
 	dummy->SetTransform(Matrix4::Scale(Vector3(radius, radius, radius)));
 	rnode->AddChild(dummy);
 
-	rnode->SetTransform(Matrix4::Translation(m_position));
+	//rnode->SetTransform(Matrix4::Translation(m_position));
 	rnode->SetBoundingRadius(radius);
 
 	softObject = new GameObjectExtended(m_name, rnode, m_pnodes);
+
+	m_pnodes[0]->SetOnUpdateCallback(
+		std::bind(&SoftBody::UpdateMeshVertices,
+			this,
+			std::placeholders::_1));
 
 	if (m_draggable)
 	{
@@ -78,6 +85,7 @@ void SoftBody::GeneratePhysicsNodes()
 			m_pnodes.push_back(pnode);
 		}
 	}
+
 	//Top left and top right corners are stationary
 	m_pnodes[m_numNodesY - 1]->SetInverseMass(0.0f);
 	m_pnodes[m_pnodes.size() - 1]->SetInverseMass(0.0f);
@@ -145,10 +153,109 @@ void SoftBody::GeneratePhysicsConstraints()
 	}
 }
 
+Mesh* SoftBody::GenerateMesh()
+{
+	//Generate a quad at each node
+	Mesh* m = new Mesh();
+	m->numVertices = (m_numNodesX) * (m_numNodesY) * 6;
+
+	m->vertices = new Vector3[m->numVertices];
+	m->textureCoords = new Vector2[m->numVertices];
+	m->colours = new Vector4[m->numVertices];
+	m->normals = new Vector3[m->numVertices];
+	m->tangents = new Vector3[m->numVertices];
+	for (int x = 0; x < m_numNodesX - 1; ++x)
+	{
+		for (int y = 0; y < m_numNodesY - 1; ++y)
+		{
+			int startIndex = (x * m_numNodesX + y) * 6;
+			Vector3 nodeOffset = Vector3(x * m_nodeSeparation, y * m_nodeSeparation, 0.0f);
+
+			//Bottom triangle
+			m->vertices[startIndex] = Vector3(nodeOffset.x, nodeOffset.y, 0.0f);
+			m->vertices[startIndex + 1] = Vector3(nodeOffset.x, nodeOffset.y + m_nodeSeparation, 0.0f);
+			m->vertices[startIndex + 2] = Vector3(nodeOffset.x + m_nodeSeparation, nodeOffset.y, 0.0f);
+
+			//Top triangle
+			m->vertices[startIndex + 3] = Vector3(nodeOffset.x, nodeOffset.y + m_nodeSeparation, 0.0f);
+			m->vertices[startIndex + 4] = Vector3(nodeOffset.x + m_nodeSeparation, nodeOffset.y + m_nodeSeparation, 0.0f);
+			m->vertices[startIndex + 5] = Vector3(nodeOffset.x + m_nodeSeparation, nodeOffset.y, 0.0f);
+
+			m->textureCoords[startIndex] = Vector2(0.0f, 0.0f);
+			m->textureCoords[startIndex + 1] = Vector2(0.0f, 1.0f);
+			m->textureCoords[startIndex + 2] = Vector2(1.0f, 0.0f);
+			m->textureCoords[startIndex + 3] = Vector2(0.0f, 1.0f);
+			m->textureCoords[startIndex + 4] = Vector2(1.0f, 1.0f);
+			m->textureCoords[startIndex + 5] = Vector2(1.0f, 0.0f);
+
+			for (int i = startIndex; i < startIndex + 6; ++i)
+			{
+				m->colours[i] = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+				m->normals[i] = Vector3(0.0f, 0.0f, -1.0f);
+				m->tangents[i] = Vector3(1.0f, 0.0f, 0.0f);
+			}
+		}
+	}
+
+	m->BufferData();
+	return m;
+}
+
+void SoftBody::UpdateMeshVertices(const Matrix4& mat4)
+{
+	float halfDims = m_nodeSeparation * 0.5f;
+
+	for (int x = 0; x < m_numNodesX - 1; ++x)
+	{
+		for (int y = 0; y < m_numNodesY - 1; ++y)
+		{
+			PhysicsNode* pnodeCurrent = m_pnodes[x * m_numNodesX + y];
+			int vertexIndex = (x * m_numNodesX + y) * 6;
+
+			//Vector3 objectPosition = m_pnodes[0]->GetPosition();
+			//Vector3 pnodePosition = pnodeCurrent->GetPosition() - objectPosition;
+
+			//Bottom triangle
+			//m_mesh->vertices[vertexIndex] = m_pnodes[0]->GetPosition() + Vector3(pnodeCurrent->GetPosition().x, 0.0f, pnodeCurrent->GetPosition().z);
+			//m_mesh->vertices[vertexIndex + 1] = m_pnodes[0]->GetPosition() + Vector3(GetRight(x, y)->GetPosition().x, 0.0f, GetRight(x, y)->GetPosition().z);
+			//m_mesh->vertices[vertexIndex + 2] = m_pnodes[0]->GetPosition() + Vector3(GetUp(x, y)->GetPosition().x, 0.0f, GetUp(x, y)->GetPosition().z);
+			//															   
+			////Top triangle												   
+			//m_mesh->vertices[vertexIndex + 3] = m_pnodes[0]->GetPosition() + Vector3(GetUp(x, y)->GetPosition().x, 0.0f, GetUp(x, y)->GetPosition().z);
+			//m_mesh->vertices[vertexIndex + 4] = m_pnodes[0]->GetPosition() + Vector3(GetRightUp(x, y)->GetPosition().x, 0.0f, GetRightUp(x, y)->GetPosition().z);
+			//m_mesh->vertices[vertexIndex + 5] = m_pnodes[0]->GetPosition() + Vector3(GetRight(x, y)->GetPosition().x, 0.0f, GetRight(x, y)->GetPosition().z);
+
+			////Bottom triangle
+			//m_mesh->vertices[vertexIndex] = m_pnodes[0]->GetPosition() - pnodeCurrent->GetPosition();
+			//m_mesh->vertices[vertexIndex + 1] = m_pnodes[0]->GetPosition() - GetRight(x, y)->GetPosition();
+			//m_mesh->vertices[vertexIndex + 2] = m_pnodes[0]->GetPosition() - GetUp(x, y)->GetPosition();
+
+			////Top triangle
+			//m_mesh->vertices[vertexIndex + 3] = m_pnodes[0]->GetPosition() - GetUp(x, y)->GetPosition();
+			//m_mesh->vertices[vertexIndex + 4] = m_pnodes[0]->GetPosition() - GetRightUp(x, y)->GetPosition();
+			//m_mesh->vertices[vertexIndex + 5] = m_pnodes[0]->GetPosition() - GetRight(x, y)->GetPosition();
+
+			//Bottom triangle
+			m_mesh->vertices[vertexIndex] = pnodeCurrent->GetPosition();
+			m_mesh->vertices[vertexIndex + 1] = GetRight(x, y)->GetPosition();
+			m_mesh->vertices[vertexIndex + 2] = GetUp(x, y)->GetPosition();
+
+			//Top triangle
+			m_mesh->vertices[vertexIndex + 3] = GetUp(x, y)->GetPosition();
+			m_mesh->vertices[vertexIndex + 4] = GetRightUp(x, y)->GetPosition();
+			m_mesh->vertices[vertexIndex + 5] = GetRight(x, y)->GetPosition();
+		}
+	}
+
+	m_mesh->GenerateNormals();
+	m_mesh->GenerateTangents();
+	m_mesh->BufferData();
+}
+
 void SoftBody::ConnectRight(const int x, const int y)
 {
 	PhysicsNode* connectFrom = m_pnodes[x * m_numNodesX + y];
-	PhysicsNode* connectTo = m_pnodes[(x + 1) * m_numNodesX + y];		//pnode directly to the right
+	PhysicsNode* connectTo = GetRight(x, y);		//pnode directly to the right
 
 	PhysicsEngine::Instance()->AddConstraint(new SpringConstraint(
 		connectFrom,													//Current pnode									
@@ -160,7 +267,7 @@ void SoftBody::ConnectRight(const int x, const int y)
 void SoftBody::ConnectUp(const int x, const int y)
 {
 	PhysicsNode* connectFrom = m_pnodes[x * m_numNodesX + y];
-	PhysicsNode* connectTo = m_pnodes[x * m_numNodesX + y + 1];			//pnode directly up
+	PhysicsNode* connectTo = GetUp(x, y);			//pnode directly up
 	
 	PhysicsEngine::Instance()->AddConstraint(new SpringConstraint(
 		connectFrom,
@@ -172,7 +279,7 @@ void SoftBody::ConnectUp(const int x, const int y)
 void SoftBody::ConnectRightUp(const int x, const int y)
 {
 	PhysicsNode* connectFrom = m_pnodes[x * m_numNodesX + y];
-	PhysicsNode* connectTo = m_pnodes[(x + 1) * m_numNodesX + y + 1];	//pnode left and up
+	PhysicsNode* connectTo = GetRightUp(x, y);	//pnode right and up
 	
 	PhysicsEngine::Instance()->AddConstraint(new SpringConstraint(
 		connectFrom,
@@ -184,7 +291,7 @@ void SoftBody::ConnectRightUp(const int x, const int y)
 void SoftBody::ConnectLeftUp(const int x, const int y)
 {
 	PhysicsNode* connectFrom = m_pnodes[x * m_numNodesX + y];
-	PhysicsNode* connectTo = m_pnodes[(x - 1) * m_numNodesX + y + 1];	//pnode left and up
+	PhysicsNode* connectTo = GetLeftUp(x, y);	//pnode left and up
 	
 	PhysicsEngine::Instance()->AddConstraint(new SpringConstraint(
 		connectFrom,

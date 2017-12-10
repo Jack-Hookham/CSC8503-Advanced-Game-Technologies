@@ -10,7 +10,6 @@
 SoftBodyScene::SoftBodyScene(const std::string& friendly_name)
 	: Scene(friendly_name)
 	, m_AccumTime(0.0f)
-	, m_pPlayer(NULL)
 {
 }
 

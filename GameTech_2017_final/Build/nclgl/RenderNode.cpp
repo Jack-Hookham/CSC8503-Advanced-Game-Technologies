@@ -1,6 +1,6 @@
 #include "RenderNode.h"
 
-RenderNode::RenderNode(Mesh*mesh, Vector4 colour)	{
+RenderNode::RenderNode(Mesh*mesh, Vector4 colour, const bool cullFace)	{
 	awake				= true;
 	this->mesh			= mesh;
 	this->color			= colour;
@@ -8,6 +8,15 @@ RenderNode::RenderNode(Mesh*mesh, Vector4 colour)	{
 	boundingRadius		= 100.0f;
 	distanceFromCamera	= 0.0f;
 	
+	if (cullFace)
+	{
+		glEnable(GL_CULL_FACE);
+	}
+	else
+	{
+		glDisable(GL_CULL_FACE);
+	}
+
 	modelScale			= Vector3(1,1,1);
 }
 

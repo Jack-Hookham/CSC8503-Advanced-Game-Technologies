@@ -15,5 +15,4 @@ public:
 
 protected:
 	float m_AccumTime;
-	GameObject* m_pPlayer;
 };
