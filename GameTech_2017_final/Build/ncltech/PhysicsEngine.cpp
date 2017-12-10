@@ -35,7 +35,7 @@ PhysicsEngine::PhysicsEngine()
 {
 	//Variables set here will /not/ be reset with each scene
 	isPaused = false;  
-	debugDrawFlags = DEBUGDRAW_FLAGS_CONSTRAINT;
+	//debugDrawFlags = DEBUGDRAW_FLAGS_CONSTRAINT;
 
 	CreateOctree();
 	SetDefaults();
@@ -335,6 +335,12 @@ void PhysicsEngine::SphereSphereCheck()
 
 			//if both objects are at rest then there is no need to check for collision
 			if (pnodeA->GetAtRest() && pnodeB->GetAtRest())
+			{
+				continue;
+			}
+
+			//if both nodes have the same soft body id then don't check collision
+			if (pnodeA->GetSoftBodyID() == pnodeB->GetSoftBodyID() && pnodeA->GetSoftBodyID() != NULL)
 			{
 				continue;
 			}

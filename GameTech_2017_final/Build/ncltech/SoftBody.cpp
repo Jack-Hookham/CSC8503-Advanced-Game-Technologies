@@ -2,7 +2,7 @@
 
 SoftBody::SoftBody(const std::string& name, const int nodesX, const int nodesY, 
 	const float separation, const Vector3 pos, const float invNodeMass, 
-	const bool collidable, const bool draggable)
+	const bool collidable, const bool draggable, const int id)
 {
 	m_name = name;
 	m_numNodesX = nodesX;
@@ -13,6 +13,7 @@ SoftBody::SoftBody(const std::string& name, const int nodesX, const int nodesY,
 	m_collidable = collidable;
 	m_draggable = draggable;
 	m_nodeRadius = m_nodeSeparation * 0.5f;
+	m_id = id;
 
 	GenerateBody();
 }
@@ -90,6 +91,7 @@ void SoftBody::GeneratePhysicsNodes()
 			pnode->SetPosition(position);
 			pnode->SetInverseMass(m_invNodeMass);
 			pnode->SetBoundingRadius(m_nodeRadius);
+			pnode->SetSoftBodyID(m_id);
 
 			if (!m_collidable)
 			{

@@ -124,6 +124,12 @@ void Octant::genPairs(std::vector<CollisionPair>& colPairs)
 					continue;
 				}
 
+				//if both nodes have the same soft body id then don't check collision
+				if (pnodeA->GetSoftBodyID() == pnodeB->GetSoftBodyID() && pnodeA->GetSoftBodyID() != NULL)
+				{
+					continue;
+				}
+
 				//pnodeA->SetTimeSinceRestCheck()
 
 				//Check they both atleast have collision shapes

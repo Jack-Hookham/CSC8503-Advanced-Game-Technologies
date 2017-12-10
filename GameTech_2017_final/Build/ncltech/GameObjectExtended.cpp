@@ -41,8 +41,3 @@ void GameObjectExtended::SetPhysicsNodes(std::vector<PhysicsNode*>& physicsNodes
 		}
 	}
 }
-
-void GameObjectExtended::GenerateMesh()
-{
-
-}

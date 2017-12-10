@@ -12,7 +12,7 @@ class SoftBody
 public:
 	SoftBody(const std::string& name, const int nodesX, const int nodesY, 
 		const float separation, const Vector3 pos, const float invNodeMass,
-		const bool collidable, const bool draggable);
+		const bool collidable, const bool draggable, const int id = NULL);
 	~SoftBody();
 
 	void GenerateBody();
@@ -33,6 +33,7 @@ protected:
 	bool m_collidable;
 	bool m_draggable; 
 	float m_nodeRadius;
+	int m_id;
 
 	std::vector<PhysicsNode*> m_pnodes;
 	Mesh* m_mesh;

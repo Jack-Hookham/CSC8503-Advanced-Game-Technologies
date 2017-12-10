@@ -132,6 +132,8 @@ public:
 	inline const bool			GetAtRest()					const { return atRest; }
 	inline const float			GetTimeSinceRestCheck()		const { return timeSinceRestCheck; }
 
+	inline const int			GetSoftBodyID()				const { return softBodyID; }
+
 
 	//<--------- SETTERS ------------->
 	inline void SetParent(GameObject* obj)							{ parent = obj; }
@@ -159,6 +161,8 @@ public:
 	inline void SetBoundingRadius(const float radius) { boundingRadius = radius; }
 	inline void SetAtRest(const bool rest) { atRest = rest; }
 	inline void SetTimeSinceRestCheck(const float time) { timeSinceRestCheck = time; }
+
+	inline void SetSoftBodyID(const int id) { softBodyID = id; }
 
 	//<---------- CALLBACKS ------------>
 	inline void SetOnCollisionCallback(PhysicsCollisionCallback callback) { onCollisionCallback = callback; }
@@ -248,4 +252,13 @@ protected:
 	//it should still be at rest, when really it should start to fall.
 	//To fix this I occasionally stop all resting objects from resting
 	float timeSinceRestCheck = 0.0f;
+
+	//Give each soft body an id
+	//All physics nodes in that body will also be given that id
+	//They can then be checked for the same id to prevent collisions
+	//between nodes in the same soft body
+	//To allow different soft bodies to collide with each other
+	//each soft body should have a unique id
+	//None soft bodies should just use NULL
+	int softBodyID = NULL;
 };
