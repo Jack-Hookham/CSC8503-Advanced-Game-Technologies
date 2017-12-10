@@ -12,7 +12,8 @@ class SoftBody
 public:
 	SoftBody(const std::string& name, const int nodesX, const int nodesY, 
 		const float separation, const Vector3 pos, const float invNodeMass,
-		const bool collidable, const bool draggable, const int id = NULL);
+		const bool collidable, const bool draggable, const int id = NULL,
+		GLuint texture = 0);
 	~SoftBody();
 
 	void GenerateBody();
@@ -37,7 +38,7 @@ protected:
 
 	std::vector<PhysicsNode*> m_pnodes;
 	Mesh* m_mesh;
-	GLuint m_texture = 0;
+	GLuint m_texture;
 	GameObjectExtended* softObject;
 
 	void UpdateMeshVertices(const Matrix4& mat4);

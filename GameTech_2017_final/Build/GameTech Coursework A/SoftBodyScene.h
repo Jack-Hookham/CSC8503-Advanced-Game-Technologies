@@ -13,6 +13,11 @@ public:
 	virtual void OnCleanupScene()		 override;
 	virtual void OnUpdateScene(float dt) override;
 
+	void InitTextures();
+
 protected:
 	float m_AccumTime;
+	GLuint m_allianceTexture;
+	GLuint m_hordeTexture;
+	GLuint m_pirateTexture;
 };

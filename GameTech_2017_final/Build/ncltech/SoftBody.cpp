@@ -2,7 +2,7 @@
 
 SoftBody::SoftBody(const std::string& name, const int nodesX, const int nodesY, 
 	const float separation, const Vector3 pos, const float invNodeMass, 
-	const bool collidable, const bool draggable, const int id)
+	const bool collidable, const bool draggable, const int id, GLuint texture)
 {
 	m_name = name;
 	m_numNodesX = nodesX;
@@ -14,6 +14,7 @@ SoftBody::SoftBody(const std::string& name, const int nodesX, const int nodesY,
 	m_draggable = draggable;
 	m_nodeRadius = m_nodeSeparation * 0.5f;
 	m_id = id;
+	m_texture = texture;
 
 	GenerateBody();
 }
@@ -21,12 +22,6 @@ SoftBody::SoftBody(const std::string& name, const int nodesX, const int nodesY,
 SoftBody::~SoftBody()
 {
 	SAFE_DELETE(m_mesh);
-
-	if (m_texture)
-	{
-		glDeleteTextures(1, &m_texture);
-		m_texture = 0;
-	}
 }
 
 void SoftBody::GenerateBody()
@@ -37,18 +32,6 @@ void SoftBody::GenerateBody()
 	GeneratePhysicsConstraints();
 	//Create the mesh for the whole 
 	m_mesh = GenerateMesh();
-
-	//Initialise textures
-	m_texture = SOIL_load_OGL_texture(TEXTUREDIR"TexCoordsTest.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
-	if (m_texture)
-	{
-		glBindTexture(GL_TEXTURE_2D, m_texture);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
 	m_mesh->SetTexture(m_texture);
 
 	RenderNode* rnode = new RenderNode();
