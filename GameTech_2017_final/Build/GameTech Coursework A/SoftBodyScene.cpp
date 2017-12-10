@@ -33,9 +33,9 @@ void SoftBodyScene::OnInitializeScene()
 
 	SoftBody* softBody = new SoftBody(
 		"Soft Body",
-		10,
-		10,
-		1.0f,
+		20,
+		20,
+		0.5f,
 		Vector3(0.0f, 10.0f, 0.0f),
 		1.0f,
 		true,

@@ -12,7 +12,7 @@ SoftBody::SoftBody(const std::string& name, const int nodesX, const int nodesY,
 	m_invNodeMass = invNodeMass;
 	m_collidable = collidable;
 	m_draggable = draggable;
-	m_nodeRadius = separation * 0.5f;
+	m_nodeRadius = m_nodeSeparation * 0.5f;
 
 	GenerateBody();
 }
@@ -140,8 +140,6 @@ void SoftBody::GeneratePhysicsConstraints()
 	{
 		for (int y = 0; y < m_numNodesY; ++y)
 		{
-			PhysicsNode* connectFrom = m_pnodes[x * m_numNodesX + y];
-			PhysicsNode* connectTo;
 			//CASE 1: 3 constraints
 			if (x == 0 && y < m_numNodesY - 1)
 			{
@@ -192,14 +190,14 @@ Mesh* SoftBody::GenerateMesh()
 			int vertexIndex = (x * m_numNodesX + y) * 6;
 
 			//Bottom triangle
-			m->vertices[vertexIndex] = pnodeCurrent->GetPosition() - m_position;
-			m->vertices[vertexIndex + 1] = GetRight(x, y)->GetPosition() - m_position;
-			m->vertices[vertexIndex + 2] = GetUp(x, y)->GetPosition() - m_position;
+			m->vertices[vertexIndex] = (pnodeCurrent->GetPosition() - m_position) / m_nodeRadius;
+			m->vertices[vertexIndex + 1] = (GetRight(x, y)->GetPosition() - m_position) / m_nodeRadius;
+			m->vertices[vertexIndex + 2] = (GetUp(x, y)->GetPosition() - m_position) / m_nodeRadius;
 
 			//Top triangle
-			m->vertices[vertexIndex + 3] = GetRight(x, y)->GetPosition() - m_position;
-			m->vertices[vertexIndex + 4] = GetRightUp(x, y)->GetPosition() - m_position;
-			m->vertices[vertexIndex + 5] = GetUp(x, y)->GetPosition() - m_position;
+			m->vertices[vertexIndex + 3] = (GetRight(x, y)->GetPosition() - m_position) / m_nodeRadius;
+			m->vertices[vertexIndex + 4] = (GetRightUp(x, y)->GetPosition() - m_position) / m_nodeRadius;
+			m->vertices[vertexIndex + 5] = (GetUp(x, y)->GetPosition() - m_position) / m_nodeRadius;
 
 			m->textureCoords[vertexIndex] = Vector2(0.0f, 0.0f);
 			m->textureCoords[vertexIndex + 1] = Vector2(0.0f, 1.0f);
@@ -231,14 +229,14 @@ void SoftBody::UpdateMeshVertices(const Matrix4& mat4)
 			int vertexIndex = (x * m_numNodesX + y) * 6;
 
 			//Bottom triangle
-			m_mesh->vertices[vertexIndex] = pnodeCurrent->GetPosition() - m_position;
-			m_mesh->vertices[vertexIndex + 1] = GetRight(x, y)->GetPosition() - m_position;
-			m_mesh->vertices[vertexIndex + 2] = GetUp(x, y)->GetPosition() - m_position;
+			m_mesh->vertices[vertexIndex] = (pnodeCurrent->GetPosition() - m_position) / m_nodeRadius;
+			m_mesh->vertices[vertexIndex + 1] = (GetRight(x, y)->GetPosition() - m_position) / m_nodeRadius;
+			m_mesh->vertices[vertexIndex + 2] =( GetUp(x, y)->GetPosition() - m_position) / m_nodeRadius;
 
 			//Top triangle
-			m_mesh->vertices[vertexIndex + 3] = GetRight(x, y)->GetPosition() - m_position;
-			m_mesh->vertices[vertexIndex + 4] = GetRightUp(x, y)->GetPosition() - m_position;
-			m_mesh->vertices[vertexIndex + 5] = GetUp(x, y)->GetPosition() - m_position;
+			m_mesh->vertices[vertexIndex + 3] = (GetRight(x, y)->GetPosition() - m_position) / m_nodeRadius;
+			m_mesh->vertices[vertexIndex + 4] = (GetRightUp(x, y)->GetPosition() - m_position) / m_nodeRadius;
+			m_mesh->vertices[vertexIndex + 5] = (GetUp(x, y)->GetPosition() - m_position) / m_nodeRadius;
 		}
 	}
 
