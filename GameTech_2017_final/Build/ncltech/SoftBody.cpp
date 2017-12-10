@@ -39,14 +39,14 @@ void SoftBody::GenerateBody()
 	m_mesh = GenerateMesh();
 
 	//Initialise textures
-	m_texture = SOIL_load_OGL_texture(TEXTUREDIR"MetalSheet.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT);
+	m_texture = SOIL_load_OGL_texture(TEXTUREDIR"TexCoordsTest.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
 	if (m_texture)
 	{
 		glBindTexture(GL_TEXTURE_2D, m_texture);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	m_mesh->SetTexture(m_texture);
@@ -135,8 +135,6 @@ void SoftBody::GeneratePhysicsConstraints()
 	 *         x = 0         x = 1         x = n
 	 * 
 	 */
-	
-
 
 	for (int x = 0; x < m_numNodesX; ++x)
 	{
@@ -184,29 +182,45 @@ Mesh* SoftBody::GenerateMesh()
 	m->colours = new Vector4[m->numVertices];
 	m->normals = new Vector3[m->numVertices];
 	m->tangents = new Vector3[m->numVertices];
+
+	float invNodeRadius = 1.0f / m_nodeRadius;
+
+	float texConstX = 1.0f / (m_numNodesX - 1);
+	float texConstY = 1.0f / (m_numNodesY - 1);
+
 	for (int x = 0; x < m_numNodesX - 1; ++x)
 	{
 		for (int y = 0; y < m_numNodesY - 1; ++y)
 		{
-			PhysicsNode* pnodeCurrent = m_pnodes[x * m_numNodesX + y];
-			int vertexIndex = (x * m_numNodesX + y) * 6;
+			PhysicsNode* pnodeCurrent = m_pnodes[x * m_numNodesY + y];
+			int vertexIndex = (x * m_numNodesY + y) * 6;
 
 			//Bottom triangle
-			m->vertices[vertexIndex] = (pnodeCurrent->GetPosition() - m_position) / m_nodeRadius;
-			m->vertices[vertexIndex + 1] = (GetRight(x, y)->GetPosition() - m_position) / m_nodeRadius;
-			m->vertices[vertexIndex + 2] = (GetUp(x, y)->GetPosition() - m_position) / m_nodeRadius;
+			m->vertices[vertexIndex] = (pnodeCurrent->GetPosition() - m_position) * invNodeRadius;
+			m->vertices[vertexIndex + 1] = (GetRight(x, y)->GetPosition() - m_position) * invNodeRadius;
+			m->vertices[vertexIndex + 2] = (GetUp(x, y)->GetPosition() - m_position) * invNodeRadius;
 
 			//Top triangle
-			m->vertices[vertexIndex + 3] = (GetRight(x, y)->GetPosition() - m_position) / m_nodeRadius;
-			m->vertices[vertexIndex + 4] = (GetRightUp(x, y)->GetPosition() - m_position) / m_nodeRadius;
-			m->vertices[vertexIndex + 5] = (GetUp(x, y)->GetPosition() - m_position) / m_nodeRadius;
+			m->vertices[vertexIndex + 3] = (GetRight(x, y)->GetPosition() - m_position) * invNodeRadius;
+			m->vertices[vertexIndex + 4] = (GetRightUp(x, y)->GetPosition() - m_position) * invNodeRadius;
+			m->vertices[vertexIndex + 5] = (GetUp(x, y)->GetPosition() - m_position) * invNodeRadius;
 
-			m->textureCoords[vertexIndex] = Vector2(0.0f, 0.0f);
-			m->textureCoords[vertexIndex + 1] = Vector2(0.0f, 1.0f);
-			m->textureCoords[vertexIndex + 2] = Vector2(1.0f, 0.0f);
-			m->textureCoords[vertexIndex + 3] = Vector2(0.0f, 1.0f);
-			m->textureCoords[vertexIndex + 4] = Vector2(1.0f, 1.0f);
-			m->textureCoords[vertexIndex + 5] = Vector2(1.0f, 0.0f);
+			//m->textureCoords[vertexIndex] = Vector2(0.0f, 0.0f);
+			//m->textureCoords[vertexIndex + 1] = Vector2(0.0f, 1.0f);
+			//m->textureCoords[vertexIndex + 2] = Vector2(1.0f, 0.0f);
+
+			//m->textureCoords[vertexIndex + 3] = Vector2(0.0f, 1.0f);
+			//m->textureCoords[vertexIndex + 4] = Vector2(1.0f, 1.0f);
+			//m->textureCoords[vertexIndex + 5] = Vector2(1.0f, 0.0f);
+
+			
+			m->textureCoords[vertexIndex] = Vector2(x * texConstX, 1 - (y * texConstY));
+			m->textureCoords[vertexIndex + 1] = Vector2((x + 1) * texConstX, 1 - (y * texConstY));
+			m->textureCoords[vertexIndex + 2] = Vector2(x * texConstX, 1 - ((y + 1) * texConstY));
+
+			m->textureCoords[vertexIndex + 3] = Vector2((x + 1) * texConstX, 1 - (y * texConstY));
+			m->textureCoords[vertexIndex + 4] = Vector2((x + 1) * texConstX, 1 - ((y + 1) * texConstY));
+			m->textureCoords[vertexIndex + 5] = Vector2(x * texConstX, 1 - ((y + 1) * texConstY));
 
 			for (int i = vertexIndex; i < vertexIndex + 6; ++i)
 			{
@@ -223,22 +237,24 @@ Mesh* SoftBody::GenerateMesh()
 
 void SoftBody::UpdateMeshVertices(const Matrix4& mat4)
 {
+	float invNodeRadius = 1.0f / m_nodeRadius;
+
 	for (int x = 0; x < m_numNodesX - 1; ++x)
 	{
 		for (int y = 0; y < m_numNodesY - 1; ++y)
 		{
-			PhysicsNode* pnodeCurrent = m_pnodes[x * m_numNodesX + y];
-			int vertexIndex = (x * m_numNodesX + y) * 6;
+			PhysicsNode* pnodeCurrent = m_pnodes[x * m_numNodesY + y];
+			int vertexIndex = (x * m_numNodesY + y) * 6;
 
 			//Bottom triangle
-			m_mesh->vertices[vertexIndex] = (pnodeCurrent->GetPosition() - m_position) / m_nodeRadius;
-			m_mesh->vertices[vertexIndex + 1] = (GetRight(x, y)->GetPosition() - m_position) / m_nodeRadius;
-			m_mesh->vertices[vertexIndex + 2] =( GetUp(x, y)->GetPosition() - m_position) / m_nodeRadius;
+			m_mesh->vertices[vertexIndex] = (pnodeCurrent->GetPosition() - m_position) * invNodeRadius;
+			m_mesh->vertices[vertexIndex + 1] = (GetRight(x, y)->GetPosition() - m_position) * invNodeRadius;
+			m_mesh->vertices[vertexIndex + 2] = (GetUp(x, y)->GetPosition() - m_position) * invNodeRadius;
 
 			//Top triangle
-			m_mesh->vertices[vertexIndex + 3] = (GetRight(x, y)->GetPosition() - m_position) / m_nodeRadius;
-			m_mesh->vertices[vertexIndex + 4] = (GetRightUp(x, y)->GetPosition() - m_position) / m_nodeRadius;
-			m_mesh->vertices[vertexIndex + 5] = (GetUp(x, y)->GetPosition() - m_position) / m_nodeRadius;
+			m_mesh->vertices[vertexIndex + 3] = (GetRight(x, y)->GetPosition() - m_position) * invNodeRadius;
+			m_mesh->vertices[vertexIndex + 4] = (GetRightUp(x, y)->GetPosition() - m_position) * invNodeRadius;
+			m_mesh->vertices[vertexIndex + 5] = (GetUp(x, y)->GetPosition() - m_position) * invNodeRadius;
 		}
 	}
 
@@ -250,11 +266,11 @@ void SoftBody::UpdateMeshVertices(const Matrix4& mat4)
 
 void SoftBody::ConnectRight(const int x, const int y)
 {
-	PhysicsNode* connectFrom = m_pnodes[x * m_numNodesX + y];
+	PhysicsNode* connectFrom = m_pnodes[x * m_numNodesY + y];
 	PhysicsNode* connectTo = GetRight(x, y);		//pnode directly to the right
 
 	PhysicsEngine::Instance()->AddConstraint(new SpringConstraint(
-		connectFrom,													//Current pnode									
+		connectFrom,								//Current pnode									
 		connectTo,
 		connectFrom->GetPosition(),
 		connectTo->GetPosition()));
@@ -262,7 +278,7 @@ void SoftBody::ConnectRight(const int x, const int y)
 
 void SoftBody::ConnectUp(const int x, const int y)
 {
-	PhysicsNode* connectFrom = m_pnodes[x * m_numNodesX + y];
+	PhysicsNode* connectFrom = m_pnodes[x * m_numNodesY + y];
 	PhysicsNode* connectTo = GetUp(x, y);			//pnode directly up
 	
 	PhysicsEngine::Instance()->AddConstraint(new SpringConstraint(
@@ -274,8 +290,8 @@ void SoftBody::ConnectUp(const int x, const int y)
 
 void SoftBody::ConnectRightUp(const int x, const int y)
 {
-	PhysicsNode* connectFrom = m_pnodes[x * m_numNodesX + y];
-	PhysicsNode* connectTo = GetRightUp(x, y);	//pnode right and up
+	PhysicsNode* connectFrom = m_pnodes[x * m_numNodesY + y];
+	PhysicsNode* connectTo = GetRightUp(x, y);		//pnode right and up
 	
 	PhysicsEngine::Instance()->AddConstraint(new SpringConstraint(
 		connectFrom,
@@ -286,8 +302,8 @@ void SoftBody::ConnectRightUp(const int x, const int y)
 
 void SoftBody::ConnectLeftUp(const int x, const int y)
 {
-	PhysicsNode* connectFrom = m_pnodes[x * m_numNodesX + y];
-	PhysicsNode* connectTo = GetLeftUp(x, y);	//pnode left and up
+	PhysicsNode* connectFrom = m_pnodes[x * m_numNodesY + y];
+	PhysicsNode* connectTo = GetLeftUp(x, y);		//pnode left and up
 	
 	PhysicsEngine::Instance()->AddConstraint(new SpringConstraint(
 		connectFrom,

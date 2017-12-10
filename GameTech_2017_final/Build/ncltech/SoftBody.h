@@ -50,10 +50,10 @@ protected:
 	void ConnectRightUp(const int x, const int y);
 	void ConnectLeftUp(const int x, const int y);
 
-	//Get physics node relative to the node passed in
-	inline PhysicsNode* GetRight(const int x, const int y)		{ return m_pnodes[(x + 1) * m_numNodesX + y]; }
-	inline PhysicsNode* GetUp(const int x, const int y)			{ return m_pnodes[ x      * m_numNodesX + y + 1]; }
-	inline PhysicsNode* GetRightUp(const int x, const int y)	{ return m_pnodes[(x + 1) * m_numNodesX + y + 1]; }
-	inline PhysicsNode* GetLeftUp(const int x, const int y)		{ return m_pnodes[(x - 1) * m_numNodesX + y + 1]; }
+	//Get physics node relative to the node indexes passed in
+	inline PhysicsNode* GetRight(const int x, const int y)		{ return m_pnodes[(x + 1) * m_numNodesY + y]; }
+	inline PhysicsNode* GetUp(const int x, const int y)			{ return m_pnodes[ x      * m_numNodesY + y + 1]; }
+	inline PhysicsNode* GetRightUp(const int x, const int y)	{ return m_pnodes[(x + 1) * m_numNodesY + y + 1]; }
+	inline PhysicsNode* GetLeftUp(const int x, const int y)		{ return m_pnodes[(x - 1) * m_numNodesY + y + 1]; }
 };
 
