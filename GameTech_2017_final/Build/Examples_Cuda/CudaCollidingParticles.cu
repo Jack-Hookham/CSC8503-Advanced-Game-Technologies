@@ -171,8 +171,50 @@ void CollideParticleWithCell(float baumgarte_factor, uint particle_idx, Particle
 	}
 }
 
+//Given a particle p, check for and collide it with all balls
+__device__
+void CollideParticleWithBall(float baumgarte_factor, Particle&  ball, Particle& particle)
+{
+	//Do a quick sphere-sphere test
+	float3 ab = ball._pos - particle._pos;
+	float lengthSq = dot(ab, ab);
+
+	const float diameterSq = PARTICLE_RADIUS * PARTICLE_RADIUS * 4.f;
+	if (lengthSq < diameterSq)
+	{
+		//We have a collision!
+		float len = sqrtf(lengthSq);
+		float3 abn = ab / len;
+
+		//Direct normal collision (no friction/shear)
+		float abnVel = dot(ball._vel - particle._vel, abn);
+		float jn = -(abnVel * (1.f + COLLISION_ELASTICITY));
+
+		//Extra energy to overcome overlap error
+		float overlap = PARTICLE_RADIUS * 2.f - len;
+		float b = overlap * baumgarte_factor;
+
+		//Normally we just add correctional energy (b) to our velocity,
+		// but with such small particles and so many collisions this quickly gets 
+		// out of control! The other way to solve positional errors is to move
+		// the positions of the spheres, though this has numerous other problems and 
+		// is ruins our collision neighbour checks. Though in general, velocity correction
+		// adds energy and positional correction removes energy (and is unstable with the 
+		// way we check collisions) so for now, we'll just use a half of each. Try messing
+		// around with these values though! :)
+		jn += b;
+		//out_particle._pos -= abn * overlap * 0.5f; //Half positional correction, half because were only applying to A and not A + B
+
+
+		jn = max(jn, 0.0f);
+		//We just assume each particle is the same mass, so half the velocity change is applied to each.
+		particle._vel -= abn * (jn * 0.5f);
+	}
+}
+
 __global__
-void CollideParticles(float baumgarte_factor, uint num_particles, Particle* particles, Particle* out_particles, uint* grid_cell_start, uint* grid_cell_end)
+void CollideParticles(float baumgarte_factor, uint num_particles, Particle* particles, Particle* out_particles,
+	uint* grid_cell_start, uint* grid_cell_end, uint numBalls, Particle* gpuBalls)
 {
 	uint index = blockIdx.x*blockDim.x + threadIdx.x;
 	if (index >= num_particles)
@@ -196,6 +238,12 @@ void CollideParticles(float baumgarte_factor, uint num_particles, Particle* part
 
 			}
 		}
+	}
+
+	//Check for collision between particle and all balls
+	for (int i = 0; i < numBalls; ++i)
+	{
+		CollideParticleWithBall(baumgarte_factor, gpuBalls[i], out_p);
 	}
 
 	out_particles[index] = out_p;
@@ -407,7 +455,9 @@ void CudaCollidingParticles::InitializeOpenGLVertexBuffer(GLuint buffer_idx)
 	gpuErrchk(cudaGraphicsGLRegisterBuffer(&cGLOutPositions, buffer_idx, cudaGraphicsMapFlagsNone));
 }
 
-void CudaCollidingParticles::UpdateParticles(float dt)
+//Pass in the cpu ball information so that the gpu particles can collide with them
+void CudaCollidingParticles::UpdateParticles(float dt, uint numBalls, Vector3* ballPos, Vector3* ballVel,
+	float* ballRadius)
 {
 	//See "ALGORITHM EXPLANATION" (top of this file) for info on what is meant to be happening here.
 
@@ -484,14 +534,32 @@ void CudaCollidingParticles::UpdateParticles(float dt)
 	dim3 grid((num_particles + block.x - 1) / block.x, 1, 1);
 	float baumgarte_factor = 0.05f / fixed_timestep;
 
+	//Set up memory location for gpu balls
+	Particle* gpuBallData;			
+	gpuErrchk(cudaMalloc(&gpuBallData, numBalls * sizeof(Particle)));
+
+	//Adjustment for the offset from the origin
+	const Vector3 offset = Vector3(9.6f, 0.0f, 9.6f);
+
+	//Set up ball data for each ball to be copied onto the gpu
+	Particle* ballData = new Particle[numBalls];
+	for (int i = 0; i < numBalls; ++i) 
+	{
+		ballData[i]._pos = make_float3(ballPos[i].x + offset.x, ballPos[i].y + offset.y, ballPos[i].z + offset.z);
+		ballData[i]._vel = make_float3(ballVel[i].x, ballVel[i].y, ballVel[i].z);
+		ballData[i].radius = ballRadius[i];
+	}
+	//Copy ballData on the cpu into gpuBallData
+	gpuErrchk(cudaMemcpy(gpuBallData, ballData, numBalls * sizeof(Particle), cudaMemcpyHostToDevice));
+
 	for (int i = 0; i < 10; ++i)
 	{
-		CollideParticles<<< grid, block >>>(baumgarte_factor, num_particles, particles_ping, particles_pong, grid_cell_start, grid_cell_end);
+		CollideParticles<<< grid, block >>>(baumgarte_factor, num_particles, particles_ping, particles_pong, 
+			grid_cell_start, grid_cell_end, numBalls, gpuBallData);
 		std::swap(particles_ping, particles_pong);
 		
 		//Should really do boundary check's here...
 	}
-
 
 	//Finally, copy our particle positions to openGL to be renderered as particles.
 	size_t tmpVertexPtrSize;

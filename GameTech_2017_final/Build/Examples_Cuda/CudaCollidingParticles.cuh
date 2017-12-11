@@ -28,7 +28,7 @@ struct Particle
 	float3 _vel;
 	float padding1;
 	float3 _pos;
-	float padding2;
+	float radius;
 };
 //#pragma pack(pop)
 
@@ -43,7 +43,7 @@ public:
 	void InitializeParticleDam(int dam_width, int dam_height, int dam_depth);
 	void InitializeOpenGLVertexBuffer(GLuint buffer_idx);
 
-	void UpdateParticles(float dt);
+	void UpdateParticles(float dt, uint numBalls, Vector3* position, Vector3* velocity, float* radius);
 
 protected:
 	uint num_particles;

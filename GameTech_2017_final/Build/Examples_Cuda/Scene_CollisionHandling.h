@@ -39,6 +39,7 @@ public:
 			true,
 			Vector4(1.0f, 0.5f, 0.5f, 1.0f));
 		this->AddGameObject(sphere1);
+		cpuBalls.push_back(sphere1);
 
 		cudaParticleProg = new CudaCollidingParticles();
 
@@ -80,10 +81,29 @@ public:
 		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "");
 		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "  No. Particles: %d", cudaParticleProg->GetNumParticles());
 
-		cudaParticleProg->UpdateParticles(dt);
+		int numBalls = cpuBalls.size();
+		Vector3* position = new Vector3[numBalls];
+		Vector3* velocity = new Vector3[numBalls];
+		float* radius = new float[numBalls];
+		for (int i = 0; i < numBalls; ++i)
+		{
+			if (m_vpObjects[i]->HasPhysics())
+			{
+				position[i] = m_vpObjects[i]->Physics()->GetPosition();
+				velocity[i] = m_vpObjects[i]->Physics()->GetLinearVelocity();
+				radius[i] = m_vpObjects[i]->Physics()->GetBoundingRadius();
+			}
+		}
+
+		cudaParticleProg->UpdateParticles(dt, numBalls, position, velocity, radius);
+
+		//SAFE_DELETE(position);
+		//SAFE_DELETE(velocity);
+		//SAFE_DELETE(radius);
 	}
 
 
 protected:
 	CudaCollidingParticles* cudaParticleProg;
+	std::vector<GameObject*> cpuBalls;
 };
