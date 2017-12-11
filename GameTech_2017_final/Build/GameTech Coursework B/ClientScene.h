@@ -7,6 +7,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "Packet.h"
+
 class ClientScene : public Scene
 {
 public:

@@ -13,6 +13,7 @@
 
 #include "ClientScene.h"
 #include "Server.h"
+#include "Packet.h"
 
 //Needed to get computer adapter IPv4 addresses via windows
 #include <iphlpapi.h>
@@ -262,7 +263,6 @@ void ClientLoop()
 
 void ServerLoop()
 {
-
 	while (true)
 	{
 		float dt = timer.GetTimedMS() * 0.001f;

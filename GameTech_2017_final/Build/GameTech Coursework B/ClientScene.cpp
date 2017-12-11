@@ -188,14 +188,23 @@ void ClientScene::OnUpdateScene(float dt)
 
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_G))
 	{
-		int mazeSize = 10;
-		std::ostringstream oss;
-		oss << "Make me a maze! Maze size: " << mazeSize;
-		char* msg = _strdup(oss.str().c_str());
+		PacketMazeParams paramsData;
+		paramsData.mazeSize = 10;
+		std::ostringstream ossMessage;
+		ossMessage << "Make me a maze! Maze size: " << paramsData.mazeSize;
+		char* msg = _strdup(ossMessage.str().c_str());
 
 		//Create packet and send to server
-		ENetPacket* msg_packet = enet_packet_create(msg, strlen(msg) + 1, 0);
-		enet_peer_send(serverConnection, 0, msg_packet);
+		ENetPacket* msgPacket = enet_packet_create(msg, strlen(msg) + 1, 0);
+		enet_peer_send(serverConnection, 0, msgPacket);
+
+		std::ostringstream ossParams;
+		ossParams << paramsData.packetType << " " << paramsData.mazeSize << " ";
+		char* params = _strdup(ossParams.str().c_str());
+
+		//Create packet and send to server
+		ENetPacket* paramsPacket = enet_packet_create(params, strlen(params) + 1, 0);
+		enet_peer_send(serverConnection, 0, paramsPacket);
 	}
 }
 
