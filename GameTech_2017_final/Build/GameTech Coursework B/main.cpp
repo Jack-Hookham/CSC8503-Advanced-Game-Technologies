@@ -36,7 +36,7 @@ void RunClient();
 void RunServer();
 void QuitCLient(bool error = false, const string &reason = "");
 
-MazeGenerator* mazeGenerator = NULL;
+MazeGenerator mazeGenerator;
 
 enum Type
 {
@@ -356,7 +356,7 @@ void RunServer()
 
 							//Generate a maze with the given parameters and broadcast it to all clients
 							std::cout << "\t Generating maze " << clientID << ": Generating maze. Maze Size: " << mazeSize << ", Maze Density: " << mazeDensity << "\n";
-							mazeGenerator->Generate(mazeSize, mazeDensity);
+							mazeGenerator.Generate(mazeSize, mazeDensity);
 							break;
 						}
 						case PacketType::PACKET_MAZE_DATA:
