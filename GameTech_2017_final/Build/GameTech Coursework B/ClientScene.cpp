@@ -98,26 +98,30 @@ void ClientScene::OnUpdateScene(float dt)
 
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_H))
 	{
-		char* msg = "Hello I am client!";
-		//Create packet and send to server
-		ENetPacket* msg_packet = enet_packet_create(msg, strlen(msg) + 1, 0);
-		enet_peer_send(serverConnection, 0, msg_packet);
+		Packet msgPacket(PACKET_MESSAGE);
+		char* msg = "Hello";
+		msgPacket.AddData(msg);
+		msg = "I am";
+		msgPacket.AddData(msg);
+		msg = "client!";
+		msgPacket.AddData(msg);
+		SendPacketToServer(msgPacket);
 	}
 
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_G))
 	{
 		int mazeSize = 10;
+		float mazeDensity = 0.5f;
 
 		Packet msgPacket(PACKET_MESSAGE);
 		std::ostringstream ossMsg;
-		ossMsg << "Make me a maze! Maze size: " << mazeSize;
-		msgPacket.data = _strdup(ossMsg.str().c_str());
+		ossMsg << "Make me a maze! Maze Size: " << mazeSize << ", Maze Density: " << mazeSize;
+		msgPacket.AddData(ossMsg.str());
 		SendPacketToServer(msgPacket);
 
 		Packet paramsPacket(PACKET_MAZE_PARAMS);
-		std::ostringstream ossParams(paramsPacket.packetType);
-		ossParams << mazeSize;
-		paramsPacket.data = _strdup(ossParams.str().c_str());
+		paramsPacket.AddData(mazeSize);
+		paramsPacket.AddData(mazeDensity);
 		SendPacketToServer(paramsPacket);
 	}
 }
@@ -135,7 +139,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 
 			//Send a 'hello' packet
 			Packet msgPacket(PACKET_MESSAGE);
-			msgPacket.data = "Hellooo!";
+			msgPacket.AddData("Hellooo!");
 			SendPacketToServer(msgPacket);
 		}
 	}
@@ -155,7 +159,6 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 		{
 			NCLERROR("Recieved Invalid Network Packet!");
 		}
-
 	}
 	break;
 
@@ -172,7 +175,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 void ClientScene::SendPacketToServer(Packet& packet)
 {
 	std::ostringstream oss;
-	oss << packet.packetType << " " << packet.data;
+	oss << packet.GetPacketType() << " " << packet.GetData();
 	char* packetWhole = _strdup(oss.str().c_str());
 
 	ENetPacket* enetPacket = enet_packet_create(packetWhole, strlen(packetWhole) + 1, 0);

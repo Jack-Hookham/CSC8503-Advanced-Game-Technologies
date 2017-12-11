@@ -17,10 +17,13 @@ Description:
 
 #pragma once
 
-#define RAND() ((rand()%101)/100.0f)
+#include <string>
+#include <sstream>
 
 #include "CommonMeshes.h"
 #include "GameObject.h"
+
+#define RAND() ((rand()%101)/100.0f)
 
 namespace CommonUtils
 {
@@ -59,4 +62,15 @@ namespace CommonUtils
 		const Vector4& color = Vector4(1.0f, 1.0f, 1.0f, 1.0f),
 		bool rest = false,
 		CommonMeshes::MeshType meshType = CommonMeshes::MeshType::DEFAULT_CUBE);
+
+	inline static bool isInteger(const std::string& s) { return s.find_first_not_of("0123456789") == std::string::npos; }
+
+	//https://stackoverflow.com/questions/447206/c-isfloat-function
+	static bool isFloat(string myString) 
+	{
+		std::istringstream iss(myString);
+		float f;
+		iss >> noskipws >> f;
+		return iss.eof() && !iss.fail();
+	}
 };

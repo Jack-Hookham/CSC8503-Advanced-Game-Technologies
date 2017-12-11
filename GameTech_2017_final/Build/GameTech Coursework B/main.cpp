@@ -14,9 +14,11 @@
 #include "ClientScene.h"
 #include "Server.h"
 #include "Packet.h"
+#include "MazeGenerator.h"
 
 //Needed to get computer adapter IPv4 addresses via windows
 #include <iphlpapi.h>
+#include "ncltech/CommonUtils.h"
 #pragma comment(lib, "IPHLPAPI.lib")
 
 #define SERVER_PORT 1234
@@ -30,9 +32,11 @@ float rotation = 0.0f;
 void Win32_PrintAllAdapterIPAddresses();
 
 void InitializeClient();
-void ClientLoop();
-void ServerLoop();
-void Quit(bool error = false, const string &reason = "");
+void RunClient();
+void RunServer();
+void QuitCLient(bool error = false, const string &reason = "");
+
+MazeGenerator* mazeGenerator = NULL;
 
 enum Type
 {
@@ -161,7 +165,7 @@ int main(int arcg, char** argv)
 			Win32_PrintAllAdapterIPAddresses();
 
 			timer.GetTimedMS();
-			ServerLoop();
+			RunServer();
 
 			system("pause");
 			server.Release();
@@ -185,10 +189,10 @@ int main(int arcg, char** argv)
 
 			Window::GetWindow().GetTimer()->GetTimedMS();
 
-			ClientLoop();
+			RunClient();
 
 			//Cleanup
-			Quit();
+			QuitCLient();
 			return 0;
 	}
 }
@@ -197,12 +201,12 @@ void InitializeClient()
 {
 	//Initialise the Window
 	if (!Window::Initialise("Game Technologies - Collision Resolution", 1280, 800, false))
-		Quit(true, "Window failed to initialise!");
+		QuitCLient(true, "Window failed to initialise!");
 
 	//Initialise ENET for networking  //!!!!!!NEW!!!!!!!!
 	if (enet_initialize() != 0)
 	{
-		Quit(true, "ENET failed to initialize!");
+		QuitCLient(true, "ENET failed to initialize!");
 	}
 
 	//Initialise the PhysicsEngine
@@ -217,7 +221,7 @@ void InitializeClient()
 	SceneManager::Instance()->EnqueueScene(new ClientScene("Network #1 - Example Client"));
 }
 
-void Quit(bool error, const string &reason) {
+void QuitCLient(bool error, const string &reason) {
 	//Release Singletons
 	SceneManager::Release();
 	GraphicsPipeline::Release();
@@ -234,7 +238,7 @@ void Quit(bool error, const string &reason) {
 	}
 }
 
-void ClientLoop()
+void RunClient()
 {
 	//Main client-loop
 	while (Window::GetWindow().UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)) {
@@ -261,7 +265,7 @@ void ClientLoop()
 	}
 }
 
-void ServerLoop()
+void RunServer()
 {
 	while (true)
 	{
@@ -281,27 +285,90 @@ void ServerLoop()
 				}
 			case ENET_EVENT_TYPE_RECEIVE:
 				{
-					printf("\t Client %d says: %s\n", evnt.peer->incomingPeerID, evnt.packet->data);
+				enet_uint16 clientID = evnt.peer->incomingPeerID;
+					printf("\t Client %d packet received: %s\n", clientID, evnt.packet->data);
 
 					//Get the first value in the packet to determine what to do with it
 					//int packetType = evnt.packet->data[0];
 
-					std::string packetData((char*)evnt.packet->data);
-					enet_uint8 packetType = *evnt.packet->data;
+					std::string packetString((char*)evnt.packet->data);
+
+					//Split the packet into string tokens
+					char delim = ' ';
+
+					//Separate first token (should be packet type) and rest of packet (packet data)
+					std::string firstToken = packetString.substr(0, packetString.find(delim));
+					std::string packetData = packetString.substr(packetString.find_first_of(delim) + 1);
+
+					uint packetType;
+					//The first token should be the packet type
+					if (CommonUtils::isInteger(firstToken))
+					{
+						packetType = std::stoi(firstToken);
+					}
+					else
+					{
+						packetType = PacketType::PACKET_BAD;
+					}
 
 					switch (packetType)
 					{
-					case PACKET_MESSAGE:
+						case PacketType::PACKET_BAD:
 						{
-							
+							printf("\t Failed to read packet from Client %d. Unknown packet type.\n", clientID);
+							break;
 						}
-					case PACKET_MAZE_PARAMS:
+						case PacketType::PACKET_MESSAGE:
 						{
-							
+							//Print the message
+							std::cout << "\t Client " << clientID << " says: " << packetData << "\n";
+							//printf("\t Client %d says: %s\n", evnt.peer->incomingPeerID, packetData.c_str());
+							break;
 						}
-					case PACKET_MAZE_DATA:
+						case PacketType::PACKET_MAZE_PARAMS:
 						{
-							
+							int mazeSize;
+							std::string secondToken = packetData.substr(0, packetData.find(delim));
+							packetData = packetData.substr(packetData.find_first_of(delim) + 1);
+							if (CommonUtils::isInteger(secondToken))
+							{
+								mazeSize = std::stoi(secondToken);
+							}
+							else
+							{
+								mazeSize = 0;
+								std::cout << "\t Failed to generate maze: Invalid maze size.\n";
+								break;
+							}
+
+							float mazeDensity;
+							std::string thirdToken = packetData.substr(0, packetData.find(delim));
+							if (CommonUtils::isFloat(thirdToken))
+							{
+								mazeDensity = ::atof(thirdToken.c_str());
+							}
+							else
+							{
+								mazeDensity = 0.0f;
+								std::cout << "\t Failed to generate maze: Invalid maze density.\n";
+								break;
+							}
+
+							//Generate a maze with the given parameters and broadcast it to all clients
+							std::cout << "\t Generating maze " << clientID << ": Generating maze. Maze Size: " << mazeSize << ", Maze Density: " << mazeDensity << "\n";
+							mazeGenerator->Generate(mazeSize, mazeDensity);
+							break;
+						}
+						case PacketType::PACKET_MAZE_DATA:
+						{
+							//Server shouldn't receive maze data packets
+							printf("\t Error: Received maze data packet from Client %d", clientID);
+							break;
+						}
+						default:
+						{
+							printf("\t Failed to read packet from Client %d. Unknown packet type.\n", clientID);
+							break;
 						}
 					}
 
