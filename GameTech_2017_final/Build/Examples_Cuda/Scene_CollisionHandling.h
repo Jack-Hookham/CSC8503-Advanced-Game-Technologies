@@ -31,7 +31,7 @@ public:
 		//Create Ground
 		this->AddGameObject(BuildCuboidObject("Ground", Vector3(0.0f, -1.0f, 0.0f), Vector3(20.0f, 1.0f, 20.0f), true, 0.0f, true, false, Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
 		GameObject* sphere1 = BuildSphereObject("Sphere1",
-			Vector3(0.0f, 20.0f, 0.0f),
+			Vector3(0.0f, 10.0f, 0.0f),
 			0.5f,
 			true,
 			1.0f,
@@ -87,11 +87,11 @@ public:
 		float* radius = new float[numBalls];
 		for (int i = 0; i < numBalls; ++i)
 		{
-			if (m_vpObjects[i]->HasPhysics())
+			if (cpuBalls[i]->HasPhysics())
 			{
-				position[i] = m_vpObjects[i]->Physics()->GetPosition();
-				velocity[i] = m_vpObjects[i]->Physics()->GetLinearVelocity();
-				radius[i] = m_vpObjects[i]->Physics()->GetBoundingRadius();
+				position[i] = cpuBalls[i]->Physics()->GetPosition();
+				velocity[i] = cpuBalls[i]->Physics()->GetLinearVelocity();
+				radius[i] = cpuBalls[i]->Physics()->GetBoundingRadius();
 			}
 		}
 

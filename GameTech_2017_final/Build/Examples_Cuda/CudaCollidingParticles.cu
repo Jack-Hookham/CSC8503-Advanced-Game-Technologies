@@ -173,13 +173,13 @@ void CollideParticleWithCell(float baumgarte_factor, uint particle_idx, Particle
 
 //Given a particle p, check for and collide it with all balls
 __device__
-void CollideParticleWithBall(float baumgarte_factor, Particle&  ball, Particle& particle)
+void CollideParticleWithBall(float baumgarte_factor, Particle& ball, Particle& particle)
 {
 	//Do a quick sphere-sphere test
 	float3 ab = ball._pos - particle._pos;
 	float lengthSq = dot(ab, ab);
 
-	const float diameterSq = PARTICLE_RADIUS * PARTICLE_RADIUS * 4.f;
+	const float diameterSq = (ball.radius + PARTICLE_RADIUS) * (ball.radius + PARTICLE_RADIUS);
 	if (lengthSq < diameterSq)
 	{
 		//We have a collision!
@@ -187,11 +187,11 @@ void CollideParticleWithBall(float baumgarte_factor, Particle&  ball, Particle& 
 		float3 abn = ab / len;
 
 		//Direct normal collision (no friction/shear)
-		float abnVel = dot(ball._vel - particle._vel, abn);
+		float abnVel = dot(ball._vel * 0.2f - particle._vel, abn);
 		float jn = -(abnVel * (1.f + COLLISION_ELASTICITY));
 
 		//Extra energy to overcome overlap error
-		float overlap = PARTICLE_RADIUS * 2.f - len;
+		float overlap = ball.radius * 2.f - len;
 		float b = overlap * baumgarte_factor;
 
 		//Normally we just add correctional energy (b) to our velocity,
@@ -467,7 +467,7 @@ void CudaCollidingParticles::UpdateParticles(float dt, uint numBalls, Vector3* b
 	// for our CPU physics engine aswell (but hopefully never been noticed ^^ ).
 	// For stability, particle systems normally use spring based collision resolution instead which
 	// handles correctional energy (our baumgarte scalar) more leanently.
-	const float3 gravity = make_float3(0, -0.02f, 0);
+	const float3 gravity = make_float3(0, -0.1f, 0);
 	const uint num_grid_cells = PARTICLE_GRID_SIZE*PARTICLE_GRID_SIZE*PARTICLE_GRID_SIZE;
 	const float fixed_timestep = 1.0f / 60.0f;
 	
@@ -543,7 +543,7 @@ void CudaCollidingParticles::UpdateParticles(float dt, uint numBalls, Vector3* b
 
 	//Set up ball data for each ball to be copied onto the gpu
 	Particle* ballData = new Particle[numBalls];
-	for (int i = 0; i < numBalls; ++i) 
+	for (int i = 0; i < numBalls; ++i)
 	{
 		ballData[i]._pos = make_float3(ballPos[i].x + offset.x, ballPos[i].y + offset.y, ballPos[i].z + offset.z);
 		ballData[i]._vel = make_float3(ballVel[i].x, ballVel[i].y, ballVel[i].z);
