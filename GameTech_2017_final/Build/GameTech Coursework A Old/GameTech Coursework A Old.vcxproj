@@ -19,9 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{FF74C3EC-6B06-4054-8829-81E6866DF745}</ProjectGuid>
-    <RootNamespace>Examples_Cuda</RootNamespace>
+    <ProjectGuid>{E7355288-7C07-4690-B9BA-16370020B69A}</ProjectGuid>
+    <RootNamespace>GameTechCoursework</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>GameTech Coursework A Old</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -52,7 +53,6 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 9.0.props" />
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
@@ -69,14 +69,6 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir);$(SolutionDir)ExternalLibs\GLEW\include;$(SolutionDir)ExternalLibs\SOIL\include;$(SolutionDir)ExternalLibs\ENET\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>$(SolutionDir)$(Configuration);$(SolutionDir)ExternalLibs\GLEW\lib;$(SolutionDir)ExternalLibs\ENET\lib;$(SolutionDir)ExternalLibs\SOIL\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir);$(SolutionDir)ExternalLibs\GLEW\include;$(SolutionDir)ExternalLibs\SOIL\include;$(SolutionDir)ExternalLibs\ENET\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>$(SolutionDir)$(Configuration);$(SolutionDir)ExternalLibs\GLEW\lib;$(SolutionDir)ExternalLibs\ENET\lib;$(SolutionDir)ExternalLibs\SOIL\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(SolutionDir);$(SolutionDir)ExternalLibs\GLEW\include;$(SolutionDir)ExternalLibs\SOIL\include;$(SolutionDir)ExternalLibs\ENET\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(SolutionDir)x64\$(Configuration);$(SolutionDir)ExternalLibs\GLEW\lib\x64;$(SolutionDir)ExternalLibs\ENET\lib\x64;$(SolutionDir)ExternalLibs\SOIL\lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
@@ -84,6 +76,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir);$(SolutionDir)ExternalLibs\GLEW\include;$(SolutionDir)ExternalLibs\SOIL\include;$(SolutionDir)ExternalLibs\ENET\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(SolutionDir)x64\$(Configuration);$(SolutionDir)ExternalLibs\GLEW\lib\x64;$(SolutionDir)ExternalLibs\ENET\lib\x64;$(SolutionDir)ExternalLibs\SOIL\lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(SolutionDir);$(SolutionDir)ExternalLibs\GLEW\include;$(SolutionDir)ExternalLibs\SOIL\include;$(SolutionDir)ExternalLibs\ENET\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>$(SolutionDir)$(Configuration);$(SolutionDir)ExternalLibs\GLEW\lib;$(SolutionDir)ExternalLibs\ENET\lib;$(SolutionDir)ExternalLibs\SOIL\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(SolutionDir);$(SolutionDir)ExternalLibs\GLEW\include;$(SolutionDir)ExternalLibs\SOIL\include;$(SolutionDir)ExternalLibs\ENET\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>$(SolutionDir)$(Configuration);$(SolutionDir)ExternalLibs\GLEW\lib;$(SolutionDir)ExternalLibs\ENET\lib;$(SolutionDir)ExternalLibs\SOIL\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -93,6 +93,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>ncltech.lib;nclgl.lib;SOIL.lib;enet.lib;ws2_32.lib;Winmm.lib;glew32.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -100,16 +101,10 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(CudaToolkitIncludeDir);$(CudaToolkitDir)/include;</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>cudart.lib;ncltech.lib;nclgl.lib;SOIL.lib;enet.lib;ws2_32.lib;Winmm.lib;glew32.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ncltech.lib;nclgl.lib;SOIL.lib;enet.lib;ws2_32.lib;Winmm.lib;glew32.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <CudaCompile>
-      <Defines>WIN32</Defines>
-      <TargetMachinePlatform>32</TargetMachinePlatform>
-    </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -132,33 +127,34 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>cudart.lib;ncltech.lib;nclgl.lib;SOIL.lib;enet.lib;ws2_32.lib;Winmm.lib;glew32.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ncltech.lib;nclgl.lib;SOIL.lib;enet.lib;ws2_32.lib;Winmm.lib;glew32.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BallPoolScene.cpp" />
+    <ClCompile Include="ConstraintsScene.cpp" />
+    <ClCompile Include="EmptyScene.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ScoreScene.cpp" />
+    <ClCompile Include="SandboxScene.cpp" />
+    <ClCompile Include="SoftBodyScene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CudaCollidingParticles.cuh" />
-    <ClInclude Include="CudaCommon.cuh" />
-    <ClInclude Include="CudaParticles.cuh" />
-    <ClInclude Include="helper_math.h" />
-    <ClInclude Include="RenderNodeParticles.h" />
-    <ClInclude Include="Scene_CollisionHandling.h" />
-    <ClInclude Include="Scene_Particles.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <CudaCompile Include="CudaCollidingParticles.cu" />
-    <CudaCompile Include="CudaParticles.cu" />
+    <ClInclude Include="BallPoolScene.h" />
+    <ClInclude Include="ConstraintsScene.h" />
+    <ClInclude Include="EmptyScene.h" />
+    <ClInclude Include="PyramidScene.h" />
+    <ClInclude Include="ScoreScene.h" />
+    <ClInclude Include="SandboxScene.h" />
+    <ClInclude Include="SoftBodyScene.h" />
+    <ClInclude Include="TargetObj.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 9.0.targets" />
   </ImportGroup>
 </Project>

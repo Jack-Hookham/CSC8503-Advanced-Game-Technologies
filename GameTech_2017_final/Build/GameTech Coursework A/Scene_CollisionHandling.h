@@ -50,7 +50,7 @@ public:
 
 		RenderNodeParticles* rnode = new RenderNodeParticles();
 		rnode->SetParticleRadius(PARTICLE_RADIUS);
-		rnode->SetColor(Vector4(1.f, 0.f, 1.f, 1.f));
+		rnode->SetColor(CommonUtils::GenColor(RAND()));
 		rnode->GeneratePositionBuffer(num_particles, NULL);
 
 		const float half_grid_world_size = PARTICLE_GRID_SIZE * PARTICLE_GRID_CELL_SIZE * 0.5f;
@@ -70,6 +70,7 @@ public:
 	{
 		Scene::OnCleanupScene();
 		delete cudaParticleProg;
+		cpuBalls.clear();
 	}
 
 	virtual void OnUpdateScene(float dt) override

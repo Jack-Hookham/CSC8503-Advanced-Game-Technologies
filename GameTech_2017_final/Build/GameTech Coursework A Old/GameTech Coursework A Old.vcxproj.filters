@@ -18,36 +18,49 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ScoreScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SandboxScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SoftBodyScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EmptyScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BallPoolScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ConstraintsScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="RenderNodeParticles.h">
+    <ClInclude Include="EmptyScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Scene_Particles.h">
+    <ClInclude Include="ScoreScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CudaParticles.cuh">
+    <ClInclude Include="SandboxScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CudaCommon.cuh">
+    <ClInclude Include="SoftBodyScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Scene_CollisionHandling.h">
+    <ClInclude Include="BallPoolScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CudaCollidingParticles.cuh">
+    <ClInclude Include="PyramidScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="helper_math.h">
+    <ClInclude Include="TargetObj.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <CudaCompile Include="CudaParticles.cu">
-      <Filter>Source Files</Filter>
-    </CudaCompile>
-    <CudaCompile Include="CudaCollidingParticles.cu">
-      <Filter>Source Files</Filter>
-    </CudaCompile>
+    <ClInclude Include="ConstraintsScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
