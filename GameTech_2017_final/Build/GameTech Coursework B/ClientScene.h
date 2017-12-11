@@ -4,6 +4,9 @@
 #include <ncltech\Scene.h>
 #include <ncltech\NetworkBase.h>
 
+#include <iostream>
+#include <sstream>
+
 class ClientScene : public Scene
 {
 public:

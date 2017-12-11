@@ -179,7 +179,7 @@ int main(int arcg, char** argv)
 			// For an example on how to set up your test Scene's,
 			// see one of the PhyX_xxxx tutorial scenes. =]
 
-			//Initialize our Window, Physics, Scenes etc
+			//Initialise our Window, Physics, Scenes etc
 			InitializeClient();
 
 			Window::GetWindow().GetTimer()->GetTimedMS();
@@ -240,7 +240,7 @@ void ClientLoop()
 		//Start Timing
 		float dt = Window::GetWindow().GetTimer()->GetTimedMS() * 0.001f;	//How many milliseconds since last update?
 
-																			//Print Status Entries
+		//Print Status Entries
 		PrintStatusEntries();
 
 		//Handle Keyboard Inputs
@@ -257,13 +257,6 @@ void ClientLoop()
 
 		GraphicsPipeline::Instance()->UpdateScene(dt);
 		GraphicsPipeline::Instance()->RenderScene();				 //Finish Timing
-
-		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_H))
-		{
-			std::string message = "Hello I am client!";
-			//Create packet and send to server
-			ENetPacket* message_packet = enet_packet_create(&message, sizeof(Vector3), 0);
-		}
 	}
 }
 

@@ -120,6 +120,19 @@ void ClientScene::OnInitializeScene()
 		false,
 		Vector4(0.2f, 0.5f, 1.0f, 1.0f));
 	this->AddGameObject(box);
+
+	//Create Ground
+	this->AddGameObject(CommonUtils::BuildCuboidObject(
+		"Ground",
+		Vector3(0.0f, -1.0f, 0.0f),
+		Vector3(20.0f, 1.0f, 20.0f),
+		true,
+		0.0f,
+		true,
+		false,
+		Vector4(1.0f, 1.0f, 1.0f, 1.0f),
+		false,
+		CommonMeshes::MeshType::DEFAULT_CUBE));
 }
 
 void ClientScene::OnCleanupScene()
@@ -164,6 +177,26 @@ void ClientScene::OnUpdateScene(float dt)
 	NCLDebug::AddStatusEntry(status_color, "Network Traffic");
 	NCLDebug::AddStatusEntry(status_color, "    Incoming: %5.2fKbps", network.m_IncomingKb);
 	NCLDebug::AddStatusEntry(status_color, "    Outgoing: %5.2fKbps", network.m_OutgoingKb);
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_H))
+	{
+		char* msg = "Hello I am client!";
+		//Create packet and send to server
+		ENetPacket* msg_packet = enet_packet_create(msg, strlen(msg) + 1, 0);
+		enet_peer_send(serverConnection, 0, msg_packet);
+	}
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_G))
+	{
+		int mazeSize = 10;
+		std::ostringstream oss;
+		oss << "Make me a maze! Maze size: " << mazeSize;
+		char* msg = _strdup(oss.str().c_str());
+
+		//Create packet and send to server
+		ENetPacket* msg_packet = enet_packet_create(msg, strlen(msg) + 1, 0);
+		enet_peer_send(serverConnection, 0, msg_packet);
+	}
 }
 
 void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
