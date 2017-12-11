@@ -163,7 +163,6 @@
     <ClInclude Include="RenderNodeParticles.h" />
     <ClInclude Include="SandboxScene.h" />
     <ClInclude Include="Scene_CollisionHandling.h" />
-    <ClInclude Include="Scene_Particles.h" />
     <ClInclude Include="ScoreScene.h" />
     <ClInclude Include="SoftBodyScene.h" />
     <ClInclude Include="TargetObj.h" />

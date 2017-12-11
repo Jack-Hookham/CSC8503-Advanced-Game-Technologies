@@ -20,7 +20,14 @@
 #include "SoftBodyScene.h"
 #include "Scene_CollisionHandling.h"
 
-PerfTimer timer_total;
+const Vector4 status_colour = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+const Vector4 status_colour_header = Vector4(0.8f, 0.9f, 1.0f, 1.0f);
+const Vector4 status_color_debug = Vector4(1.0f, 0.6f, 1.0f, 1.0f);
+
+bool draw_debug = false;
+bool show_perf_metrics = false;
+PerfTimer timer_total, timer_physics, timer_update, timer_render;
+uint shadowCycleKey = 4;
 
 void Quit(bool error = false, const string &reason = "");
 
@@ -44,6 +51,8 @@ void Initialize()
 	SceneManager::Instance()->EnqueueScene(new ScoreScene("GameTech #3 - Projectile Game"));
 	SceneManager::Instance()->EnqueueScene(new BallPoolScene("GameTech #4 - Ball Pool"));
 	SceneManager::Instance()->EnqueueScene(new Scene_CollisionHandling("GameTech #5 - Ball Pool GPU acceleration"));
+
+	GraphicsPipeline::Instance()->SetVsyncEnabled(true);
 }
 
 
@@ -86,23 +95,67 @@ void Quit(bool error, const string &reason) {
 
 void PrintStatusEntries()
 {
-	const Vector4 status_color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	const Vector4 status_color_debug = Vector4(1.0f, 0.6f, 1.0f, 1.0f);
-	const Vector4 status_color_performance = Vector4(1.0f, 0.6f, 0.6f, 1.0f);
-
 	//Print Current Scene Name
-	NCLDebug::AddStatusEntry(status_color, "[%d/%d]: %s ([T]/[Y] to cycle or [R] to reload)",
+	NCLDebug::AddStatusEntry(status_colour_header, "[%d/%d]: %s ([T]/[Y] to cycle or [R] to reload)",
 		SceneManager::Instance()->GetCurrentSceneIndex() + 1,
 		SceneManager::Instance()->SceneCount(),
 		SceneManager::Instance()->GetCurrentScene()->GetSceneName().c_str()
 	);
 
-	timer_total.PrintOutputToStatusEntry(status_color, "Frame Time: ");
+	timer_total.PrintOutputToStatusEntry(status_colour, "Frame Time: ");
+
+	//Print Engine Options
+	NCLDebug::AddStatusEntry(status_colour_header, "NCLTech Settings");
+	NCLDebug::AddStatusEntry(status_colour, "     Physics Engine: %s (Press P to toggle)", PhysicsEngine::Instance()->IsPaused() ? "Paused  " : "Enabled ");
+	NCLDebug::AddStatusEntry(status_colour, "     Monitor V-Sync: %s (Press L to toggle)", GraphicsPipeline::Instance()->GetVsyncEnabled() ? "Enabled " : "Disabled");
+	NCLDebug::AddStatusEntry(status_colour, "     Camera Speed: %f [- +]", GraphicsPipeline::Instance()->GetCamera()->GetSpeed());
+	NCLDebug::AddStatusEntry(status_colour, "     Use Octree        : %s [U]", (PhysicsEngine::Instance()->UsingOctrees()) ? "Enabled " : "Disabled");
+	NCLDebug::AddStatusEntry(status_colour, "     Use SphereSphere  : %s [I]", (PhysicsEngine::Instance()->UsingSphereSphere()) ? "Enabled " : "Disabled");
+
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 1.0f, 1.0f, 1.0f), "Sphere Sphere Checks    : %d", PhysicsEngine::Instance()->GetNumSphereSphereChecks());
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 1.0f, 1.0f, 1.0f), "Broadphase pairs        : %d", PhysicsEngine::Instance()->GetBroadphaseColPairs().size());
+
+	std::ostringstream oss;
+	oss << std::fixed << std::setprecision(2) << GraphicsPipeline::Instance()->GetCamera()->GetPosition();
+	std::string s = "Camera Position: " + oss.str();
+	NCLDebug::AddStatusEntry(status_colour, s);
+
+	//Print debug info
+	uint drawFlags = PhysicsEngine::Instance()->GetDebugDrawFlags();
+	NCLDebug::AddStatusEntry(status_color_debug, "--- Debug Info  [G] ---");
+	if (draw_debug)
+	{
+		NCLDebug::AddStatusEntry(status_color_debug, "Constraints       : %s [Z]", (drawFlags & DEBUGDRAW_FLAGS_CONSTRAINT) ? "Enabled " : "Disabled");
+		NCLDebug::AddStatusEntry(status_color_debug, "Collision Normals : %s [X]", (drawFlags & DEBUGDRAW_FLAGS_COLLISIONNORMALS) ? "Enabled " : "Disabled");
+		NCLDebug::AddStatusEntry(status_color_debug, "Collision Volumes : %s [C]", (drawFlags & DEBUGDRAW_FLAGS_COLLISIONVOLUMES) ? "Enabled " : "Disabled");
+		NCLDebug::AddStatusEntry(status_color_debug, "Manifolds         : %s [V]", (drawFlags & DEBUGDRAW_FLAGS_MANIFOLD) ? "Enabled " : "Disabled");
+		NCLDebug::AddStatusEntry(status_color_debug, "Draw Octree       : %s [O]", (drawFlags & DEBUGDRAW_FLAGS_OCTREE) ? "Enabled " : "Disabled");
+		NCLDebug::AddStatusEntry(status_color_debug, "Bounding Radius   : %s [B]", (drawFlags & DEBUGDRAW_FLAGS_BOUNDINGRADIUS) ? "Enabled " : "Disabled");
+		NCLDebug::AddStatusEntry(status_color_debug, "");
+	}
+	NCLDebug::AddStatusEntry(status_colour, "");
+
+	//Print Performance Timers
+	NCLDebug::AddStatusEntry(status_colour, "FPS: %5.2f  (Press H for %s info)", 1000.f / timer_total.GetAvg(), show_perf_metrics ? "less" : "more");
+	if (show_perf_metrics)
+	{
+		timer_total.PrintOutputToStatusEntry(status_colour, "          Total Time     :");
+		timer_update.PrintOutputToStatusEntry(status_colour, "          Scene Update   :");
+		timer_physics.PrintOutputToStatusEntry(status_colour, "          Physics Update :");
+		timer_render.PrintOutputToStatusEntry(status_colour, "          Render Scene   :");
+	}
+	NCLDebug::AddStatusEntry(status_colour, "");
 }
 
 
 void HandleKeyboardInputs()
 {
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_P))
+		PhysicsEngine::Instance()->SetPaused(!PhysicsEngine::Instance()->IsPaused());
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_L))
+		GraphicsPipeline::Instance()->SetVsyncEnabled(!GraphicsPipeline::Instance()->GetVsyncEnabled());
+
 	uint sceneIdx = SceneManager::Instance()->GetCurrentSceneIndex();
 	uint sceneMax = SceneManager::Instance()->SceneCount();
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_Y))
@@ -113,6 +166,101 @@ void HandleKeyboardInputs()
 
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_R))
 		SceneManager::Instance()->JumpToScene(sceneIdx);
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_G))
+		draw_debug = !draw_debug;
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_H))
+		show_perf_metrics = !show_perf_metrics;
+
+	uint drawFlags = PhysicsEngine::Instance()->GetDebugDrawFlags();
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_Z))
+		drawFlags ^= DEBUGDRAW_FLAGS_CONSTRAINT;
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_X))
+		drawFlags ^= DEBUGDRAW_FLAGS_COLLISIONNORMALS;
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_C))
+		drawFlags ^= DEBUGDRAW_FLAGS_COLLISIONVOLUMES;
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_V))
+		drawFlags ^= DEBUGDRAW_FLAGS_MANIFOLD;
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_O))
+		drawFlags ^= DEBUGDRAW_FLAGS_OCTREE;
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_B))
+		drawFlags ^= DEBUGDRAW_FLAGS_BOUNDINGRADIUS;
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_U))
+		PhysicsEngine::Instance()->ToggleOctrees();
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_I))
+		PhysicsEngine::Instance()->ToggleSphereSphere();
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_M))
+	{
+		GraphicsPipeline::Instance()->ResetCamera();
+	}
+
+	//Fire sphere
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_J))
+	{
+		float projectTileSpeed = 30.0f;
+
+		//Set direction to camera direction
+		Vector3 direction = Matrix4::Rotation(GraphicsPipeline::Instance()->GetCamera()->GetYaw(), Vector3(0, 1, 0))
+			* Matrix4::Rotation(GraphicsPipeline::Instance()->GetCamera()->GetPitch(), Vector3(1, 0, 0)) * Vector3(0, 0, -1);
+
+
+		Vector4 color = CommonUtils::GenColor(RAND(), 1.0f);
+		GameObject* obj = CommonUtils::BuildSphereObject(
+			"",
+			Vector3(GraphicsPipeline::Instance()->GetCamera()->GetPosition()),
+			0.5f,
+			true,
+			1 / 10.0f,
+			true,
+			true,
+			color,
+			false);
+		obj->Physics()->SetElasticity(0.1f);
+		obj->Physics()->SetFriction(0.9f);
+		obj->Physics()->SetLinearVelocity(direction * projectTileSpeed);
+		SceneManager::Instance()->GetCurrentScene()->AddGameObject(obj);
+	}
+
+	//Fire cube
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_K))
+	{
+		float projectTileSpeed = 30.0f;
+
+		//Set direction to camera direction
+		Vector3 direction = Matrix4::Rotation(GraphicsPipeline::Instance()->GetCamera()->GetYaw(), Vector3(0, 1, 0))
+			* Matrix4::Rotation(GraphicsPipeline::Instance()->GetCamera()->GetPitch(), Vector3(1, 0, 0)) * Vector3(0, 0, -1);
+
+		Vector4 color = CommonUtils::GenColor(RAND(), 1.0f);
+		GameObject* obj = CommonUtils::BuildCuboidObject(
+			"",
+			Vector3(GraphicsPipeline::Instance()->GetCamera()->GetPosition()),
+			Vector3(0.5f, 0.5f, 0.5f),
+			true,
+			1 / 10.0f,
+			true,
+			true,
+			color,
+			false,
+			CommonMeshes::MeshType::PORTAL_CUBE);
+		obj->Physics()->SetElasticity(0.2f);
+		obj->Physics()->SetFriction(0.9f);
+		obj->Physics()->SetLinearVelocity(direction * projectTileSpeed);
+
+		//Initial push??
+		//cube->Physics()->SetLinearVelocity(Quaternion::AxisAngleToQuaterion(Vector3(0.0f, 0.0f, 1.0f), 20.0f).ToMatrix3() * Vector3(-1.f, 0.f, 0.f));
+		SceneManager::Instance()->GetCurrentScene()->AddGameObject(obj);
+	}
+
+	PhysicsEngine::Instance()->SetDebugDrawFlags(drawFlags);
 }
 
 
