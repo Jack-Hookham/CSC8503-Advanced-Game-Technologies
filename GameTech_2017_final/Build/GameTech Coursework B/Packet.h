@@ -9,21 +9,15 @@ enum PacketType
 	PACKET_MAZE_DATA
 };
 
-struct PacketMazeParams
+//A packet contains a type so that it can be identified and processed correctly
+//as well as a char* of data to be processed
+struct Packet
 {
-	int packetType = PACKET_MAZE_PARAMS;
-	int mazeSize;
-};
+	Packet(int type)
+	{
+		packetType = type;
+	}
 
-struct PacketMazeData
-{
-	int packetType = PACKET_MAZE_DATA;
-	int mazeSize;
-	bool* isWall;
-};
-
-struct PacketMessage
-{
-	int packetType = PACKET_MESSAGE;
-	char* message;
+	int packetType;
+	char* data;
 };

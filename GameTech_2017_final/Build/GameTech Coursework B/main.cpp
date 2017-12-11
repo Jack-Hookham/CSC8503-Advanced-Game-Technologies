@@ -275,17 +275,45 @@ void ServerLoop()
 			switch (evnt.type)
 			{
 			case ENET_EVENT_TYPE_CONNECT:
-				printf("- New Client Connected\n");
-				break;
-
+				{
+					printf("- New Client Connected\n");
+					break;
+				}
 			case ENET_EVENT_TYPE_RECEIVE:
-				printf("\t Client %d says: %s\n", evnt.peer->incomingPeerID, evnt.packet->data);
-				enet_packet_destroy(evnt.packet);
-				break;
+				{
+					printf("\t Client %d says: %s\n", evnt.peer->incomingPeerID, evnt.packet->data);
 
+					//Get the first value in the packet to determine what to do with it
+					//int packetType = evnt.packet->data[0];
+
+					std::string packetData((char*)evnt.packet->data);
+					enet_uint8 packetType = *evnt.packet->data;
+
+					switch (packetType)
+					{
+					case PACKET_MESSAGE:
+						{
+							
+						}
+					case PACKET_MAZE_PARAMS:
+						{
+							
+						}
+					case PACKET_MAZE_DATA:
+						{
+							
+						}
+					}
+
+					//printf
+					enet_packet_destroy(evnt.packet);
+					break;
+				}
 			case ENET_EVENT_TYPE_DISCONNECT:
-				printf("- Client %d has disconnected.\n", evnt.peer->incomingPeerID);
-				break;
+				{
+					printf("- Client %d has disconnected.\n", evnt.peer->incomingPeerID);
+					break;
+				}
 			}
 		});
 

@@ -21,8 +21,9 @@ public:
 	void ProcessNetworkEvent(const ENetEvent& evnt);
 
 protected:
-	GameObject* box;
+	void SendPacketToServer(Packet& packet);
 
+	GameObject* box;
 
 	NetworkBase network;
 	ENetPeer*	serverConnection;
