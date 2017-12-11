@@ -228,6 +228,7 @@ void HandleKeyboardInputs()
 		obj->Physics()->SetFriction(0.9f);
 		obj->Physics()->SetLinearVelocity(direction * projectTileSpeed);
 		SceneManager::Instance()->GetCurrentScene()->AddGameObject(obj);
+		SceneManager::Instance()->GetCurrentScene()->AddBallToCPUList(obj);
 	}
 
 	//Fire cube
@@ -258,6 +259,7 @@ void HandleKeyboardInputs()
 		//Initial push??
 		//cube->Physics()->SetLinearVelocity(Quaternion::AxisAngleToQuaterion(Vector3(0.0f, 0.0f, 1.0f), 20.0f).ToMatrix3() * Vector3(-1.f, 0.f, 0.f));
 		SceneManager::Instance()->GetCurrentScene()->AddGameObject(obj);
+		SceneManager::Instance()->GetCurrentScene()->AddBallToCPUList(obj);
 	}
 
 	PhysicsEngine::Instance()->SetDebugDrawFlags(drawFlags);
@@ -273,7 +275,8 @@ int main()
 	Window::GetWindow().GetTimer()->GetTimedMS();
 
 	//Create main game-loop
-	while (Window::GetWindow().UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)) {
+	while (Window::GetWindow().UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE))
+	{
 		//Start Timing
 		float dt = Window::GetWindow().GetTimer()->GetTimedMS() * 0.001f;	//How many milliseconds since last update?
 		timer_total.UpdateRealElapsedTime(dt);

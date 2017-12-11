@@ -39,7 +39,7 @@ public:
 			true,
 			Vector4(1.0f, 0.5f, 0.5f, 1.0f));
 		this->AddGameObject(sphere1);
-		cpuBalls.push_back(sphere1);
+		AddBallToCPUList(sphere1);
 
 		cudaParticleProg = new CudaCollidingParticles();
 
@@ -70,7 +70,6 @@ public:
 	{
 		Scene::OnCleanupScene();
 		delete cudaParticleProg;
-		cpuBalls.clear();
 	}
 
 	virtual void OnUpdateScene(float dt) override
@@ -82,29 +81,20 @@ public:
 		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "");
 		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "  No. Particles: %d", cudaParticleProg->GetNumParticles());
 
-		int numBalls = cpuBalls.size();
-		Vector3* position = new Vector3[numBalls];
-		Vector3* velocity = new Vector3[numBalls];
-		float* radius = new float[numBalls];
-		for (int i = 0; i < numBalls; ++i)
+		for (int i = 0; i < cpuBalls.size(); ++i)
 		{
 			if (cpuBalls[i]->HasPhysics())
 			{
-				position[i] = cpuBalls[i]->Physics()->GetPosition();
-				velocity[i] = cpuBalls[i]->Physics()->GetLinearVelocity();
-				radius[i] = cpuBalls[i]->Physics()->GetBoundingRadius();
+				ballPositions[i] = cpuBalls[i]->Physics()->GetPosition();
+				ballVelocites[i] = cpuBalls[i]->Physics()->GetLinearVelocity();
+				ballRadii[i] = cpuBalls[i]->Physics()->GetBoundingRadius();
 			}
 		}
 
-		cudaParticleProg->UpdateParticles(dt, numBalls, position, velocity, radius);
-
-		//SAFE_DELETE(position);
-		//SAFE_DELETE(velocity);
-		//SAFE_DELETE(radius);
+		cudaParticleProg->UpdateParticles(dt, cpuBalls.size(), ballPositions, ballVelocites, ballRadii);
 	}
 
 
 protected:
 	CudaCollidingParticles* cudaParticleProg;
-	std::vector<GameObject*> cpuBalls;
 };

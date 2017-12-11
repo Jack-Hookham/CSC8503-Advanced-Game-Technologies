@@ -43,7 +43,7 @@ public:
 	void InitializeParticleDam(int dam_width, int dam_height, int dam_depth);
 	void InitializeOpenGLVertexBuffer(GLuint buffer_idx);
 
-	void UpdateParticles(float dt, uint numBalls, Vector3* position, Vector3* velocity, float* radius);
+	void UpdateParticles(float dt, uint numBalls, std::vector<Vector3> position, std::vector<Vector3> velocity, std::vector<float> radius);
 
 protected:
 	uint num_particles;

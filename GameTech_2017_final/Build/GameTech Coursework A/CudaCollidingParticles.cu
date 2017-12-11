@@ -456,8 +456,8 @@ void CudaCollidingParticles::InitializeOpenGLVertexBuffer(GLuint buffer_idx)
 }
 
 //Pass in the cpu ball information so that the gpu particles can collide with them
-void CudaCollidingParticles::UpdateParticles(float dt, uint numBalls, Vector3* ballPos, Vector3* ballVel,
-	float* ballRadius)
+void CudaCollidingParticles::UpdateParticles(float dt, uint numBalls, std::vector<Vector3> ballPos, std::vector<Vector3> ballVel,
+	std::vector<float> ballRadius)
 {
 	//See "ALGORITHM EXPLANATION" (top of this file) for info on what is meant to be happening here.
 

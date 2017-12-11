@@ -29,6 +29,8 @@ float rotation = 0.0f;
 void Win32_PrintAllAdapterIPAddresses();
 
 void InitializeClient();
+void ClientLoop();
+void ServerLoop();
 void Quit(bool error = false, const string &reason = "");
 
 enum Type
@@ -158,52 +160,7 @@ int main(int arcg, char** argv)
 			Win32_PrintAllAdapterIPAddresses();
 
 			timer.GetTimedMS();
-			while (true)
-			{
-				float dt = timer.GetTimedMS() * 0.001f;
-				accum_time += dt;
-				rotation += 0.5f * PI * dt;
-
-				//Handle All Incoming Packets and Send any enqued packets
-				server.ServiceNetwork(dt, [&](const ENetEvent& evnt)
-				{
-					switch (evnt.type)
-					{
-					case ENET_EVENT_TYPE_CONNECT:
-						printf("- New Client Connected\n");
-						break;
-
-					case ENET_EVENT_TYPE_RECEIVE:
-						printf("\t Client %d says: %s\n", evnt.peer->incomingPeerID, evnt.packet->data);
-						enet_packet_destroy(evnt.packet);
-						break;
-
-					case ENET_EVENT_TYPE_DISCONNECT:
-						printf("- Client %d has disconnected.\n", evnt.peer->incomingPeerID);
-						break;
-					}
-				});
-
-				//Broadcast update packet to all connected clients at a rate of UPDATE_TIMESTEP updates per second
-				if (accum_time >= UPDATE_TIMESTEP)
-				{
-					//Packet data
-					// - At the moment this is just a position update that rotates around the origin of the world
-					//   though this can be any variable, structure or class you wish. Just remember that everything 
-					//   you send takes up valuable network bandwidth so no sending every PhysicsObject struct each frame ;)
-					accum_time = 0.0f;
-					Vector3 pos = Vector3(
-						cos(rotation) * 2.0f,
-						1.5f,
-						sin(rotation) * 2.0f);
-
-					//Create the packet and broadcast it (unreliable transport) to all clients
-					ENetPacket* position_update = enet_packet_create(&pos, sizeof(Vector3), 0);
-					enet_host_broadcast(server.m_pNetwork, 0, position_update);
-				}
-
-				Sleep(0);
-			}
+			ServerLoop();
 
 			system("pause");
 			server.Release();
@@ -227,29 +184,7 @@ int main(int arcg, char** argv)
 
 			Window::GetWindow().GetTimer()->GetTimedMS();
 
-			//Create main game-loop
-			while (Window::GetWindow().UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)) {
-				//Start Timing
-				float dt = Window::GetWindow().GetTimer()->GetTimedMS() * 0.001f;	//How many milliseconds since last update?
-
-																					//Print Status Entries
-				PrintStatusEntries();
-
-				//Handle Keyboard Inputs
-				HandleKeyboardInputs();
-
-				//Update Scene
-				SceneManager::Instance()->GetCurrentScene()->FireOnSceneUpdate(dt);
-
-				//Update Physics
-				PhysicsEngine::Instance()->Update(dt);
-				PhysicsEngine::Instance()->DebugRender();
-
-				//Render Scene
-
-				GraphicsPipeline::Instance()->UpdateScene(dt);
-				GraphicsPipeline::Instance()->RenderScene();				 //Finish Timing
-			}
+			ClientLoop();
 
 			//Cleanup
 			Quit();
@@ -295,5 +230,90 @@ void Quit(bool error, const string &reason) {
 		std::cout << reason << std::endl;
 		system("PAUSE");
 		exit(-1);
+	}
+}
+
+void ClientLoop()
+{
+	//Main client-loop
+	while (Window::GetWindow().UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)) {
+		//Start Timing
+		float dt = Window::GetWindow().GetTimer()->GetTimedMS() * 0.001f;	//How many milliseconds since last update?
+
+																			//Print Status Entries
+		PrintStatusEntries();
+
+		//Handle Keyboard Inputs
+		HandleKeyboardInputs();
+
+		//Update Scene
+		SceneManager::Instance()->GetCurrentScene()->FireOnSceneUpdate(dt);
+
+		//Update Physics
+		PhysicsEngine::Instance()->Update(dt);
+		PhysicsEngine::Instance()->DebugRender();
+
+		//Render Scene
+
+		GraphicsPipeline::Instance()->UpdateScene(dt);
+		GraphicsPipeline::Instance()->RenderScene();				 //Finish Timing
+
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_H))
+		{
+			std::string message = "Hello I am client!";
+			//Create packet and send to server
+			ENetPacket* message_packet = enet_packet_create(&message, sizeof(Vector3), 0);
+		}
+	}
+}
+
+void ServerLoop()
+{
+
+	while (true)
+	{
+		float dt = timer.GetTimedMS() * 0.001f;
+		accum_time += dt;
+		rotation += 0.5f * PI * dt;
+
+		//Handle All Incoming Packets and Send any enqued packets
+		server.ServiceNetwork(dt, [&](const ENetEvent& evnt)
+		{
+			switch (evnt.type)
+			{
+			case ENET_EVENT_TYPE_CONNECT:
+				printf("- New Client Connected\n");
+				break;
+
+			case ENET_EVENT_TYPE_RECEIVE:
+				printf("\t Client %d says: %s\n", evnt.peer->incomingPeerID, evnt.packet->data);
+				enet_packet_destroy(evnt.packet);
+				break;
+
+			case ENET_EVENT_TYPE_DISCONNECT:
+				printf("- Client %d has disconnected.\n", evnt.peer->incomingPeerID);
+				break;
+			}
+		});
+
+		//Broadcast update packet to all connected clients at a rate of UPDATE_TIMESTEP updates per second
+		if (accum_time >= UPDATE_TIMESTEP)
+		{
+			//Packet data
+			// - At the moment this is just a position update that rotates around the origin of the world
+			//   though this can be any variable, structure or class you wish. Just remember that everything 
+			//   you send takes up valuable network bandwidth so no sending every PhysicsObject struct each frame ;)
+			accum_time = 0.0f;
+			Vector3 pos = Vector3(
+				cos(rotation) * 2.0f,
+				1.5f,
+				sin(rotation) * 2.0f);
+
+			//Create the packet and broadcast it (unreliable transport) to all clients
+			ENetPacket* position_update = enet_packet_create(&pos, sizeof(Vector3), 0);
+			enet_host_broadcast(server.m_pNetwork, 0, position_update);
+		}
+
+		Sleep(0);
 	}
 }

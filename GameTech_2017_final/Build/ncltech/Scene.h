@@ -72,7 +72,14 @@ public:
 	//	 - Override to remove custom objects/physics here as needed
 	//	   Note: Default action here automatically delete all game objects and
 	//           remove all update callback's.
-	virtual void OnCleanupScene()		{ DeleteAllGameObjects(); };	
+	virtual void OnCleanupScene()		{ 
+		DeleteAllGameObjects();
+
+		cpuBalls.clear();
+		ballPositions.clear();
+		ballVelocites.clear();
+		ballRadii.clear();
+	};
 
 	// Update Scene Logic
 	//   - Called once per frame and should contain time-sensitive update logic
@@ -204,6 +211,15 @@ public:
 				it++;
 		}
 	}
+
+	void AddBallToCPUList(GameObject* ball)
+	{
+		cpuBalls.push_back(ball);
+		ballPositions.push_back(ball->Physics()->GetPosition());
+		ballVelocites.push_back(ball->Physics()->GetLinearVelocity());
+		ballRadii.push_back(ball->Physics()->GetBoundingRadius());
+	}
+
 protected:
 	// Delete all contained Objects
 	//    - This is the default action upon firing OnCleanupScene()
@@ -222,4 +238,10 @@ protected:
 	std::string					m_SceneName;
 	std::vector<GameObject*>	m_vpObjects;
 	SceneUpdateMap				m_UpdateCallbacks;
+
+	//Used to track balls created on the cpu for the ball pool GPU scene
+	std::vector<GameObject*> cpuBalls;
+	std::vector<Vector3> ballPositions;
+	std::vector<Vector3> ballVelocites;
+	std::vector<float> ballRadii;
 };
