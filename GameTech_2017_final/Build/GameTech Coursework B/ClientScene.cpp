@@ -6,12 +6,23 @@ const Vector4 status_color = Vector4(status_color3.x, status_color3.y, status_co
 ClientScene::ClientScene(const std::string& friendly_name)
 	: Scene(friendly_name)
 	, serverConnection(NULL)
-	, box(NULL)
 {
+	wallMesh = new OBJMesh(MESHDIR"cube.obj");
+
+	GLuint whitetex;
+	glGenTextures(1, &whitetex);
+	glBindTexture(GL_TEXTURE_2D, whitetex);
+	unsigned int pixel = 0xFFFFFFFF;
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, &pixel);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	wallMesh->SetTexture(whitetex);
 }
 
 void ClientScene::OnInitializeScene()
 {
+	generator = new MazeGenerator();
+
 	//Initialize Client Network
 	if (network.Initialize(0))
 	{
@@ -22,18 +33,6 @@ void ClientScene::OnInitializeScene()
 		NCLDebug::Log("Network: Attempting to connect to server.");
 	}
 
-	//Generate Simple Scene with a box that can be updated upon recieving server packets
-	box = CommonUtils::BuildCuboidObject(
-		"Server",
-		Vector3(0.0f, 1.0f, 0.0f),
-		Vector3(0.5f, 0.5f, 0.5f),
-		true,									//Physics Enabled here Purely to make setting position easier via Physics()->SetPosition()
-		0.0f,
-		false,
-		false,
-		Vector4(0.2f, 0.5f, 1.0f, 1.0f));
-	this->AddGameObject(box);
-
 	//Create Ground
 	this->AddGameObject(CommonUtils::BuildCuboidObject(
 		"Ground",
@@ -43,7 +42,7 @@ void ClientScene::OnInitializeScene()
 		0.0f,
 		true,
 		false,
-		Vector4(1.0f, 1.0f, 1.0f, 1.0f),
+		Vector4(0.2f, 0.5f, 1.0f, 1.0f),
 		false,
 		CommonMeshes::MeshType::DEFAULT_CUBE));
 }
@@ -51,7 +50,6 @@ void ClientScene::OnInitializeScene()
 void ClientScene::OnCleanupScene()
 {
 	Scene::OnCleanupScene();
-	box = NULL; // Deleted in above function
 
 				//Send one final packet telling the server we are disconnecting
 				// - We are not waiting to resend this, so if it fails to arrive
@@ -62,8 +60,8 @@ void ClientScene::OnCleanupScene()
 	network.Release();
 	serverConnection = NULL;
 	SAFE_DELETE(wallMesh);
-	SAFE_DELETE(mazeGenerator);
-	SAFE_DELETE(mazeRenderer);
+	SAFE_DELETE(generator);
+	SAFE_DELETE(maze);
 }
 
 void ClientScene::OnUpdateScene(float dt)
@@ -85,10 +83,6 @@ void ClientScene::OnUpdateScene(float dt)
 	uint8_t ip2 = (serverConnection->address.host >> 8) & 0xFF;
 	uint8_t ip3 = (serverConnection->address.host >> 16) & 0xFF;
 	uint8_t ip4 = (serverConnection->address.host >> 24) & 0xFF;
-
-	NCLDebug::DrawTextWs(box->Physics()->GetPosition() + Vector3(0.f, 0.6f, 0.f), STATUS_TEXT_SIZE, TEXTALIGN_CENTRE, Vector4(0.f, 0.f, 0.f, 1.f),
-		"Peer: %u.%u.%u.%u:%u", ip1, ip2, ip3, ip4, serverConnection->address.port);
-
 
 	NCLDebug::AddStatusEntry(status_color, "Network Traffic");
 	NCLDebug::AddStatusEntry(status_color, "    Incoming: %5.2fKbps", network.m_IncomingKb);
@@ -144,103 +138,90 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 	//Server has sent us a new packet
 	case ENET_EVENT_TYPE_RECEIVE:
 	{
-		//Parse the packet and determine what to do with it
-		if (evnt.packet->dataLength == sizeof(Vector3))
+		
+		std::string packetString((char*)evnt.packet->data);
+
+		//Split the packet into string tokens
+		char delim = ' ';
+
+		//Separate first token (should be packet type) and rest of packet (packet data)
+		std::string firstToken = packetString.substr(0, packetString.find(delim));
+		std::string packetData = packetString.substr(packetString.find_first_of(delim) + 1);
+		
+		uint packetType;
+		//The first token should be the packet type
+		if (CommonUtils::isInteger(firstToken))
 		{
-			Vector3 pos;
-			memcpy(&pos, evnt.packet->data, sizeof(Vector3));
-			box->Physics()->SetPosition(pos);
+			packetType = std::stoi(firstToken);
 		}
 		else
 		{
-			std::string packetString((char*)evnt.packet->data);
+			packetType = PacketType::PACKET_BAD;
+		}
+		std::cout << "Packet type: " << packetType << ", Packet data: " << packetData << "\n";
 
-			//Split the packet into string tokens
-			char delim = ' ';
-
-			//Separate first token (should be packet type) and rest of packet (packet data)
-			std::string firstToken = packetString.substr(0, packetString.find(delim));
-			std::string packetData = packetString.substr(packetString.find_first_of(delim) + 1);
-			
-			uint packetType;
-			//The first token should be the packet type
-			if (CommonUtils::isInteger(firstToken))
+		switch(packetType)
+		{
+			case PACKET_BAD:
 			{
-				packetType = std::stoi(firstToken);
+				std::cout << "\t Failed to read packet from Server. Unknown packet type.\n";
+				break;
 			}
-			else
+			case PACKET_MESSAGE:
 			{
-				packetType = PacketType::PACKET_BAD;
+				//Print the message
+				std::cout << "\t Server broadcast: " << packetData << "\n";
+				break;
 			}
-			std::cout << "Packet type: " << packetType << ", Packet data: " << packetData << "\n";
-
-			switch(packetType)
+			case PACKET_MAZE_PARAMS:
 			{
-				case PACKET_BAD:
+				//Client shouldn't receive maze param packets
+				std::cout << "\t Error: Received maze data packet from Server";
+				break;
+			}
+			case PACKET_MAZE_DATA:
+			{
+				//Process maze data packet, generate and render maze
+				int length = packetData.length();
+				bool* isWall = new bool[packetData.length()];
+				int idx = 0;
+				for (auto data : packetData)
 				{
-					std::cout << "\t Failed to read packet from Server. Unknown packet type.\n";
-					break;
+					isWall[idx] = (data == '1');
+					idx++;
 				}
-				case PACKET_MESSAGE:
+
+				//Generate the maze from the packet data received from the client
+				//Generate a maze with density 0
+				generator->Generate(mazeSize, 0);
+				//Populate the wall data with the data from the server
+				GraphEdge* allEdges = generator->GetAllEdgesArr();
+				uint base_offset = mazeSize * (mazeSize - 1);
+				for (uint y = 0; y < mazeSize; ++y)
 				{
-					//Print the message
-					std::cout << "\t Server broadcast: " << packetData << "\n";
-					break;
-				}
-				case PACKET_MAZE_PARAMS:
-				{
-					//Client shouldn't receive maze param packets
-					std::cout << "\t Error: Received maze data packet from Server";
-					break;
-				}
-				case PACKET_MAZE_DATA:
-				{
-					//Process maze data packet, generate and render maze
-					int length = packetData.length();
-					bool* isWall = new bool[packetData.length()];
-					int idx = 0;
-					for (auto data : packetData)
+					for (uint x = 0; x < mazeSize - 1; ++x)
 					{
-						isWall[idx] = (data == '1');
-						idx++;
+						GraphEdge* edgeX = &allEdges[(y * (mazeSize - 1) + x)];
+						edgeX->_iswall = isWall[(y * (mazeSize - 1) + x)];
 					}
-
-					//Generate the maze from the packet data received from the client
-					GraphEdge* allEdges = mazeGenerator->GetAllEdgesArr();
-					uint base_offset = mazeSize * (mazeSize - 1);
-					for (uint y = 0; y < mazeSize; ++y)
-					{
-						for (uint x = 0; x < mazeSize - 1; ++x)
-						{
-							GraphEdge* edgeX = &allEdges[(y * (mazeSize - 1) + x)];
-							edgeX->_iswall = isWall[(y * (mazeSize - 1) + x)];
-						}
-					}
-					for (uint y = 0; y < mazeSize - 1; ++y)
-					{
-						for (uint x = 0; x < mazeSize; ++x)
-						{
-							GraphEdge* edgeY = &allEdges[base_offset + (x * (mazeSize - 1) + y)];
-							edgeY->_iswall = isWall[base_offset + (x * (mazeSize - 1) + y)];
-						}
-					}
-
-					GenerateNewMaze();
-					//The maze is returned in a [0,0,0] - [1,1,1] cube (with edge walls outside) regardless of grid_size,
-					// so we need to scale it to whatever size we want
-					Matrix4 maze_scalar = Matrix4::Scale(Vector3(5.f, 5.0f / float(mazeSize), 5.f)) * Matrix4::Translation(Vector3(-0.5f, 0.f, -0.5f));
-
-					maze = new MazeRenderer(mazeGenerator, wallMesh);
-					maze->Render()->SetTransform(Matrix4::Translation(pos_maze) * maze_scalar);
-					this->AddGameObject(maze);
-
-					break;
 				}
-				default:
+				for (uint y = 0; y < mazeSize - 1; ++y)
 				{
-					std::cout << "\t Failed to read packet from Server. Unknown packet type.\n";
-					break;
+					for (uint x = 0; x < mazeSize; ++x)
+					{
+						GraphEdge* edgeY = &allEdges[base_offset + (x * (mazeSize - 1) + y)];
+						edgeY->_iswall = isWall[base_offset + (x * (mazeSize - 1) + y)];
+					}
 				}
+
+				GenerateNewMaze();
+
+				break;
+			}
+			default:
+			{
+				std::cout << "\t Failed to read packet from Server. Unknown packet type.\n";
+				break;
 			}
 		}
 	}
@@ -254,6 +235,37 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 	}
 	break;
 	}
+}
+
+void ClientScene::GenerateNewMaze()
+{
+	this->DeleteAllGameObjects(); //Cleanup old mazes
+
+	//The maze is returned in a [0,0,0] - [1,1,1] cube (with edge walls outside) regardless of grid_size,
+	// so we need to scale it to whatever size we want
+	Matrix4 maze_scalar = Matrix4::Scale(Vector3(5.f, 5.0f / float(mazeSize), 5.f)) * Matrix4::Translation(Vector3(-0.5f, 0.f, -0.5f));
+
+	maze = new MazeRenderer(generator, wallMesh);
+	maze->Render()->SetTransform(Matrix4::Translation(pos_maze) * maze_scalar);
+	this->AddGameObject(maze);
+
+	//Create Ground (..we still have some common ground to work off)
+	GameObject* ground = CommonUtils::BuildCuboidObject(
+		"Ground",
+		Vector3(0.0f, -1.0f, 0.0f),
+		Vector3(20.0f, 1.0f, 20.0f),
+		false,
+		0.0f,
+		false,
+		false,
+		Vector4(0.2f, 0.5f, 1.0f, 1.0f));
+
+	this->AddGameObject(ground);
+
+	GraphNode* start = generator->GetStartNode();
+	GraphNode* end = generator->GetGoalNode();
+
+	//UpdateAStarPreset();
 }
 
 void ClientScene::SendPacketToServer(const Packet& packet)

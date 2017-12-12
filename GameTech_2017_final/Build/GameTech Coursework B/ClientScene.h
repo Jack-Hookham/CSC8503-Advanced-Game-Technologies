@@ -5,7 +5,8 @@
 #include <ncltech\PhysicsEngine.h>
 #include <nclgl\NCLDebug.h>
 #include <ncltech\DistanceConstraint.h>
-#include <ncltech\CommonUtils.h>"
+#include <ncltech\CommonUtils.h>
+#include <nclgl\OBJMesh.h>
 
 #include <iostream>
 #include <sstream>
@@ -27,17 +28,17 @@ public:
 
 	void ProcessNetworkEvent(const ENetEvent& evnt);
 
+	void GenerateNewMaze();
+
 protected:
 	void SendPacketToServer(const Packet& packet);
 
-	GameObject* box;
-
 	NetworkBase network;
 	ENetPeer*	serverConnection;
-	MazeGenerator* mazeGenerator;
+	MazeGenerator* generator;
 	MazeRenderer* maze;
 	Mesh* wallMesh;
 
 	int mazeSize = 16;
-	float mazeDensity = 0.5f;
+	float mazeDensity = 0.0f;
 };
