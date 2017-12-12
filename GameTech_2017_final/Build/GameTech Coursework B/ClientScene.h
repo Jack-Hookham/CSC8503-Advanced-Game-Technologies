@@ -41,6 +41,9 @@ protected:
 	MazeRenderer* maze;
 	Mesh* wallMesh;
 
+	GameObject* startNode;
+	GameObject* endNode;
+
 	int mazeSize = 16;
 	float mazeDensity = 1.0f;
 };

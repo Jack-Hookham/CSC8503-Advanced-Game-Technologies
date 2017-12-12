@@ -12,7 +12,16 @@ enum PacketType
 	PACKET_MAZE_DATA,
 	PACKET_MOVE_START,
 	PACKET_MOVE_END,
-	PACKET_MOVE_CLIENT
+	PACKET_MOVE_CLIENT,
+	ROUTE_REQUEST_PACKET
+};
+
+enum MoveDirection
+{
+	MOVEMENT_UP,
+	MOVEMENT_LEFT,
+	MOVENENT_DOWN,
+	MOVEMENT_RIGHT
 };
 
 //A packet contains a type so that it can be identified and processed correctly
@@ -20,12 +29,14 @@ enum PacketType
 class Packet
 {
 public:
-	Packet(int type)
+	Packet(int type) : m_packetType(type), m_data("")
 	{
-		m_packetType = type;
-		m_data = "";
 	}
-	~Packet() {};
+
+	~Packet()
+	{
+		delete[] m_data;
+	};
 
 	//Add data onto the end of the current data
 	template<typename T>
@@ -45,6 +56,7 @@ public:
 	}
 
 	inline const int GetPacketType() const { return m_packetType; }
+	inline void SetData(char* data) { m_data = data; }
 	inline const char* GetData() const { return m_data; }
 
 	inline char* Data() { return m_data; }

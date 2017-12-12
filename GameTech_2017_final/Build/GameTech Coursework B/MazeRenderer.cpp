@@ -241,32 +241,32 @@ void MazeRenderer::Generate_BuildRenderNodes()
 
 
 	//Finally - our start/end goals
-	GraphNode* start = maze->GetStartNode();
-	GraphNode* end = maze->GetGoalNode();
+	//GraphNode* start = maze->GetStartNode();
+	//GraphNode* end = maze->GetGoalNode();
 
-	Vector3 cellpos = Vector3(
-		start->_pos.x * 3,
-		0.0f,
-		start->_pos.y * 3
-	) * scalar;
-	Vector3 cellsize = Vector3(
-		scalar * 2,
-		1.0f,
-		scalar * 2
-	);
+	//Vector3 cellpos = Vector3(
+	//	start->_pos.x * 3,
+	//	0.0f,
+	//	start->_pos.y * 3
+	//) * scalar;
+	//Vector3 cellsize = Vector3(
+	//	scalar * 2,
+	//	1.0f,
+	//	scalar * 2
+	//);
 
-	cube = new RenderNode(mesh, Vector4(0.0f, 1.0f, 0.0f, 1.0f));
-	cube->SetTransform(Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
-	root->AddChild(cube);
+	//cube = new RenderNode(mesh, Vector4(0.0f, 1.0f, 0.0f, 1.0f));
+	//cube->SetTransform(Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
+	//root->AddChild(cube);
 
-	cellpos = Vector3(
-		end->_pos.x * 3,
-		0.0f,
-		end->_pos.y * 3
-	) * scalar;
-	cube = new RenderNode(mesh, Vector4(1.0f, 0.0f, 0.0f, 1.0f));
-	cube->SetTransform(Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
-	root->AddChild(cube);
+	//cellpos = Vector3(
+	//	end->_pos.x * 3,
+	//	0.0f,
+	//	end->_pos.y * 3
+	//) * scalar;
+	//cube = new RenderNode(mesh, Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+	//cube->SetTransform(Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
+	//root->AddChild(cube);
 
 	this->SetRender(root);
 }

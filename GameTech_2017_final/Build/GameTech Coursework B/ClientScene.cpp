@@ -68,12 +68,12 @@ void ClientScene::OnCleanupScene()
 	serverConnection = NULL;
 	SAFE_DELETE(wallMesh);
 	SAFE_DELETE(generator);
+	SAFE_DELETE(maze);
 }
 
 void ClientScene::OnUpdateScene(float dt)
 {
 	Scene::OnUpdateScene(dt);
-
 
 	//Update Network
 	auto callback = std::bind(
@@ -81,8 +81,6 @@ void ClientScene::OnUpdateScene(float dt)
 		this,								// Associated class instance
 		std::placeholders::_1);				// Where to place the first parameter
 	network.ServiceNetwork(dt, callback);
-
-
 
 	//Add Debug Information to screen
 	uint8_t ip1 = serverConnection->address.host & 0xFF;
@@ -101,7 +99,6 @@ void ClientScene::OnUpdateScene(float dt)
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   [G] To generate a new maze", mazeSize);
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Grid Size : %2d ([1]/[2] to change)", mazeSize);
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Density : %2.0f percent ([3]/[4] to change)", mazeDensity * 100.f);
-
 
 	HandleKeyboardInputs();
 }
@@ -129,7 +126,6 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 	//Server has sent us a new packet
 	case ENET_EVENT_TYPE_RECEIVE:
 	{
-		
 		std::string packetString((char*)evnt.packet->data);
 
 		//Split the packet into string tokens
@@ -210,6 +206,12 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 
 				GenerateNewMaze();
 
+				delete[] isWall;
+				break;
+			}
+			case PACKET_MOVE_START:
+			{
+				generator->GetStartNode()->_pos += Vector3(0.0f, 0.0f, 5.0f);
 				break;
 			}
 			default:
@@ -259,6 +261,33 @@ void ClientScene::GenerateNewMaze()
 	GraphNode* start = generator->GetStartNode();
 	GraphNode* end = generator->GetGoalNode();
 
+	uint flatMazeSize = mazeSize * 3 - 1;
+	const float scalar = 1.0f / (float)flatMazeSize;
+
+	Vector3 cellpos = Vector3(
+		start->_pos.x * 3.0f,
+		0.0f,
+		start->_pos.y * 3
+	) * scalar;
+	Vector3 cellsize = Vector3(
+		scalar * 2,
+		1.0f,
+		scalar * 2
+	);
+
+	startNode = new GameObject("startnode", new RenderNode(wallMesh, Vector4(0.0f, 1.0f, 0.0f, 1.0f)), NULL);
+	startNode->Render()->SetTransform(maze_scalar * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
+	this->AddGameObject(startNode);
+
+	cellpos = Vector3(
+		end->_pos.x * 3.0f,
+		1.0f,
+		end->_pos.y * 3.0f
+	) * scalar;
+	endNode = new GameObject("endnode", new RenderNode(wallMesh, Vector4(1.0f, 0.0f, 0.0f, 1.0f)), NULL);
+	endNode->Render()->SetTransform(maze_scalar * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
+	this->AddGameObject(endNode);
+
 	//UpdateAStarPreset();
 }
 
@@ -274,30 +303,48 @@ void ClientScene::SendPacketToServer(const Packet& packet)
 
 void ClientScene::HandleKeyboardInputs()
 {
-	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_H))
-	{
-		Packet msgPacket(PACKET_MESSAGE);
-		char* msg = "Hello";
-		msgPacket.AddDataSpaced(msg);
-		msg = "I am";
-		msgPacket.AddDataSpaced(msg);
-		msg = "client!";
-		msgPacket.AddDataSpaced(msg);
-		SendPacketToServer(msgPacket);
-	}
-
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_G))
 	{
-		Packet msgPacket(PACKET_MESSAGE);
-		std::ostringstream ossMsg;
-		ossMsg << "Make me a maze! Maze Size: " << mazeSize << ", Maze Density: " << mazeSize;
-		msgPacket.AddDataSpaced(ossMsg.str());
-		SendPacketToServer(msgPacket);
+		//Packet msgPacket(PACKET_MESSAGE);
+		//std::ostringstream ossMsg;
+		//ossMsg << "Make me a maze! Maze Size: " << mazeSize << ", Maze Density: " << mazeSize;
+		//msgPacket.AddDataSpaced(ossMsg.str());
+		//SendPacketToServer(msgPacket);
 
 		Packet paramsPacket(PACKET_MAZE_PARAMS);
 		paramsPacket.AddDataSpaced(mazeSize);
 		paramsPacket.AddDataSpaced(mazeDensity);
 		SendPacketToServer(paramsPacket);
+	}
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_H))
+	{
+		Packet routeRequestPacket(ROUTE_REQUEST_PACKET);
+		SendPacketToServer(routeRequestPacket);
+	}
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_UP))
+	{
+		//Send a move start position request to the server
+		//Packet moveStartReq(PACKET_MOVE_START);
+		//moveStartReq.AddData(MOVEMENT_UP);
+		//SendPacketToServer(moveStartReq);
+		if (generator->GetStartNode())
+		{
+			generator->GetStartNode()->_pos += Vector3(0.0f, 0.0f, 5.0f);
+		}
+	}
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_DOWN))
+	{
+		//Send a move start position request to the server
+		//Packet moveStartReq(PACKET_MOVE_START);
+		//moveStartReq.AddData(MOVEMENT_UP);
+		//SendPacketToServer(moveStartReq);
+		if (generator->GetStartNode())
+		{
+			generator->GetStartNode()->_pos += Vector3(0.0f, 0.0f, -5.0f);
+		}
 	}
 
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_1))

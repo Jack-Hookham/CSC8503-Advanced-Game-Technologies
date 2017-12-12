@@ -19,7 +19,6 @@ public:
 	GraphNode* GetGoalNode()  const { return end; }
 	uint GetSize() const { return size; }
 
-
 	//Used as a hack for the MazeRenderer to generate the walls more effeciently
 	GraphNode* GetAllNodesArr() { return allNodes; }
 	GraphEdge* GetAllEdgesArr() { return allEdges; }
@@ -35,9 +34,6 @@ protected:
 	void Generate_Prims();
 	void Generate_Sparse(float density);
 
-
-
-public:
 	uint size;
 	GraphNode *start, *end;
 
