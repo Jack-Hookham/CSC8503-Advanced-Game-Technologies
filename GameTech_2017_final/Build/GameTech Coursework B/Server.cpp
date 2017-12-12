@@ -177,7 +177,7 @@ void Server::RunServer()
 
 					break;
 				}
-				case PacketType::ROUTE_REQUEST_PACKET:
+				case PacketType::PATH_REQUEST_PACKET:
 				{
 
 					break;

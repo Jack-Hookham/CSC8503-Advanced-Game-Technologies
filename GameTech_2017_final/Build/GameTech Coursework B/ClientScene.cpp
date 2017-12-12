@@ -239,7 +239,7 @@ void ClientScene::GenerateNewMaze()
 
 	//The maze is returned in a [0,0,0] - [1,1,1] cube (with edge walls outside) regardless of grid_size,
 	// so we need to scale it to whatever size we want
-	Matrix4 mazeScalarMat4 = Matrix4::Scale(Vector3(5.0f, 5.0f / float(mazeSize), 5.0f)) * Matrix4::Translation(Vector3(-0.5f, 0.0f, -0.5f));
+	mazeScalarMat4 = Matrix4::Scale(Vector3(5.0f, 5.0f / float(mazeSize), 5.0f)) * Matrix4::Translation(Vector3(-0.5f, 0.0f, -0.5f));
 
 	maze = new MazeRenderer(generator, wallMesh);
 	maze->Render()->SetTransform(Matrix4::Translation(pos_maze) * mazeScalarMat4);
@@ -267,12 +267,12 @@ void ClientScene::GenerateNewMaze()
 	Vector3 cellpos = Vector3(
 		start->_pos.x * 3.0f,
 		0.0f,
-		start->_pos.y * 3
+		start->_pos.y * 3.0f
 	) * mazeScalarf;
 	Vector3 cellsize = Vector3(
-		mazeScalarf * 2,
+		mazeScalarf * 2.0f,
 		1.0f,
-		mazeScalarf * 2
+		mazeScalarf * 2.0f
 	);
 
 	startNode = new GameObject("startnode", new RenderNode(wallMesh, Vector4(0.0f, 1.0f, 0.0f, 1.0f)), NULL);
@@ -319,8 +319,10 @@ void ClientScene::HandleKeyboardInputs()
 
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_H))
 	{
-		Packet routeRequestPacket(ROUTE_REQUEST_PACKET);
-		SendPacketToServer(routeRequestPacket);
+		//Request a path 
+		Packet pathRequestPacket(PATH_REQUEST_PACKET);
+		//pathRequestPacket.AddData(startNode->Render()->);
+		SendPacketToServer(pathRequestPacket);
 	}
 
 	//End node movement (CTRL + Arrow key)
@@ -328,53 +330,72 @@ void ClientScene::HandleKeyboardInputs()
 	{
 		if (generator->GetEndNode())
 		{
-			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_UP))
+			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_UP) && generator->GetEndNode()->_pos.y > 0.001f)
 			{
-				endNode->Render()->SetTransform(Matrix4::Translation(Vector3(0.0f, 0.0f, -15.0f) * mazeScalarf) * endNode->Render()->GetTransform());
+				//endNode->Render()->SetTransform(Matrix4::Translation(Vector3(0.0f, 0.0f, -15.0f) * mazeScalarf) * endNode->Render()->GetTransform());
+				generator->GetEndNode()->_pos.y -= 1.0f;
+				UpdateEndObj();
 			}
 
-			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_DOWN))
+			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_DOWN) && generator->GetEndNode()->_pos.y < mazeSize - 1.0f)
 			{
-				endNode->Render()->SetTransform(Matrix4::Translation(Vector3(0.0f, 0.0f, 15.0f) * mazeScalarf) * endNode->Render()->GetTransform());
+				//endNode->Render()->SetTransform(Matrix4::Translation(Vector3(0.0f, 0.0f, 15.0f) * mazeScalarf) * endNode->Render()->GetTransform());
+				generator->GetEndNode()->_pos.y += 1.0f;
+				UpdateEndObj();
 			}
 
-			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_RIGHT))
+			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_RIGHT) && generator->GetEndNode()->_pos.x < mazeSize - 1.0f)
 			{
-				endNode->Render()->SetTransform(Matrix4::Translation(Vector3(15.0f, 0.0f, 0.0f) * mazeScalarf) * endNode->Render()->GetTransform());
+				//endNode->Render()->SetTransform(Matrix4::Translation(Vector3(15.0f, 0.0f, 0.0f) * mazeScalarf) * endNode->Render()->GetTransform());
+				generator->GetEndNode()->_pos.x += 1.0f;
+				UpdateEndObj();
 			}
 
-			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_LEFT))
+			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_LEFT) && generator->GetEndNode()->_pos.x > 0.001f)
 			{
-				endNode->Render()->SetTransform(Matrix4::Translation(Vector3(-15.0f, 0.0f, 0.0f) * mazeScalarf) * endNode->Render()->GetTransform());
+				//endNode->Render()->SetTransform(Matrix4::Translation(Vector3(-15.0f, 0.0f, 0.0f) * mazeScalarf) * endNode->Render()->GetTransform());
+				generator->GetEndNode()->_pos.x -= 1.0f;
+				UpdateEndObj();
 			}
 		}
 	}
 	//Start node movement (Arrow key)
 	else if (generator->GetStartNode())
 	{
-		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_UP))
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_UP) && generator->GetStartNode()->_pos.y > 0.001f)
 		{
 			//Send a move start position request to the server
 			//Packet moveStartReq(PACKET_MOVE_START);
 			//moveStartReq.AddData(MOVEMENT_UP);
 			//SendPacketToServer(moveStartReq);
 
-			startNode->Render()->SetTransform(Matrix4::Translation(Vector3(0.0f, 0.0f, -15.0f) * mazeScalarf) * startNode->Render()->GetTransform());
+			//startNode->Render()->SetTransform(Matrix4::Translation(Vector3(0.0f, 0.0f, -15.0f) * mazeScalarf) * startNode->Render()->GetTransform());
+
+			//Update the start node position on the generator
+			generator->GetStartNode()->_pos.y -= 1.0f;
+			//This is then used to update the GameObject's position
+			UpdateStartObj();
 		}
 
-		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_DOWN))
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_DOWN) && generator->GetStartNode()->_pos.y < mazeSize - 1.0f)
 		{
-			startNode->Render()->SetTransform(Matrix4::Translation(Vector3(0.0f, 0.0f, 15.0f) * mazeScalarf) * startNode->Render()->GetTransform());
+			//startNode->Render()->SetTransform(Matrix4::Translation(Vector3(0.0f, 0.0f, 15.0f) * mazeScalarf) * startNode->Render()->GetTransform());
+			generator->GetStartNode()->_pos.y += 1.0f;
+			UpdateStartObj();
 		}
 
-		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_RIGHT))
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_RIGHT) && generator->GetStartNode()->_pos.x < mazeSize - 1.0f)
 		{
-			startNode->Render()->SetTransform(Matrix4::Translation(Vector3(15.0f, 0.0f, 0.0f) * mazeScalarf) * startNode->Render()->GetTransform());
+			//startNode->Render()->SetTransform(Matrix4::Translation(Vector3(15.0f, 0.0f, 0.0f) * mazeScalarf) * startNode->Render()->GetTransform());#
+			generator->GetStartNode()->_pos.x += 1.0f;
+			UpdateStartObj();
 		}
 
-		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_LEFT))
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_LEFT) && generator->GetStartNode()->_pos.x > 0.001f)
 		{
-			startNode->Render()->SetTransform(Matrix4::Translation(Vector3(-15.0f, 0.0f, 0.0f) * mazeScalarf) * startNode->Render()->GetTransform());
+			//startNode->Render()->SetTransform(Matrix4::Translation(Vector3(-15.0f, 0.0f, 0.0f) * mazeScalarf) * startNode->Render()->GetTransform());
+			generator->GetStartNode()->_pos.x -= 1.0f;
+			UpdateStartObj();
 		}
 	}
 
@@ -397,4 +418,51 @@ void ClientScene::HandleKeyboardInputs()
 	{
 		mazeDensity = max(mazeDensity - 0.1f, 0.0f);
 	}
+}
+
+void ClientScene::UpdateStartObj()
+{
+	//mazeScalarMat4 = Matrix4::Scale(Vector3(5.0f, 5.0f / float(mazeSize), 5.0f)) * Matrix4::Translation(Vector3(-0.5f, 0.0f, -0.5f));
+	//uint flatMazeSize = mazeSize * 3 - 1;
+	//mazeScalarf = 1.0f / (float)flatMazeSize;
+
+	GraphNode* start = generator->GetStartNode();
+
+	Vector3 cellpos = Vector3(
+		start->_pos.x * 3.0f,
+		0.0f,
+		start->_pos.y * 3.0f
+	) * mazeScalarf;
+
+	Vector3 cellsize = Vector3(
+		mazeScalarf * 2.0f,
+		1.0f,
+		mazeScalarf * 2.0f
+	);
+
+	startNode->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
+}
+
+void ClientScene::UpdateEndObj()
+{
+	mazeScalarMat4 = Matrix4::Scale(Vector3(5.0f, 5.0f / float(mazeSize), 5.0f)) * Matrix4::Translation(Vector3(-0.5f, 0.0f, -0.5f));
+	uint flatMazeSize = mazeSize * 3 - 1;
+	mazeScalarf = 1.0f / (float)flatMazeSize;
+
+	GraphNode* end = generator->GetEndNode();
+
+	Vector3 cellpos = Vector3(
+		end->_pos.x * 3.0f,
+		1.0f,
+		end->_pos.y * 3.0f
+	) * mazeScalarf;
+
+	Vector3 cellsize = Vector3(
+		mazeScalarf * 2.0f,
+		1.0f,
+		mazeScalarf * 2.0f
+	);
+
+	endNode->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
+
 }

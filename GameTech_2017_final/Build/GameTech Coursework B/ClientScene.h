@@ -34,6 +34,8 @@ public:
 protected:
 	void SendPacketToServer(const Packet& packet);
 	void HandleKeyboardInputs();
+	void UpdateStartObj();
+	void UpdateEndObj();
 
 	NetworkBase network;
 	ENetPeer*	serverConnection;
