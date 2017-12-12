@@ -3,7 +3,7 @@
 #include <ncltech\NetworkBase.h>
 
 //Start at 1
-//0 used for bad packet
+//0 used for bad packet checks
 enum PacketType
 {
 	PACKET_BAD,
@@ -26,10 +26,18 @@ public:
 
 	//Add data onto the end of the current data
 	template<typename T>
-	void AddData(T data)
+	void AddDataSpaced(T data)
 	{
 		std::ostringstream oss;
 		oss << m_data << data << " ";
+		m_data = _strdup(oss.str().c_str());
+	}
+
+	template<typename T>
+	void AddData(T data)
+	{
+		std::ostringstream oss;
+		oss << m_data << data;
 		m_data = _strdup(oss.str().c_str());
 	}
 

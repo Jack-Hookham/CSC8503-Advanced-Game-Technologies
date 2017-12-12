@@ -34,9 +34,10 @@ void Win32_PrintAllAdapterIPAddresses();
 void InitializeClient();
 void RunClient();
 void RunServer();
-void QuitCLient(bool error = false, const string &reason = "");
+void QuitClient(bool error = false, const string &reason = "");
+void SendPacketToClients(const Packet& packet);
 
-MazeGenerator mazeGenerator;
+MazeGenerator* mazeGenerator = NULL;
 
 enum Type
 {
@@ -192,7 +193,7 @@ int main(int arcg, char** argv)
 			RunClient();
 
 			//Cleanup
-			QuitCLient();
+			QuitClient();
 			return 0;
 	}
 }
@@ -201,12 +202,12 @@ void InitializeClient()
 {
 	//Initialise the Window
 	if (!Window::Initialise("Game Technologies - Collision Resolution", 1280, 800, false))
-		QuitCLient(true, "Window failed to initialise!");
+		QuitClient(true, "Window failed to initialise!");
 
 	//Initialise ENET for networking  //!!!!!!NEW!!!!!!!!
 	if (enet_initialize() != 0)
 	{
-		QuitCLient(true, "ENET failed to initialize!");
+		QuitClient(true, "ENET failed to initialize!");
 	}
 
 	//Initialise the PhysicsEngine
@@ -221,7 +222,7 @@ void InitializeClient()
 	SceneManager::Instance()->EnqueueScene(new ClientScene("Network #1 - Example Client"));
 }
 
-void QuitCLient(bool error, const string &reason) {
+void QuitClient(bool error, const string &reason) {
 	//Release Singletons
 	SceneManager::Release();
 	GraphicsPipeline::Release();
@@ -236,6 +237,16 @@ void QuitCLient(bool error, const string &reason) {
 		system("PAUSE");
 		exit(-1);
 	}
+}
+
+void SendPacketToClients(const Packet& packet)
+{
+	std::ostringstream oss;
+	oss << packet.GetPacketType() << " " << packet.GetData();
+	char* packetWhole = _strdup(oss.str().c_str());
+
+	ENetPacket* enetPacket = enet_packet_create(packetWhole, strlen(packetWhole) + 1, 0);
+	enet_host_broadcast(server.m_pNetwork, 0, enetPacket);
 }
 
 void RunClient()
@@ -267,6 +278,8 @@ void RunClient()
 
 void RunServer()
 {
+	mazeGenerator = new MazeGenerator();
+
 	while (true)
 	{
 		float dt = timer.GetTimedMS() * 0.001f;
@@ -285,15 +298,10 @@ void RunServer()
 				}
 			case ENET_EVENT_TYPE_RECEIVE:
 				{
-				enet_uint16 clientID = evnt.peer->incomingPeerID;
+					enet_uint16 clientID = evnt.peer->incomingPeerID;
 					printf("\t Client %d packet received: %s\n", clientID, evnt.packet->data);
 
-					//Get the first value in the packet to determine what to do with it
-					//int packetType = evnt.packet->data[0];
-
 					std::string packetString((char*)evnt.packet->data);
-
-					//Split the packet into string tokens
 					char delim = ' ';
 
 					//Separate first token (should be packet type) and rest of packet (packet data)
@@ -315,14 +323,13 @@ void RunServer()
 					{
 						case PacketType::PACKET_BAD:
 						{
-							printf("\t Failed to read packet from Client %d. Unknown packet type.\n", clientID);
+							std::cout << "\t Failed to read packet from Client " << clientID << ". Unknown packet type.\n";
 							break;
 						}
 						case PacketType::PACKET_MESSAGE:
 						{
 							//Print the message
 							std::cout << "\t Client " << clientID << " says: " << packetData << "\n";
-							//printf("\t Client %d says: %s\n", evnt.peer->incomingPeerID, packetData.c_str());
 							break;
 						}
 						case PacketType::PACKET_MAZE_PARAMS:
@@ -356,7 +363,44 @@ void RunServer()
 
 							//Generate a maze with the given parameters and broadcast it to all clients
 							std::cout << "\t Generating maze " << clientID << ": Generating maze. Maze Size: " << mazeSize << ", Maze Density: " << mazeDensity << "\n";
-							mazeGenerator.Generate(mazeSize, mazeDensity);
+							mazeGenerator->Generate(mazeSize, mazeDensity);
+							GraphEdge* allEdges = mazeGenerator->GetAllEdgesArr();
+
+							Packet mazeData(PACKET_MAZE_DATA);			//Packet containing all of the maze wall information
+
+							uint base_offset = mazeSize * (mazeSize - 1);
+							for (uint y = 0; y < mazeSize; ++y)
+							{
+								for (uint x = 0; x < mazeSize - 1; ++x)
+								{
+									GraphEdge* edgeX = &allEdges[(y * (mazeSize - 1) + x)];
+									if (edgeX->_iswall)
+									{
+										mazeData.AddData(1);
+									}
+									else
+									{
+										mazeData.AddData(0);
+									}
+								}
+							}
+							for (uint y = 0; y < mazeSize - 1; ++y)
+							{
+								for (uint x = 0; x < mazeSize; ++x)
+								{
+									GraphEdge* edgeY = &allEdges[base_offset + (x * (mazeSize - 1) + y)];
+									if (edgeY->_iswall)
+									{
+										mazeData.AddData(1);
+									}
+									else
+									{
+										mazeData.AddData(0);
+									}
+								}
+							}
+
+							SendPacketToClients(mazeData);
 							break;
 						}
 						case PacketType::PACKET_MAZE_DATA:
@@ -367,12 +411,11 @@ void RunServer()
 						}
 						default:
 						{
-							printf("\t Failed to read packet from Client %d. Unknown packet type.\n", clientID);
+							std::cout << "\t Failed to read packet from Client " << clientID << ". Unknown packet type.\n";
 							break;
 						}
 					}
 
-					//printf
 					enet_packet_destroy(evnt.packet);
 					break;
 				}
@@ -404,4 +447,6 @@ void RunServer()
 
 		Sleep(0);
 	}
+
+	SAFE_DELETE(mazeGenerator);
 }

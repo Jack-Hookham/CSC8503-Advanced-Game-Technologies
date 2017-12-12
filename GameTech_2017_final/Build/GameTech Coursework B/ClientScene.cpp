@@ -1,9 +1,4 @@
 #include "ClientScene.h"
-#include <ncltech\SceneManager.h>
-#include <ncltech\PhysicsEngine.h>
-#include <nclgl\NCLDebug.h>
-#include <ncltech\DistanceConstraint.h>
-#include <ncltech\CommonUtils.h>
 
 const Vector3 status_color3 = Vector3(1.0f, 0.6f, 0.6f);
 const Vector4 status_color = Vector4(status_color3.x, status_color3.y, status_color3.z, 1.0f);
@@ -66,6 +61,9 @@ void ClientScene::OnCleanupScene()
 	//Release network and all associated data/peer connections
 	network.Release();
 	serverConnection = NULL;
+	SAFE_DELETE(wallMesh);
+	SAFE_DELETE(mazeGenerator);
+	SAFE_DELETE(mazeRenderer);
 }
 
 void ClientScene::OnUpdateScene(float dt)
@@ -100,28 +98,25 @@ void ClientScene::OnUpdateScene(float dt)
 	{
 		Packet msgPacket(PACKET_MESSAGE);
 		char* msg = "Hello";
-		msgPacket.AddData(msg);
+		msgPacket.AddDataSpaced(msg);
 		msg = "I am";
-		msgPacket.AddData(msg);
+		msgPacket.AddDataSpaced(msg);
 		msg = "client!";
-		msgPacket.AddData(msg);
+		msgPacket.AddDataSpaced(msg);
 		SendPacketToServer(msgPacket);
 	}
 
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_G))
 	{
-		int mazeSize = 10;
-		float mazeDensity = 0.5f;
-
 		Packet msgPacket(PACKET_MESSAGE);
 		std::ostringstream ossMsg;
 		ossMsg << "Make me a maze! Maze Size: " << mazeSize << ", Maze Density: " << mazeSize;
-		msgPacket.AddData(ossMsg.str());
+		msgPacket.AddDataSpaced(ossMsg.str());
 		SendPacketToServer(msgPacket);
 
 		Packet paramsPacket(PACKET_MAZE_PARAMS);
-		paramsPacket.AddData(mazeSize);
-		paramsPacket.AddData(mazeDensity);
+		paramsPacket.AddDataSpaced(mazeSize);
+		paramsPacket.AddDataSpaced(mazeDensity);
 		SendPacketToServer(paramsPacket);
 	}
 }
@@ -130,7 +125,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 {
 	switch (evnt.type)
 	{
-		//New connection request or an existing peer accepted our connection request
+	//New connection request or an existing peer accepted our connection request
 	case ENET_EVENT_TYPE_CONNECT:
 	{
 		if (evnt.peer == serverConnection)
@@ -139,7 +134,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 
 			//Send a 'hello' packet
 			Packet msgPacket(PACKET_MESSAGE);
-			msgPacket.AddData("Hellooo!");
+			msgPacket.AddDataSpaced("Hellooo!");
 			SendPacketToServer(msgPacket);
 		}
 	}
@@ -149,6 +144,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 	//Server has sent us a new packet
 	case ENET_EVENT_TYPE_RECEIVE:
 	{
+		//Parse the packet and determine what to do with it
 		if (evnt.packet->dataLength == sizeof(Vector3))
 		{
 			Vector3 pos;
@@ -157,7 +153,95 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 		}
 		else
 		{
-			NCLERROR("Recieved Invalid Network Packet!");
+			std::string packetString((char*)evnt.packet->data);
+
+			//Split the packet into string tokens
+			char delim = ' ';
+
+			//Separate first token (should be packet type) and rest of packet (packet data)
+			std::string firstToken = packetString.substr(0, packetString.find(delim));
+			std::string packetData = packetString.substr(packetString.find_first_of(delim) + 1);
+			
+			uint packetType;
+			//The first token should be the packet type
+			if (CommonUtils::isInteger(firstToken))
+			{
+				packetType = std::stoi(firstToken);
+			}
+			else
+			{
+				packetType = PacketType::PACKET_BAD;
+			}
+			std::cout << "Packet type: " << packetType << ", Packet data: " << packetData << "\n";
+
+			switch(packetType)
+			{
+				case PACKET_BAD:
+				{
+					std::cout << "\t Failed to read packet from Server. Unknown packet type.\n";
+					break;
+				}
+				case PACKET_MESSAGE:
+				{
+					//Print the message
+					std::cout << "\t Server broadcast: " << packetData << "\n";
+					break;
+				}
+				case PACKET_MAZE_PARAMS:
+				{
+					//Client shouldn't receive maze param packets
+					std::cout << "\t Error: Received maze data packet from Server";
+					break;
+				}
+				case PACKET_MAZE_DATA:
+				{
+					//Process maze data packet, generate and render maze
+					int length = packetData.length();
+					bool* isWall = new bool[packetData.length()];
+					int idx = 0;
+					for (auto data : packetData)
+					{
+						isWall[idx] = (data == '1');
+						idx++;
+					}
+
+					//Generate the maze from the packet data received from the client
+					GraphEdge* allEdges = mazeGenerator->GetAllEdgesArr();
+					uint base_offset = mazeSize * (mazeSize - 1);
+					for (uint y = 0; y < mazeSize; ++y)
+					{
+						for (uint x = 0; x < mazeSize - 1; ++x)
+						{
+							GraphEdge* edgeX = &allEdges[(y * (mazeSize - 1) + x)];
+							edgeX->_iswall = isWall[(y * (mazeSize - 1) + x)];
+						}
+					}
+					for (uint y = 0; y < mazeSize - 1; ++y)
+					{
+						for (uint x = 0; x < mazeSize; ++x)
+						{
+							GraphEdge* edgeY = &allEdges[base_offset + (x * (mazeSize - 1) + y)];
+							edgeY->_iswall = isWall[base_offset + (x * (mazeSize - 1) + y)];
+						}
+					}
+
+					GenerateNewMaze();
+					//The maze is returned in a [0,0,0] - [1,1,1] cube (with edge walls outside) regardless of grid_size,
+					// so we need to scale it to whatever size we want
+					Matrix4 maze_scalar = Matrix4::Scale(Vector3(5.f, 5.0f / float(mazeSize), 5.f)) * Matrix4::Translation(Vector3(-0.5f, 0.f, -0.5f));
+
+					maze = new MazeRenderer(mazeGenerator, wallMesh);
+					maze->Render()->SetTransform(Matrix4::Translation(pos_maze) * maze_scalar);
+					this->AddGameObject(maze);
+
+					break;
+				}
+				default:
+				{
+					std::cout << "\t Failed to read packet from Server. Unknown packet type.\n";
+					break;
+				}
+			}
 		}
 	}
 	break;
@@ -172,7 +256,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 	}
 }
 
-void ClientScene::SendPacketToServer(Packet& packet)
+void ClientScene::SendPacketToServer(const Packet& packet)
 {
 	std::ostringstream oss;
 	oss << packet.GetPacketType() << " " << packet.GetData();

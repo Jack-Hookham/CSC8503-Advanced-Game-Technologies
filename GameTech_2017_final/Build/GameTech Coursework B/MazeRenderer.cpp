@@ -70,7 +70,7 @@ uint MazeRenderer::Generate_FlatMaze()
 	// a true value corresponds to a solid wall and false to open space.
 	// - Each GraphNode is a 2x2 open space with a 1 pixel wall around it.
 	uint size = maze->GetSize();
-	GraphEdge* allEdges = maze->allEdges;
+	GraphEdge* allEdges = maze->GetAllEdgesArr();
 
 	flat_maze_size = size * 3 - 1;
 
