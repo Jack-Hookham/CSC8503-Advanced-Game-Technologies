@@ -2,7 +2,7 @@
 
 Server::Server()
 	: generator(NULL)
-	, search_as(NULL)
+	, searchAStar(new SearchAStar())
 {
 }
 
@@ -11,7 +11,7 @@ Server::~Server()
 	networkBase.Release();
 
 	SAFE_DELETE(generator);
-	SAFE_DELETE(search_as);
+	SAFE_DELETE(searchAStar);
 }
 
 void Server::RunServer()
@@ -58,135 +58,147 @@ void Server::RunServer()
 
 				switch (packetType)
 				{
-				case PacketType::PACKET_BAD:
-				{
-					std::cout << "\t Failed to read packet from Client " << clientID << ". Unknown packet type.\n";
-					break;
-				}
-				case PacketType::PACKET_MESSAGE:
-				{
-					//Print the message
-					std::cout << "\t Client " << clientID << " says: " << packetData << "\n";
-					break;
-				}
-				case PacketType::PACKET_MAZE_PARAMS:
-				{
-					int mazeSize;
-					std::string secondToken = packetData.substr(0, packetData.find(delim));
-					packetData = packetData.substr(packetData.find_first_of(delim) + 1);
-					if (CommonUtils::isInteger(secondToken))
+					case PacketType::PACKET_BAD:
 					{
-						mazeSize = std::stoi(secondToken);
-					}
-					else
-					{
-						mazeSize = 0;
-						std::cout << "\t Failed to generate maze: Invalid maze size.\n";
+						std::cout << "\t Failed to read packet from Client " << clientID << ". Unknown packet type.\n";
 						break;
 					}
-
-					float mazeDensity;
-					std::string thirdToken = packetData.substr(0, packetData.find(delim));
-					if (CommonUtils::isFloat(thirdToken))
+					case PacketType::PACKET_MESSAGE:
 					{
-						mazeDensity = ::atof(thirdToken.c_str());
-					}
-					else
-					{
-						mazeDensity = 0.0f;
-						std::cout << "\t Failed to generate maze: Invalid maze density.\n";
+						//Print the message
+						std::cout << "\t Client " << clientID << " says: " << packetData << "\n";
 						break;
 					}
-
-					//Generate a maze with the given parameters and broadcast it to all clients
-					std::cout << "\t Generating maze " << clientID << ": Generating maze. Maze Size: " << mazeSize << ", Maze Density: " << mazeDensity << "\n";
-					generator->Generate(mazeSize, mazeDensity);
-
-
-
-					GraphEdge* allEdges = generator->GetAllEdgesArr();
-					Packet mazeData(PACKET_MAZE_DATA);			//Packet containing all of the maze wall information
-
-					mazeData.InitData(new char[mazeSize * (mazeSize - 1) * 2]);
-
-					uint base_offset = mazeSize * (mazeSize - 1);
-					for (uint y = 0; y < mazeSize; ++y)
+					case PacketType::PACKET_MAZE_PARAMS:
 					{
-						for (uint x = 0; x < mazeSize - 1; ++x)
+						int mazeSize;
+						std::string secondToken = packetData.substr(0, packetData.find(delim));
+						packetData = packetData.substr(packetData.find_first_of(delim) + 1);
+						if (CommonUtils::isInteger(secondToken))
 						{
-							GraphEdge* edgeX = &allEdges[(y * (mazeSize - 1) + x)];
-							if (edgeX->_iswall)
+							mazeSize = std::stoi(secondToken);
+						}
+						else
+						{
+							mazeSize = 0;
+							std::cout << "\t Failed to generate maze: Invalid maze size.\n";
+							break;
+						}
+
+						float mazeDensity;
+						std::string thirdToken = packetData.substr(0, packetData.find(delim));
+						if (CommonUtils::isFloat(thirdToken))
+						{
+							mazeDensity = ::atof(thirdToken.c_str());
+						}
+						else
+						{
+							mazeDensity = 0.0f;
+							std::cout << "\t Failed to generate maze: Invalid maze density.\n";
+							break;
+						}
+
+						//Generate a maze with the given parameters and broadcast it to all clients
+						std::cout << "\t Generating maze " << clientID << ": Generating maze. Maze Size: " << mazeSize << ", Maze Density: " << mazeDensity << "\n";
+						generator->Generate(mazeSize, mazeDensity);
+
+						GraphEdge* allEdges = generator->GetAllEdgesArr();
+						Packet mazeData(PACKET_MAZE_DATA);			//Packet containing all of the maze wall information
+
+						mazeData.InitData(new char[mazeSize * (mazeSize - 1) * 2]);
+
+						uint base_offset = mazeSize * (mazeSize - 1);
+						for (uint y = 0; y < mazeSize; ++y)
+						{
+							for (uint x = 0; x < mazeSize - 1; ++x)
 							{
-								//mazeData.AddData('1');
-								mazeData.Data()[(y * (mazeSize - 1) + x)] = '1';
-							}
-							else
-							{
-								//mazeData.AddData('0');
-								mazeData.Data()[(y * (mazeSize - 1) + x)] = '0';
+								GraphEdge* edgeX = &allEdges[(y * (mazeSize - 1) + x)];
+								if (edgeX->_iswall)
+								{
+									//mazeData.AddData('1');
+									mazeData.Data()[(y * (mazeSize - 1) + x)] = '1';
+								}
+								else
+								{
+									//mazeData.AddData('0');
+									mazeData.Data()[(y * (mazeSize - 1) + x)] = '0';
+								}
 							}
 						}
-					}
-					for (uint y = 0; y < mazeSize - 1; ++y)
-					{
-						for (uint x = 0; x < mazeSize; ++x)
+						for (uint y = 0; y < mazeSize - 1; ++y)
 						{
-							GraphEdge* edgeY = &allEdges[base_offset + (x * (mazeSize - 1) + y)];
-							if (edgeY->_iswall)
+							for (uint x = 0; x < mazeSize; ++x)
 							{
-								//mazeData.AddData('1');
-								mazeData.Data()[base_offset + (x * (mazeSize - 1) + y)] = '1';
-							}
-							else
-							{
-								//mazeData.AddData('0');
-								mazeData.Data()[base_offset + (x * (mazeSize - 1) + y)] = '0';
+								GraphEdge* edgeY = &allEdges[base_offset + (x * (mazeSize - 1) + y)];
+								if (edgeY->_iswall)
+								{
+									//mazeData.AddData('1');
+									mazeData.Data()[base_offset + (x * (mazeSize - 1) + y)] = '1';
+								}
+								else
+								{
+									//mazeData.AddData('0');
+									mazeData.Data()[base_offset + (x * (mazeSize - 1) + y)] = '0';
+								}
 							}
 						}
-					}
 
-					SendPacketToClients(mazeData);
-					break;
-				}
-				case PacketType::PACKET_MAZE_DATA:
-				{
-					//Server shouldn't receive maze data packets
-					std::cout << "\t Error: Received maze data packet from Client " << clientID << ".\n";
-					break;
-				}
-				case PacketType::PACKET_MOVE_START:
-				{
-					if (generator)
+						SendPacketToClients(mazeData);
+						break;
+					}
+					case PacketType::PACKET_MAZE_DATA:
 					{
-						//Send a move start position ack to the client
-						Vector3 currentPos = generator->GetStartNode()->_pos;
-						generator->GetStartNode()->_pos += Vector3(0.0f, 0.0f, 1.0f);
-
-						Packet moveStartAck(PACKET_MOVE_START);
-						moveStartAck.AddData(MOVEMENT_UP);
-						SendPacketToClient(peer, moveStartAck);
+						//Server shouldn't receive maze data packets
+						std::cout << "\t Error: Received maze data packet from Client " << clientID << ".\n";
+						break;
 					}
-					else
+					case PacketType::PATH_REQUEST_PACKET:
 					{
-						std::cout << "No maze generated! Can't move start position of Client " << clientID << "!\n";
+						GraphNode* start = new GraphNode();
+						GraphNode* end = new GraphNode();
+
+						//Split the data into its (hopefully) 4 floats
+						std::vector<std::string> packetTokens;
+						std::stringstream ss(packetData);
+						string token;
+						while (getline(ss, token, delim))
+						{
+							packetTokens.push_back(token);
+						}
+
+						for (int i = 0; i < 4; ++i)
+						{
+							if (!CommonUtils::isFloat(packetTokens[i]))
+							{
+								packetType = PacketType::PACKET_BAD;
+							}
+						}
+						if (packetType == PacketType::PACKET_BAD)
+						{
+							std::cout << "Failed to parse path request from Client " << clientID << ".\n";
+							break;
+						}
+
+						start->_pos.x = ::atof(packetTokens[0].c_str());
+						start->_pos.y = ::atof(packetTokens[1].c_str());
+						end->_pos.x = ::atof(packetTokens[2].c_str());
+						end->_pos.y = ::atof(packetTokens[3].c_str());
+
+						searchAStar->FindBestPath(start, end);
+						const std::list<const GraphNode*> finalPath = searchAStar->GetFinalPath();
+
+						Packet pathPacket(PATH_PACKET);
+
+						SAFE_DELETE(start);
+						SAFE_DELETE(end);
+						
+						break;
 					}
-					break;
-				}
-				case PacketType::PACKET_MOVE_END:
-				{
-
-					break;
-				}
-				case PacketType::PATH_REQUEST_PACKET:
-				{
-
-					break;
-				}
-				default:
-				{
-					std::cout << "\t Failed to read packet from Client " << clientID << ". Unknown packet type " << packetType << ".\n";
-					break;
-				}
+					default:
+					{
+						std::cout << "\t Failed to read packet from Client " << clientID << ". Unknown packet type " << packetType << ".\n";
+						break;
+					}
 				}
 
 				SearchAStar*		search_as;

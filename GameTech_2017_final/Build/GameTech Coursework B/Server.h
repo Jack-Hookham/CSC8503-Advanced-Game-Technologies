@@ -31,8 +31,6 @@ private:
 	GameTimer timer;
 	NetworkBase networkBase;
 	MazeGenerator* generator;
-	SearchAStar* search_as;
-
-	
+	SearchAStar* searchAStar;
 };
 

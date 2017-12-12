@@ -36,6 +36,7 @@ protected:
 	void HandleKeyboardInputs();
 	void UpdateStartObj();
 	void UpdateEndObj();
+	void RequestPath();
 
 	NetworkBase network;
 	ENetPeer*	serverConnection;
@@ -50,4 +51,6 @@ protected:
 	float mazeDensity = 1.0f;
 	float mazeScalarf = 1.0f;
 	Matrix4 mazeScalarMat4 = Matrix4();
+
+	bool drawPath;
 };

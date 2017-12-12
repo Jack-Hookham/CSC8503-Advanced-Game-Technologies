@@ -8,6 +8,14 @@ ClientScene::ClientScene(const std::string& friendly_name)
 	, serverConnection(NULL)
 	, generator(NULL)
 	, maze(NULL)
+	, wallMesh(NULL)
+	, startNode(NULL)
+	, endNode(NULL)
+	, mazeSize(16)
+	, mazeDensity(1.0f)
+	, mazeScalarf(1.0f)
+	, mazeScalarMat4(Matrix4())
+	, drawPath(false)
 {
 }
 
@@ -24,9 +32,9 @@ void ClientScene::OnInitializeScene()
 
 	wallMesh->SetTexture(whitetex);
 
-	GraphicsPipeline::Instance()->GetCamera()->SetPosition(Vector3(-1.5, 15.0f, 1));
-	GraphicsPipeline::Instance()->GetCamera()->SetPitch(-80);
-	GraphicsPipeline::Instance()->GetCamera()->SetYaw(0);
+	GraphicsPipeline::Instance()->GetCamera()->SetPosition(Vector3(0.0f, 15.0f, 0.0f));
+	GraphicsPipeline::Instance()->GetCamera()->SetPitch(-80.0f);
+	GraphicsPipeline::Instance()->GetCamera()->SetYaw(0.0f);
 
 	generator = new MazeGenerator();
 
@@ -68,7 +76,6 @@ void ClientScene::OnCleanupScene()
 	serverConnection = NULL;
 	SAFE_DELETE(wallMesh);
 	SAFE_DELETE(generator);
-	SAFE_DELETE(maze);
 }
 
 void ClientScene::OnUpdateScene(float dt)
@@ -209,11 +216,6 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				delete[] isWall;
 				break;
 			}
-			case PACKET_MOVE_START:
-			{
-				//generator->GetStartNode()->_pos += Vector3(0.0f, 0.0f, 5.0f);
-				break;
-			}
 			default:
 			{
 				std::cout << "\t Failed to read packet from Server. Unknown packet type.\n";
@@ -317,12 +319,14 @@ void ClientScene::HandleKeyboardInputs()
 		SendPacketToServer(paramsPacket);
 	}
 
-	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_H))
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_H) && generator->GetStartNode())
 	{
+		drawPath = !drawPath;
 		//Request a path 
-		Packet pathRequestPacket(PATH_REQUEST_PACKET);
-		//pathRequestPacket.AddData(startNode->Render()->);
-		SendPacketToServer(pathRequestPacket);
+		if (drawPath)
+		{
+			RequestPath();
+		}
 	}
 
 	//End node movement (CTRL + Arrow key)
@@ -422,10 +426,6 @@ void ClientScene::HandleKeyboardInputs()
 
 void ClientScene::UpdateStartObj()
 {
-	//mazeScalarMat4 = Matrix4::Scale(Vector3(5.0f, 5.0f / float(mazeSize), 5.0f)) * Matrix4::Translation(Vector3(-0.5f, 0.0f, -0.5f));
-	//uint flatMazeSize = mazeSize * 3 - 1;
-	//mazeScalarf = 1.0f / (float)flatMazeSize;
-
 	GraphNode* start = generator->GetStartNode();
 
 	Vector3 cellpos = Vector3(
@@ -445,10 +445,6 @@ void ClientScene::UpdateStartObj()
 
 void ClientScene::UpdateEndObj()
 {
-	mazeScalarMat4 = Matrix4::Scale(Vector3(5.0f, 5.0f / float(mazeSize), 5.0f)) * Matrix4::Translation(Vector3(-0.5f, 0.0f, -0.5f));
-	uint flatMazeSize = mazeSize * 3 - 1;
-	mazeScalarf = 1.0f / (float)flatMazeSize;
-
 	GraphNode* end = generator->GetEndNode();
 
 	Vector3 cellpos = Vector3(
@@ -464,5 +460,14 @@ void ClientScene::UpdateEndObj()
 	);
 
 	endNode->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
+}
 
+void ClientScene::RequestPath()
+{
+	Packet pathRequestPacket(PATH_REQUEST_PACKET);
+	pathRequestPacket.AddDataSpaced(generator->GetStartNode()->_pos.x);
+	pathRequestPacket.AddDataSpaced(generator->GetStartNode()->_pos.y);
+	pathRequestPacket.AddDataSpaced(generator->GetEndNode()->_pos.x);
+	pathRequestPacket.AddDataSpaced(generator->GetEndNode()->_pos.y);
+	SendPacketToServer(pathRequestPacket);
 }
