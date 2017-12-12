@@ -19,9 +19,13 @@ public:
 	GraphNode* GetGoalNode()  const { return end; }
 	uint GetSize() const { return size; }
 
+
 	//Used as a hack for the MazeRenderer to generate the walls more effeciently
 	GraphNode* GetAllNodesArr() { return allNodes; }
 	GraphEdge* GetAllEdgesArr() { return allEdges; }
+
+	void SetStartNode(GraphNode* start) { this->start = start; }
+	void SetGoalNode(GraphNode* end) { this->end = end; }
 
 protected:
 	void GetRandomStartEndNodes();
@@ -37,7 +41,6 @@ public:
 	uint size;
 	GraphNode *start, *end;
 
-protected:
 	GraphNode* allNodes;
 	GraphEdge* allEdges;
 };

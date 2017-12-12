@@ -6,6 +6,12 @@ const Vector4 status_color = Vector4(status_color3.x, status_color3.y, status_co
 ClientScene::ClientScene(const std::string& friendly_name)
 	: Scene(friendly_name)
 	, serverConnection(NULL)
+	, generator(NULL)
+	, maze(NULL)
+{
+}
+
+void ClientScene::OnInitializeScene()
 {
 	wallMesh = new OBJMesh(MESHDIR"cube.obj");
 
@@ -17,10 +23,11 @@ ClientScene::ClientScene(const std::string& friendly_name)
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	wallMesh->SetTexture(whitetex);
-}
 
-void ClientScene::OnInitializeScene()
-{
+	GraphicsPipeline::Instance()->GetCamera()->SetPosition(Vector3(-1.5, 15.0f, 1));
+	GraphicsPipeline::Instance()->GetCamera()->SetPitch(-80);
+	GraphicsPipeline::Instance()->GetCamera()->SetYaw(0);
+
 	generator = new MazeGenerator();
 
 	//Initialize Client Network
@@ -61,7 +68,6 @@ void ClientScene::OnCleanupScene()
 	serverConnection = NULL;
 	SAFE_DELETE(wallMesh);
 	SAFE_DELETE(generator);
-	SAFE_DELETE(maze);
 }
 
 void ClientScene::OnUpdateScene(float dt)
@@ -84,35 +90,20 @@ void ClientScene::OnUpdateScene(float dt)
 	uint8_t ip3 = (serverConnection->address.host >> 16) & 0xFF;
 	uint8_t ip4 = (serverConnection->address.host >> 24) & 0xFF;
 
+	std::ostringstream oss;
+	oss << std::fixed << std::setprecision(2) << GraphicsPipeline::Instance()->GetCamera()->GetPosition();
+	std::string s = "Camera Position: " + oss.str();
+	NCLDebug::AddStatusEntry(status_color, s);
 	NCLDebug::AddStatusEntry(status_color, "Network Traffic");
 	NCLDebug::AddStatusEntry(status_color, "    Incoming: %5.2fKbps", network.m_IncomingKb);
-	NCLDebug::AddStatusEntry(status_color, "    Outgoing: %5.2fKbps", network.m_OutgoingKb);
+	NCLDebug::AddStatusEntry(status_color, "    Outgoing: %5.2fKbps", network.m_OutgoingKb);		
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "--- Controls ---");
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   [G] To generate a new maze", mazeSize);
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Grid Size : %2d ([1]/[2] to change)", mazeSize);
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Density : %2.0f percent ([3]/[4] to change)", mazeDensity * 100.f);
 
-	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_H))
-	{
-		Packet msgPacket(PACKET_MESSAGE);
-		char* msg = "Hello";
-		msgPacket.AddDataSpaced(msg);
-		msg = "I am";
-		msgPacket.AddDataSpaced(msg);
-		msg = "client!";
-		msgPacket.AddDataSpaced(msg);
-		SendPacketToServer(msgPacket);
-	}
 
-	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_G))
-	{
-		Packet msgPacket(PACKET_MESSAGE);
-		std::ostringstream ossMsg;
-		ossMsg << "Make me a maze! Maze Size: " << mazeSize << ", Maze Density: " << mazeSize;
-		msgPacket.AddDataSpaced(ossMsg.str());
-		SendPacketToServer(msgPacket);
-
-		Packet paramsPacket(PACKET_MAZE_PARAMS);
-		paramsPacket.AddDataSpaced(mazeSize);
-		paramsPacket.AddDataSpaced(mazeDensity);
-		SendPacketToServer(paramsPacket);
-	}
+	HandleKeyboardInputs();
 }
 
 void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
@@ -158,7 +149,6 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 		{
 			packetType = PacketType::PACKET_BAD;
 		}
-		std::cout << "Packet type: " << packetType << ", Packet data: " << packetData << "\n";
 
 		switch(packetType)
 		{
@@ -181,9 +171,13 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 			}
 			case PACKET_MAZE_DATA:
 			{
+				const uint dataLength = mazeSize * (mazeSize - 1) * 2;
+				//Ensure that data string isn't longer than the required length
+				packetData.resize(dataLength);
+				std::cout << "Packet type: " << packetType << ", Packet data: " << packetData << "\n";
+
 				//Process maze data packet, generate and render maze
-				int length = packetData.length();
-				bool* isWall = new bool[packetData.length()];
+				bool* isWall = new bool[dataLength];
 				int idx = 0;
 				for (auto data : packetData)
 				{
@@ -193,7 +187,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 
 				//Generate the maze from the packet data received from the client
 				//Generate a maze with density 0
-				generator->Generate(mazeSize, 0);
+				generator->Generate(mazeSize, 0.0f);
 				//Populate the wall data with the data from the server
 				GraphEdge* allEdges = generator->GetAllEdgesArr();
 				uint base_offset = mazeSize * (mazeSize - 1);
@@ -276,4 +270,53 @@ void ClientScene::SendPacketToServer(const Packet& packet)
 
 	ENetPacket* enetPacket = enet_packet_create(packetWhole, strlen(packetWhole) + 1, 0);
 	enet_peer_send(serverConnection, 0, enetPacket);
+}
+
+void ClientScene::HandleKeyboardInputs()
+{
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_H))
+	{
+		Packet msgPacket(PACKET_MESSAGE);
+		char* msg = "Hello";
+		msgPacket.AddDataSpaced(msg);
+		msg = "I am";
+		msgPacket.AddDataSpaced(msg);
+		msg = "client!";
+		msgPacket.AddDataSpaced(msg);
+		SendPacketToServer(msgPacket);
+	}
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_G))
+	{
+		Packet msgPacket(PACKET_MESSAGE);
+		std::ostringstream ossMsg;
+		ossMsg << "Make me a maze! Maze Size: " << mazeSize << ", Maze Density: " << mazeSize;
+		msgPacket.AddDataSpaced(ossMsg.str());
+		SendPacketToServer(msgPacket);
+
+		Packet paramsPacket(PACKET_MAZE_PARAMS);
+		paramsPacket.AddDataSpaced(mazeSize);
+		paramsPacket.AddDataSpaced(mazeDensity);
+		SendPacketToServer(paramsPacket);
+	}
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_1))
+	{
+		mazeSize++;
+	}
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_2))
+	{
+		mazeSize = max(mazeSize - 1, 2);
+	}
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_3))
+	{
+		mazeDensity = min(mazeDensity + 0.1f, 1.0f);
+	}
+
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_4))
+	{
+		mazeDensity = max(mazeDensity - 0.1f, 0.0f);
+	}
 }

@@ -9,7 +9,10 @@ enum PacketType
 	PACKET_BAD,
 	PACKET_MESSAGE,
 	PACKET_MAZE_PARAMS,
-	PACKET_MAZE_DATA
+	PACKET_MAZE_DATA,
+	PACKET_MOVE_START,
+	PACKET_MOVE_END,
+	PACKET_MOVE_CLIENT
 };
 
 //A packet contains a type so that it can be identified and processed correctly
@@ -43,6 +46,9 @@ public:
 
 	inline const int GetPacketType() const { return m_packetType; }
 	inline const char* GetData() const { return m_data; }
+
+	inline char* Data() { return m_data; }
+	inline void InitData(char* data) { m_data = data; }
 
 private:
 	int m_packetType;

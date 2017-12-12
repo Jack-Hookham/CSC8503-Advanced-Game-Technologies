@@ -15,6 +15,7 @@
 #include "Server.h"
 #include "Packet.h"
 #include "MazeGenerator.h"
+#include "SearchAStar.h"
 
 //Needed to get computer adapter IPv4 addresses via windows
 #include <iphlpapi.h>
@@ -38,6 +39,7 @@ void QuitClient(bool error = false, const string &reason = "");
 void SendPacketToClients(const Packet& packet);
 
 MazeGenerator* mazeGenerator = NULL;
+SearchAStar* search_as;
 
 enum Type
 {
@@ -364,9 +366,13 @@ void RunServer()
 							//Generate a maze with the given parameters and broadcast it to all clients
 							std::cout << "\t Generating maze " << clientID << ": Generating maze. Maze Size: " << mazeSize << ", Maze Density: " << mazeDensity << "\n";
 							mazeGenerator->Generate(mazeSize, mazeDensity);
-							GraphEdge* allEdges = mazeGenerator->GetAllEdgesArr();
 
+	
+
+							GraphEdge* allEdges = mazeGenerator->GetAllEdgesArr();
 							Packet mazeData(PACKET_MAZE_DATA);			//Packet containing all of the maze wall information
+						
+							mazeData.InitData(new char[mazeSize * (mazeSize - 1) * 2]);
 
 							uint base_offset = mazeSize * (mazeSize - 1);
 							for (uint y = 0; y < mazeSize; ++y)
@@ -376,31 +382,33 @@ void RunServer()
 									GraphEdge* edgeX = &allEdges[(y * (mazeSize - 1) + x)];
 									if (edgeX->_iswall)
 									{
-										mazeData.AddData(0);
+										//mazeData.AddData('1');
+										mazeData.Data()[(y * (mazeSize - 1) + x)] = '1';
 									}
 									else
 									{
-										mazeData.AddData(1);
+										//mazeData.AddData('0');
+										mazeData.Data()[(y * (mazeSize - 1) + x)] = '0';
 									}
 								}
 							}
 							for (uint y = 0; y < mazeSize - 1; ++y)
 							{
-								for (uint x = 0; x < mazeSize-1; ++x)
+								for (uint x = 0; x < mazeSize; ++x)
 								{
 									GraphEdge* edgeY = &allEdges[base_offset + (x * (mazeSize - 1) + y)];
 									if (edgeY->_iswall)
 									{
-										mazeData.AddData(0);
+										//mazeData.AddData('1');
+										mazeData.Data()[base_offset + (x * (mazeSize - 1) + y)] = '1';
 									}
 									else
 									{
-										mazeData.AddData(1);
+										//mazeData.AddData('0');
+										mazeData.Data()[base_offset + (x * (mazeSize - 1) + y)] = '0';
 									}
 								}
 							}
-
-							mazeData.AddData(0);
 
 							SendPacketToClients(mazeData);
 							break;
@@ -417,6 +425,8 @@ void RunServer()
 							break;
 						}
 					}
+
+					SearchAStar*		search_as;
 
 					enet_packet_destroy(evnt.packet);
 					break;

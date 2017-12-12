@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 
 #include "Packet.h"
 #include "MazeGenerator.h"
@@ -32,6 +33,7 @@ public:
 
 protected:
 	void SendPacketToServer(const Packet& packet);
+	void HandleKeyboardInputs();
 
 	NetworkBase network;
 	ENetPeer*	serverConnection;
@@ -40,5 +42,5 @@ protected:
 	Mesh* wallMesh;
 
 	int mazeSize = 16;
-	float mazeDensity = 0.0f;
+	float mazeDensity = 1.0f;
 };
