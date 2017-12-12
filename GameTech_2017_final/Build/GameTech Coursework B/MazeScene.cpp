@@ -39,7 +39,7 @@ void MazeScene::UpdateAStarPreset()
 	search_as->SetWeightings(weightingG, weightingH);
 
 	GraphNode* start = generator->GetStartNode();
-	GraphNode* end = generator->GetGoalNode();
+	GraphNode* end = generator->GetEndNode();
 	search_as->FindBestPath(start, end);
 }
 

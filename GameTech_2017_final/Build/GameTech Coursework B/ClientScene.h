@@ -46,4 +46,6 @@ protected:
 
 	int mazeSize = 16;
 	float mazeDensity = 1.0f;
+	float mazeScalarf = 1.0f;
+	Matrix4 mazeScalarMat4 = Matrix4();
 };

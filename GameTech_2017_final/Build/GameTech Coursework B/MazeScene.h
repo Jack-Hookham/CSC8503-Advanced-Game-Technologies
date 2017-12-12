@@ -80,7 +80,7 @@ public:
 		this->AddGameObject(ground);
 
 		GraphNode* start = generator->GetStartNode();
-		GraphNode* end = generator->GetGoalNode();
+		GraphNode* end = generator->GetEndNode();
 
 		UpdateAStarPreset();
 	}
