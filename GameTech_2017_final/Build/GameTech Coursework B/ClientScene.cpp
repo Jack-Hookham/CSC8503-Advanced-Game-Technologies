@@ -209,7 +209,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				const uint dataLength = mazeSize * (mazeSize - 1) * 2;
 				//Ensure that data string isn't longer than the required length
 				packetData.resize(dataLength);
-				std::cout << "Packet type: " << packetType << ", Packet data: " << packetData << "\n";
+				//std::cout << "Packet type: " << packetType << ", Packet data: " << packetData << "\n";
 
 				//Process maze data packet, generate and render maze
 				bool* isWall = new bool[dataLength];
