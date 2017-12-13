@@ -1,4 +1,5 @@
 #include "Server.h"
+#include <numeric>
 
 Server::Server()
 	: generator(NULL)
@@ -115,12 +116,10 @@ void Server::RunServer()
 								GraphEdge* edgeX = &allEdges[(y * (mazeSize - 1) + x)];
 								if (edgeX->_iswall)
 								{
-									//mazeData.AddData('1');
 									mazeData.Data()[(y * (mazeSize - 1) + x)] = '1';
 								}
 								else
 								{
-									//mazeData.AddData('0');
 									mazeData.Data()[(y * (mazeSize - 1) + x)] = '0';
 								}
 							}
@@ -132,12 +131,10 @@ void Server::RunServer()
 								GraphEdge* edgeY = &allEdges[base_offset + (x * (mazeSize - 1) + y)];
 								if (edgeY->_iswall)
 								{
-									//mazeData.AddData('1');
 									mazeData.Data()[base_offset + (x * (mazeSize - 1) + y)] = '1';
 								}
 								else
 								{
-									//mazeData.AddData('0');
 									mazeData.Data()[base_offset + (x * (mazeSize - 1) + y)] = '0';
 								}
 							}
@@ -154,8 +151,8 @@ void Server::RunServer()
 					}
 					case PacketType::PATH_REQUEST_PACKET:
 					{
-						GraphNode* start = new GraphNode();
-						GraphNode* end = new GraphNode();
+						GraphNode* start = generator->GetStartNode();
+						GraphNode* end = generator->GetEndNode();
 
 						//Split the data into its (hopefully) 4 floats
 						std::vector<std::string> packetTokens;
@@ -179,19 +176,36 @@ void Server::RunServer()
 							break;
 						}
 
+						//Set the new path start and end positions
 						start->_pos.x = ::atof(packetTokens[0].c_str());
 						start->_pos.y = ::atof(packetTokens[1].c_str());
 						end->_pos.x = ::atof(packetTokens[2].c_str());
 						end->_pos.y = ::atof(packetTokens[3].c_str());
 
-						searchAStar->FindBestPath(start, end);
+						std::cout << "\t Server generating path between Start (" << generator->GetStartNode()->_pos.x << ", " << generator->GetStartNode()->_pos.y <<
+							") and End (" << generator->GetEndNode()->_pos.x << ", " << generator->GetEndNode()->_pos.y << ").\n";
+
+						searchAStar->FindBestPath(generator->GetStartNode(), generator->GetEndNode());
 						const std::list<const GraphNode*> finalPath = searchAStar->GetFinalPath();
 
 						Packet pathPacket(PATH_PACKET);
 
-						SAFE_DELETE(start);
-						SAFE_DELETE(end);
-						
+						//Add the final path nodes to the packet data
+						int* pathIndices = new int[finalPath.size()];
+						char* pathIndicesChar = new char[finalPath.size()];
+
+						std::vector<std::string> pathIndiciesVec;
+
+						for (auto it = finalPath.begin(); it != finalPath.end(); ++it)
+						{
+							pathIndiciesVec.push_back(FindNode(*it));
+						}
+
+						std::string pathIndiciesString;
+						pathIndiciesString = std::accumulate(std::begin(pathIndiciesVec), std::end(pathIndiciesVec), pathIndiciesString);
+						pathPacket.SetData(pathIndiciesString);
+						SendPacketToClient(peer, pathPacket);
+
 						break;
 					}
 					default:
@@ -236,4 +250,18 @@ void Server::SendPacketToClient(ENetPeer* peer, const Packet& packet)
 
 	ENetPacket* enetPacket = enet_packet_create(packetWhole, strlen(packetWhole) + 1, 0);
 	enet_peer_send(peer, 0, enetPacket);
+}
+
+std::string Server::FindNode(const GraphNode * node)
+{
+	Vector3 posToFind = node->_pos;
+
+	for (int j = 0; j < generator->GetSize() * generator->GetSize(); ++j)
+	{
+		if (generator->GetAllNodesArr()[j]._pos == posToFind)
+		{
+			return to_string(j) + " ";
+		}
+	}
+	return "-1 ";
 }

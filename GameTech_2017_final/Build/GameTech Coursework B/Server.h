@@ -27,6 +27,7 @@ public:
 private:
 	void SendPacketToClients(const Packet& packet);
 	void SendPacketToClient(ENetPeer* peer, const Packet& packet);
+	std::string FindNode(const GraphNode* node);
 
 	GameTimer timer;
 	NetworkBase networkBase;

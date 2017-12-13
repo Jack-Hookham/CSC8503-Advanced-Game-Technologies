@@ -30,7 +30,7 @@ enum MoveDirection
 class Packet
 {
 public:
-	Packet(int type) : m_packetType(type), m_data("")
+	Packet(int type) : m_packetType(type), m_data(NULL)
 	{
 	}
 
@@ -39,29 +39,33 @@ public:
 		delete[] m_data;
 	};
 
-	//Add data onto the end of the current data
-	template<typename T>
-	void AddDataSpaced(T data)
+	void SetData(std::string data)
 	{
-		std::ostringstream oss;
-		oss << m_data << data << " ";
-		m_data = _strdup(oss.str().c_str());
-	}
-
-	template<typename T>
-	void AddData(T data)
-	{
-		std::ostringstream oss;
-		oss << m_data << data;
-		m_data = _strdup(oss.str().c_str());
+		//Delete old memory if it has been previously allocated
+		if (m_data)
+		{
+			delete[] m_data;
+		}
+		//Allocate enough memory for the data plus a termination char
+		m_data = new char[data.length() + 1];
+		for (int i = 0; i < data.length(); ++i)
+		{
+			char from = data[i];
+			m_data[i] = from;
+		}
+		//Add termination char
+		m_data[data.length()] = '\0';
 	}
 
 	inline const int GetPacketType() const { return m_packetType; }
-	inline void SetData(char* data) { m_data = data; }
 	inline const char* GetData() const { return m_data; }
 
 	inline char* Data() { return m_data; }
-	inline void InitData(char* data) { m_data = data; }
+	inline void InitData(char* data)
+	{
+		if (m_data) { delete[] m_data; } 
+		m_data = data;
+	}
 
 private:
 	int m_packetType;

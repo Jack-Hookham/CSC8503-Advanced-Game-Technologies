@@ -6,8 +6,8 @@ const Vector4 status_color = Vector4(status_color3.x, status_color3.y, status_co
 ClientScene::ClientScene(const std::string& friendly_name)
 	: Scene(friendly_name)
 	, serverConnection(NULL)
-	, generator(NULL)
-	, maze(NULL)
+	, mazeGenerator(NULL)
+	, mazeRenderer(NULL)
 	, wallMesh(NULL)
 	, startNode(NULL)
 	, endNode(NULL)
@@ -36,7 +36,7 @@ void ClientScene::OnInitializeScene()
 	GraphicsPipeline::Instance()->GetCamera()->SetPitch(-80.0f);
 	GraphicsPipeline::Instance()->GetCamera()->SetYaw(0.0f);
 
-	generator = new MazeGenerator();
+	mazeGenerator = new MazeGenerator();
 
 	//Initialize Client Network
 	if (network.Initialize(0))
@@ -75,7 +75,7 @@ void ClientScene::OnCleanupScene()
 	network.Release();
 	serverConnection = NULL;
 	SAFE_DELETE(wallMesh);
-	SAFE_DELETE(generator);
+	SAFE_DELETE(mazeGenerator);
 }
 
 void ClientScene::OnUpdateScene(float dt)
@@ -108,6 +108,11 @@ void ClientScene::OnUpdateScene(float dt)
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Density : %2.0f percent ([3]/[4] to change)", mazeDensity * 100.f);
 
 	HandleKeyboardInputs();
+
+	if (drawPath)
+	{
+		DrawPath(finalPath, 2.5f / float(mazeSize));
+	}
 }
 
 void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
@@ -123,7 +128,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 
 			//Send a 'hello' packet
 			Packet msgPacket(PACKET_MESSAGE);
-			msgPacket.AddDataSpaced("Hellooo!");
+			msgPacket.SetData(std::string("Hellooo!"));
 			SendPacketToServer(msgPacket);
 		}
 	}
@@ -190,9 +195,9 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 
 				//Generate the maze from the packet data received from the client
 				//Generate a maze with density 0
-				generator->Generate(mazeSize, 0.0f);
+				mazeGenerator->Generate(mazeSize, 0.0f);
 				//Populate the wall data with the data from the server
-				GraphEdge* allEdges = generator->GetAllEdgesArr();
+				GraphEdge* allEdges = mazeGenerator->GetAllEdgesArr();
 				uint base_offset = mazeSize * (mazeSize - 1);
 				for (uint y = 0; y < mazeSize; ++y)
 				{
@@ -214,6 +219,23 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				GenerateNewMaze();
 
 				delete[] isWall;
+				break;
+			}
+			case PATH_PACKET:
+			{
+				std::cout << "\t Updating path packet with nodes: " << packetData << ".\n";
+
+				//Update the path to be rendered
+				//Clear the current path
+				finalPath.clear();
+				//Convert packet string data to indecies of the all nodes array
+				std::istringstream iss(packetData);
+				int pathVal;
+				while (iss >> pathVal)
+				{
+					finalPath.push_back(pathVal);
+				}
+
 				break;
 			}
 			default:
@@ -239,13 +261,13 @@ void ClientScene::GenerateNewMaze()
 {
 	this->DeleteAllGameObjects(); //Cleanup old mazes
 
-	//The maze is returned in a [0,0,0] - [1,1,1] cube (with edge walls outside) regardless of grid_size,
+	//The maze is returned in a [0,0,0] - [1,1,1] cube (with edge walls outside) regardless of maze size,
 	// so we need to scale it to whatever size we want
 	mazeScalarMat4 = Matrix4::Scale(Vector3(5.0f, 5.0f / float(mazeSize), 5.0f)) * Matrix4::Translation(Vector3(-0.5f, 0.0f, -0.5f));
 
-	maze = new MazeRenderer(generator, wallMesh);
-	maze->Render()->SetTransform(Matrix4::Translation(pos_maze) * mazeScalarMat4);
-	this->AddGameObject(maze);
+	mazeRenderer = new MazeRenderer(mazeGenerator, wallMesh);
+	 mazeRenderer->Render()->SetTransform(Matrix4::Translation(pos_maze) * mazeScalarMat4);
+	this->AddGameObject(mazeRenderer);
 
 	//Create Ground (..we still have some common ground to work off)
 	GameObject* ground = CommonUtils::BuildCuboidObject(
@@ -260,8 +282,8 @@ void ClientScene::GenerateNewMaze()
 
 	this->AddGameObject(ground);
 
-	GraphNode* start = generator->GetStartNode();
-	GraphNode* end = generator->GetEndNode();
+	GraphNode* start = mazeGenerator->GetStartNode();
+	GraphNode* end = mazeGenerator->GetEndNode();
 
 	uint flatMazeSize = mazeSize * 3 - 1;
 	mazeScalarf = 1.0f / (float)flatMazeSize;
@@ -314,12 +336,12 @@ void ClientScene::HandleKeyboardInputs()
 		//SendPacketToServer(msgPacket);
 
 		Packet paramsPacket(PACKET_MAZE_PARAMS);
-		paramsPacket.AddDataSpaced(mazeSize);
-		paramsPacket.AddDataSpaced(mazeDensity);
+		std::string data = to_string(mazeSize) + std::string(" ") + to_string(mazeDensity);
+		paramsPacket.SetData(data);
 		SendPacketToServer(paramsPacket);
 	}
 
-	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_H) && generator->GetStartNode())
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_H) && mazeGenerator->GetStartNode())
 	{
 		drawPath = !drawPath;
 		//Request a path 
@@ -332,41 +354,41 @@ void ClientScene::HandleKeyboardInputs()
 	//End node movement (CTRL + Arrow key)
 	if (Window::GetKeyboard()->KeyHeld(KEYBOARD_CONTROL))
 	{
-		if (generator->GetEndNode())
+		if (mazeGenerator->GetEndNode())
 		{
-			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_UP) && generator->GetEndNode()->_pos.y > 0.001f)
+			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_UP) && mazeGenerator->GetEndNode()->_pos.y > 0.001f)
 			{
 				//endNode->Render()->SetTransform(Matrix4::Translation(Vector3(0.0f, 0.0f, -15.0f) * mazeScalarf) * endNode->Render()->GetTransform());
-				generator->GetEndNode()->_pos.y -= 1.0f;
+				mazeGenerator->GetEndNode()->_pos.y -= 1.0f;
 				UpdateEndObj();
 			}
 
-			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_DOWN) && generator->GetEndNode()->_pos.y < mazeSize - 1.0f)
+			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_DOWN) && mazeGenerator->GetEndNode()->_pos.y < mazeSize - 1.0f)
 			{
 				//endNode->Render()->SetTransform(Matrix4::Translation(Vector3(0.0f, 0.0f, 15.0f) * mazeScalarf) * endNode->Render()->GetTransform());
-				generator->GetEndNode()->_pos.y += 1.0f;
+				mazeGenerator->GetEndNode()->_pos.y += 1.0f;
 				UpdateEndObj();
 			}
 
-			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_RIGHT) && generator->GetEndNode()->_pos.x < mazeSize - 1.0f)
+			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_RIGHT) && mazeGenerator->GetEndNode()->_pos.x < mazeSize - 1.0f)
 			{
 				//endNode->Render()->SetTransform(Matrix4::Translation(Vector3(15.0f, 0.0f, 0.0f) * mazeScalarf) * endNode->Render()->GetTransform());
-				generator->GetEndNode()->_pos.x += 1.0f;
+				mazeGenerator->GetEndNode()->_pos.x += 1.0f;
 				UpdateEndObj();
 			}
 
-			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_LEFT) && generator->GetEndNode()->_pos.x > 0.001f)
+			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_LEFT) && mazeGenerator->GetEndNode()->_pos.x > 0.001f)
 			{
 				//endNode->Render()->SetTransform(Matrix4::Translation(Vector3(-15.0f, 0.0f, 0.0f) * mazeScalarf) * endNode->Render()->GetTransform());
-				generator->GetEndNode()->_pos.x -= 1.0f;
+				mazeGenerator->GetEndNode()->_pos.x -= 1.0f;
 				UpdateEndObj();
 			}
 		}
 	}
 	//Start node movement (Arrow key)
-	else if (generator->GetStartNode())
+	else if (mazeGenerator->GetStartNode())
 	{
-		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_UP) && generator->GetStartNode()->_pos.y > 0.001f)
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_UP) && mazeGenerator->GetStartNode()->_pos.y > 0.001f)
 		{
 			//Send a move start position request to the server
 			//Packet moveStartReq(PACKET_MOVE_START);
@@ -376,29 +398,29 @@ void ClientScene::HandleKeyboardInputs()
 			//startNode->Render()->SetTransform(Matrix4::Translation(Vector3(0.0f, 0.0f, -15.0f) * mazeScalarf) * startNode->Render()->GetTransform());
 
 			//Update the start node position on the generator
-			generator->GetStartNode()->_pos.y -= 1.0f;
+			mazeGenerator->GetStartNode()->_pos.y -= 1.0f;
 			//This is then used to update the GameObject's position
 			UpdateStartObj();
 		}
 
-		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_DOWN) && generator->GetStartNode()->_pos.y < mazeSize - 1.0f)
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_DOWN) && mazeGenerator->GetStartNode()->_pos.y < mazeSize - 1.0f)
 		{
 			//startNode->Render()->SetTransform(Matrix4::Translation(Vector3(0.0f, 0.0f, 15.0f) * mazeScalarf) * startNode->Render()->GetTransform());
-			generator->GetStartNode()->_pos.y += 1.0f;
+			mazeGenerator->GetStartNode()->_pos.y += 1.0f;
 			UpdateStartObj();
 		}
 
-		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_RIGHT) && generator->GetStartNode()->_pos.x < mazeSize - 1.0f)
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_RIGHT) && mazeGenerator->GetStartNode()->_pos.x < mazeSize - 1.0f)
 		{
 			//startNode->Render()->SetTransform(Matrix4::Translation(Vector3(15.0f, 0.0f, 0.0f) * mazeScalarf) * startNode->Render()->GetTransform());#
-			generator->GetStartNode()->_pos.x += 1.0f;
+			mazeGenerator->GetStartNode()->_pos.x += 1.0f;
 			UpdateStartObj();
 		}
 
-		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_LEFT) && generator->GetStartNode()->_pos.x > 0.001f)
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_LEFT) && mazeGenerator->GetStartNode()->_pos.x > 0.001f)
 		{
 			//startNode->Render()->SetTransform(Matrix4::Translation(Vector3(-15.0f, 0.0f, 0.0f) * mazeScalarf) * startNode->Render()->GetTransform());
-			generator->GetStartNode()->_pos.x -= 1.0f;
+			mazeGenerator->GetStartNode()->_pos.x -= 1.0f;
 			UpdateStartObj();
 		}
 	}
@@ -426,7 +448,7 @@ void ClientScene::HandleKeyboardInputs()
 
 void ClientScene::UpdateStartObj()
 {
-	GraphNode* start = generator->GetStartNode();
+	GraphNode* start = mazeGenerator->GetStartNode();
 
 	Vector3 cellpos = Vector3(
 		start->_pos.x * 3.0f,
@@ -445,7 +467,7 @@ void ClientScene::UpdateStartObj()
 
 void ClientScene::UpdateEndObj()
 {
-	GraphNode* end = generator->GetEndNode();
+	GraphNode* end = mazeGenerator->GetEndNode();
 
 	Vector3 cellpos = Vector3(
 		end->_pos.x * 3.0f,
@@ -465,9 +487,55 @@ void ClientScene::UpdateEndObj()
 void ClientScene::RequestPath()
 {
 	Packet pathRequestPacket(PATH_REQUEST_PACKET);
-	pathRequestPacket.AddDataSpaced(generator->GetStartNode()->_pos.x);
-	pathRequestPacket.AddDataSpaced(generator->GetStartNode()->_pos.y);
-	pathRequestPacket.AddDataSpaced(generator->GetEndNode()->_pos.x);
-	pathRequestPacket.AddDataSpaced(generator->GetEndNode()->_pos.y);
+	std::string data = to_string(mazeGenerator->GetStartNode()->_pos.x) + " " +
+		to_string(mazeGenerator->GetStartNode()->_pos.y) + " " +
+		to_string(mazeGenerator->GetEndNode()->_pos.x) + " " +
+		to_string(mazeGenerator->GetEndNode()->_pos.y);
+	pathRequestPacket.SetData(data);
 	SendPacketToServer(pathRequestPacket);
+}
+
+void ClientScene::DrawPath(const std::vector<int>& finalPath, float lineWidth)
+{
+	if (finalPath.size() > 0)
+	{
+		float grid_scalar = 1.0f / (float)mazeGenerator->GetSize();
+		float col_factor = 0.2f / (float)finalPath.size();
+
+		Matrix4 transform = mazeRenderer->Render()->GetWorldTransform();
+		mazeGenerator->GetAllNodesArr();
+
+		for (int i = 0; i < finalPath.size() - 1; ++i)
+		{
+			Vector3 start = transform * Vector3(
+				(mazeGenerator->GetAllNodesArr()[finalPath[i]]._pos.x + 0.5f) * grid_scalar,
+				0.1f,
+				(mazeGenerator->GetAllNodesArr()[finalPath[i]]._pos.y + 0.5f) * grid_scalar);
+
+			Vector3 end = transform * Vector3(
+				(mazeGenerator->GetAllNodesArr()[finalPath[i + 1]]._pos.x + 0.5f) * grid_scalar,
+				0.1f,
+				(mazeGenerator->GetAllNodesArr()[finalPath[i + 1]]._pos.y + 0.5f) * grid_scalar);
+
+			NCLDebug::DrawThickLine(start, end, lineWidth, CommonUtils::GenColor(0.8f + i * col_factor));
+		}
+	}
+
+	
+	//float index = 0.0f;
+	//for (const SearchHistoryElement& edge : history)
+	//{
+	//	Vector3 start = transform * Vector3(
+	//		(edge.first->_pos.x + 0.5f) * grid_scalar,
+	//		0.1f,
+	//		(edge.first->_pos.y + 0.5f) * grid_scalar);
+
+	//	Vector3 end = transform * Vector3(
+	//		(edge.second->_pos.x + 0.5f) * grid_scalar,
+	//		0.1f,
+	//		(edge.second->_pos.y + 0.5f) * grid_scalar);
+
+	//	NCLDebug::DrawThickLine(start, end, line_width, CommonUtils::GenColor(0.8f + index * col_factor));
+	//	index += 1.0f;
+	//}
 }

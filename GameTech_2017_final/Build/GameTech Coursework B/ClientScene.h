@@ -37,20 +37,22 @@ protected:
 	void UpdateStartObj();
 	void UpdateEndObj();
 	void RequestPath();
+	void DrawPath(const std::vector<int>& finalPath, const float lineWidth);
 
 	NetworkBase network;
 	ENetPeer*	serverConnection;
-	MazeGenerator* generator;
-	MazeRenderer* maze;
+	MazeGenerator* mazeGenerator;
+	MazeRenderer* mazeRenderer;
 	Mesh* wallMesh;
 
 	GameObject* startNode;
 	GameObject* endNode;
 
-	int mazeSize = 16;
-	float mazeDensity = 1.0f;
-	float mazeScalarf = 1.0f;
+	int mazeSize;
+	float mazeDensity;
+	float mazeScalarf;
 	Matrix4 mazeScalarMat4 = Matrix4();
 
 	bool drawPath;
+	std::vector<int> finalPath;
 };
