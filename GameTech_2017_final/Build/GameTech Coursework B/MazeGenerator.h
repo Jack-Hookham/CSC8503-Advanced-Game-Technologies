@@ -15,16 +15,30 @@ public:
 
 	//All points on the maze grid are connected in some shape or form
 	// so any two nodes picked randomly /will/ have a path between them
-	GraphNode* GetStartNode() const { return start; }
-	GraphNode* GetEndNode()  const { return end; }
-	uint GetSize() const { return size; }
+	inline GraphNode* GetStartNode() const { return start; }
+	inline GraphNode* GetEndNode()  const { return end; }
+	inline uint GetSize() const { return size; }
 
 	//Used as a hack for the MazeRenderer to generate the walls more effeciently
-	GraphNode* GetAllNodesArr() { return allNodes; }
-	GraphEdge* GetAllEdgesArr() { return allEdges; }
+	inline GraphNode* GetAllNodesArr() { return allNodes; }
+	inline GraphEdge* GetAllEdgesArr() { return allEdges; }
 
-	void SetStartNode(GraphNode* start) { this->start = start; }
-	void SetEndNode(GraphNode* end) { this->end = end; }
+	inline void SetStartNode(GraphNode* start) { this->start = start; }
+	inline void SetEndNode(GraphNode* end) { this->end = end; }
+
+	inline void SetStartIdx(const int idx)
+	{
+		startIdx = idx;
+		start = &allNodes[idx];
+	}
+	inline void SetEndIdx(const int idx)
+	{
+		endIdx = idx;
+		end = &allNodes[idx];
+	}
+
+	inline const int GetStartIdx() { return startIdx; }
+	inline const int GetEndIdx() { return endIdx; }
 
 protected:
 	void GetRandomStartEndNodes();
@@ -36,6 +50,8 @@ protected:
 
 	uint size;
 	GraphNode *start, *end;
+	int startIdx;
+	int endIdx;
 
 	GraphNode* allNodes;
 	GraphEdge* allEdges;

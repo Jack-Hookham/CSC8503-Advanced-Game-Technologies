@@ -15,6 +15,8 @@ MazeGenerator::MazeGenerator()
 	: size(0)
 	, start(NULL)
 	, end(NULL)
+	, startIdx(0)
+	, endIdx(0)
 	, allNodes(NULL)
 	, allEdges(NULL)
 {
@@ -99,10 +101,14 @@ void MazeGenerator::GetRandomStartEndNodes()
 	case 0: //x
 		start = &allNodes[idxS * size];
 		end = &allNodes[(idxE + 1) * size - 1];
+		startIdx = idxS * size;
+		endIdx = (idxE + 1) * size - 1;
 		break;
 	case 1: //y
 		start = &allNodes[idxS];
 		end = &allNodes[size * (size - 1) + idxE];
+		startIdx = idxS;
+		endIdx = size * (size - 1) + idxE;
 		break;
 	}
 }

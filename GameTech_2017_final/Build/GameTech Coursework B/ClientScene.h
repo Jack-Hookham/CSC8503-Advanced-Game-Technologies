@@ -34,8 +34,8 @@ public:
 protected:
 	void SendPacketToServer(const Packet& packet);
 	void HandleKeyboardInputs();
-	void UpdateStartObj();
-	void UpdateEndObj();
+	void UpdateStartPosition();
+	void UpdateEndPosition();
 	void RequestPath();
 	void DrawPath(const std::vector<int>& finalPath, const float lineWidth);
 

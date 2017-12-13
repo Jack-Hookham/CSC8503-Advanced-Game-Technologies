@@ -76,6 +76,7 @@ void ClientScene::OnCleanupScene()
 	serverConnection = NULL;
 	SAFE_DELETE(wallMesh);
 	SAFE_DELETE(mazeGenerator);
+	mazeRenderer = NULL;
 }
 
 void ClientScene::OnUpdateScene(float dt)
@@ -95,10 +96,6 @@ void ClientScene::OnUpdateScene(float dt)
 	uint8_t ip3 = (serverConnection->address.host >> 16) & 0xFF;
 	uint8_t ip4 = (serverConnection->address.host >> 24) & 0xFF;
 
-	std::ostringstream oss;
-	oss << std::fixed << std::setprecision(2) << GraphicsPipeline::Instance()->GetCamera()->GetPosition();
-	std::string s = "Camera Position: " + oss.str();
-	NCLDebug::AddStatusEntry(status_color, s);
 	NCLDebug::AddStatusEntry(status_color, "Network Traffic");
 	NCLDebug::AddStatusEntry(status_color, "    Incoming: %5.2fKbps", network.m_IncomingKb);
 	NCLDebug::AddStatusEntry(status_color, "    Outgoing: %5.2fKbps", network.m_OutgoingKb);		
@@ -106,10 +103,20 @@ void ClientScene::OnUpdateScene(float dt)
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   [G] To generate a new maze", mazeSize);
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Grid Size : %2d ([1]/[2] to change)", mazeSize);
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Density : %2.0f percent ([3]/[4] to change)", mazeDensity * 100.f);
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Draw Path :  %s [H] to toggle)", drawPath ? "On" : "Off");
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "");
+
+	NCLDebug::AddStatusEntry(Vector4(status_color), "--- Debug ---");
+	std::ostringstream oss;
+	oss << std::fixed << std::setprecision(2) << GraphicsPipeline::Instance()->GetCamera()->GetPosition();
+	std::string s = "Camera Position: " + oss.str();
+	NCLDebug::AddStatusEntry(status_color, s);
+	NCLDebug::AddStatusEntry(Vector4(status_color), "   Start Index: %d", mazeGenerator->GetStartIdx());
+	NCLDebug::AddStatusEntry(Vector4(status_color), "   End Index: %d", mazeGenerator->GetEndIdx());
 
 	HandleKeyboardInputs();
 
-	if (drawPath)
+	if (mazeRenderer && mazeGenerator && drawPath)
 	{
 		DrawPath(finalPath, 2.5f / float(mazeSize));
 	}
@@ -173,8 +180,28 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 			}
 			case PACKET_MAZE_PARAMS:
 			{
-				//Client shouldn't receive maze param packets
-				std::cout << "\t Error: Received maze data packet from Server";
+				//Update the clients parameters
+				//Split the data into its (hopefully) 2 ints
+				std::vector<std::string> packetTokens;
+				std::stringstream ss(packetData);
+				string token;
+				while (getline(ss, token, delim))
+				{
+					packetTokens.push_back(token);
+				}
+
+				if (CommonUtils::isInteger(packetTokens[0]) && CommonUtils::isFloat(packetTokens[1]))
+				{
+					std::cout << "\t Updated maze parameters from server.\n";
+					mazeSize = std::stoi(packetTokens[0]);
+					mazeDensity = std::atof(packetTokens[1].c_str());
+				}
+				else
+				{
+					std::cout << "\t Failed to process maze parameters from server.\n";
+					return;
+				}
+
 				break;
 			}
 			case PACKET_MAZE_DATA:
@@ -221,7 +248,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				delete[] isWall;
 				break;
 			}
-			case PATH_PACKET:
+			case PACKET_PATH:
 			{
 				std::cout << "\t Updating path packet with nodes: " << packetData << ".\n";
 
@@ -312,7 +339,8 @@ void ClientScene::GenerateNewMaze()
 	endNode->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
 	this->AddGameObject(endNode);
 
-	//UpdateAStarPreset();
+	//Request a path 
+	RequestPath();
 }
 
 void ClientScene::SendPacketToServer(const Packet& packet)
@@ -329,12 +357,6 @@ void ClientScene::HandleKeyboardInputs()
 {
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_G))
 	{
-		//Packet msgPacket(PACKET_MESSAGE);
-		//std::ostringstream ossMsg;
-		//ossMsg << "Make me a maze! Maze Size: " << mazeSize << ", Maze Density: " << mazeSize;
-		//msgPacket.AddDataSpaced(ossMsg.str());
-		//SendPacketToServer(msgPacket);
-
 		Packet paramsPacket(PACKET_MAZE_PARAMS);
 		std::string data = to_string(mazeSize) + std::string(" ") + to_string(mazeDensity);
 		paramsPacket.SetData(data);
@@ -344,11 +366,6 @@ void ClientScene::HandleKeyboardInputs()
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_H) && mazeGenerator->GetStartNode())
 	{
 		drawPath = !drawPath;
-		//Request a path 
-		if (drawPath)
-		{
-			RequestPath();
-		}
 	}
 
 	//End node movement (CTRL + Arrow key)
@@ -356,72 +373,66 @@ void ClientScene::HandleKeyboardInputs()
 	{
 		if (mazeGenerator->GetEndNode())
 		{
-			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_UP) && mazeGenerator->GetEndNode()->_pos.y > 0.001f)
+			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_UP) && mazeGenerator->GetEndIdx() > mazeSize - 1)
 			{
-				//endNode->Render()->SetTransform(Matrix4::Translation(Vector3(0.0f, 0.0f, -15.0f) * mazeScalarf) * endNode->Render()->GetTransform());
-				mazeGenerator->GetEndNode()->_pos.y -= 1.0f;
-				UpdateEndObj();
+				mazeGenerator->SetEndIdx(mazeGenerator->GetEndIdx() - mazeSize);
+				UpdateEndPosition();
+				RequestPath();
 			}
 
-			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_DOWN) && mazeGenerator->GetEndNode()->_pos.y < mazeSize - 1.0f)
+			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_DOWN) && mazeGenerator->GetEndIdx() < mazeSize * (mazeSize - 1))
 			{
-				//endNode->Render()->SetTransform(Matrix4::Translation(Vector3(0.0f, 0.0f, 15.0f) * mazeScalarf) * endNode->Render()->GetTransform());
-				mazeGenerator->GetEndNode()->_pos.y += 1.0f;
-				UpdateEndObj();
+				mazeGenerator->SetEndIdx(mazeGenerator->GetEndIdx() + mazeSize);
+				UpdateEndPosition();
+				RequestPath();
 			}
 
-			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_RIGHT) && mazeGenerator->GetEndNode()->_pos.x < mazeSize - 1.0f)
+			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_RIGHT) && mazeGenerator->GetEndIdx() % mazeSize != mazeSize - 1)
 			{
-				//endNode->Render()->SetTransform(Matrix4::Translation(Vector3(15.0f, 0.0f, 0.0f) * mazeScalarf) * endNode->Render()->GetTransform());
-				mazeGenerator->GetEndNode()->_pos.x += 1.0f;
-				UpdateEndObj();
+				mazeGenerator->SetEndIdx(mazeGenerator->GetEndIdx() + 1);
+				UpdateEndPosition();
+				RequestPath();
 			}
 
-			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_LEFT) && mazeGenerator->GetEndNode()->_pos.x > 0.001f)
+			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_LEFT) && mazeGenerator->GetEndIdx() % mazeSize != 0)
 			{
-				//endNode->Render()->SetTransform(Matrix4::Translation(Vector3(-15.0f, 0.0f, 0.0f) * mazeScalarf) * endNode->Render()->GetTransform());
-				mazeGenerator->GetEndNode()->_pos.x -= 1.0f;
-				UpdateEndObj();
+				mazeGenerator->SetEndIdx(mazeGenerator->GetEndIdx() - 1);
+				UpdateEndPosition();
+				RequestPath();
 			}
 		}
 	}
 	//Start node movement (Arrow key)
 	else if (mazeGenerator->GetStartNode())
 	{
-		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_UP) && mazeGenerator->GetStartNode()->_pos.y > 0.001f)
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_UP) && mazeGenerator->GetStartIdx() > mazeSize - 1)
 		{
-			//Send a move start position request to the server
-			//Packet moveStartReq(PACKET_MOVE_START);
-			//moveStartReq.AddData(MOVEMENT_UP);
-			//SendPacketToServer(moveStartReq);
-
-			//startNode->Render()->SetTransform(Matrix4::Translation(Vector3(0.0f, 0.0f, -15.0f) * mazeScalarf) * startNode->Render()->GetTransform());
-
 			//Update the start node position on the generator
-			mazeGenerator->GetStartNode()->_pos.y -= 1.0f;
+			mazeGenerator->SetStartIdx(mazeGenerator->GetStartIdx() - mazeSize);
 			//This is then used to update the GameObject's position
-			UpdateStartObj();
+			UpdateStartPosition();
+			RequestPath();
 		}
 
-		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_DOWN) && mazeGenerator->GetStartNode()->_pos.y < mazeSize - 1.0f)
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_DOWN) && mazeGenerator->GetStartIdx() < mazeSize * (mazeSize - 1))
 		{
-			//startNode->Render()->SetTransform(Matrix4::Translation(Vector3(0.0f, 0.0f, 15.0f) * mazeScalarf) * startNode->Render()->GetTransform());
-			mazeGenerator->GetStartNode()->_pos.y += 1.0f;
-			UpdateStartObj();
+			mazeGenerator->SetStartIdx(mazeGenerator->GetStartIdx() + mazeSize);
+			UpdateStartPosition();
+			RequestPath();
 		}
 
-		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_RIGHT) && mazeGenerator->GetStartNode()->_pos.x < mazeSize - 1.0f)
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_RIGHT) && mazeGenerator->GetStartIdx() % mazeSize != mazeSize - 1)
 		{
-			//startNode->Render()->SetTransform(Matrix4::Translation(Vector3(15.0f, 0.0f, 0.0f) * mazeScalarf) * startNode->Render()->GetTransform());#
-			mazeGenerator->GetStartNode()->_pos.x += 1.0f;
-			UpdateStartObj();
+			mazeGenerator->SetStartIdx(mazeGenerator->GetStartIdx() + 1);
+			UpdateStartPosition();
+			RequestPath();
 		}
 
-		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_LEFT) && mazeGenerator->GetStartNode()->_pos.x > 0.001f)
+		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_LEFT) && mazeGenerator->GetStartIdx() % mazeSize != 0)
 		{
-			//startNode->Render()->SetTransform(Matrix4::Translation(Vector3(-15.0f, 0.0f, 0.0f) * mazeScalarf) * startNode->Render()->GetTransform());
-			mazeGenerator->GetStartNode()->_pos.x -= 1.0f;
-			UpdateStartObj();
+			mazeGenerator->SetStartIdx(mazeGenerator->GetStartIdx() - 1);
+			UpdateStartPosition();
+			RequestPath();
 		}
 	}
 
@@ -446,8 +457,9 @@ void ClientScene::HandleKeyboardInputs()
 	}
 }
 
-void ClientScene::UpdateStartObj()
+void ClientScene::UpdateStartPosition()
 {
+	mazeGenerator->SetStartNode(&mazeGenerator->GetAllNodesArr()[mazeGenerator->GetStartIdx()]);
 	GraphNode* start = mazeGenerator->GetStartNode();
 
 	Vector3 cellpos = Vector3(
@@ -463,10 +475,17 @@ void ClientScene::UpdateStartObj()
 	);
 
 	startNode->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
+
+	//Tell the server about the new start position
+	Packet positionPacket(PACKET_MOVE_START);
+	std::string positionString = to_string(start->_pos.x) + " " + to_string(start->_pos.y);
+	positionPacket.SetData(positionString);
+	SendPacketToServer(positionPacket);
 }
 
-void ClientScene::UpdateEndObj()
+void ClientScene::UpdateEndPosition()
 {
+	mazeGenerator->SetEndNode(&mazeGenerator->GetAllNodesArr()[mazeGenerator->GetEndIdx()]);
 	GraphNode* end = mazeGenerator->GetEndNode();
 
 	Vector3 cellpos = Vector3(
@@ -482,15 +501,19 @@ void ClientScene::UpdateEndObj()
 	);
 
 	endNode->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
+
+	//Tell the server about the new end position
+	Packet positionPacket(PACKET_MOVE_END);
+	std::string positionString = to_string(end->_pos.x) + " " + to_string(end->_pos.y);
+	positionPacket.SetData(positionString);
+	SendPacketToServer(positionPacket);
 }
 
 void ClientScene::RequestPath()
 {
-	Packet pathRequestPacket(PATH_REQUEST_PACKET);
-	std::string data = to_string(mazeGenerator->GetStartNode()->_pos.x) + " " +
-		to_string(mazeGenerator->GetStartNode()->_pos.y) + " " +
-		to_string(mazeGenerator->GetEndNode()->_pos.x) + " " +
-		to_string(mazeGenerator->GetEndNode()->_pos.y);
+	Packet pathRequestPacket(PACKET_PATH_REQUEST);
+	std::string data = to_string(mazeGenerator->GetStartIdx()) + " " +
+		to_string(mazeGenerator->GetEndIdx());
 	pathRequestPacket.SetData(data);
 	SendPacketToServer(pathRequestPacket);
 }
@@ -520,22 +543,4 @@ void ClientScene::DrawPath(const std::vector<int>& finalPath, float lineWidth)
 			NCLDebug::DrawThickLine(start, end, lineWidth, CommonUtils::GenColor(0.8f + i * col_factor));
 		}
 	}
-
-	
-	//float index = 0.0f;
-	//for (const SearchHistoryElement& edge : history)
-	//{
-	//	Vector3 start = transform * Vector3(
-	//		(edge.first->_pos.x + 0.5f) * grid_scalar,
-	//		0.1f,
-	//		(edge.first->_pos.y + 0.5f) * grid_scalar);
-
-	//	Vector3 end = transform * Vector3(
-	//		(edge.second->_pos.x + 0.5f) * grid_scalar,
-	//		0.1f,
-	//		(edge.second->_pos.y + 0.5f) * grid_scalar);
-
-	//	NCLDebug::DrawThickLine(start, end, line_width, CommonUtils::GenColor(0.8f + index * col_factor));
-	//	index += 1.0f;
-	//}
 }
