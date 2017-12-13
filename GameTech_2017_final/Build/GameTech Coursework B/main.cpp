@@ -183,6 +183,7 @@ int main(int arcg, char** argv)
 			return 0;
 		}
 	}
+	SAFE_DELETE(server);
 }
 
 void InitializeClient()

@@ -32,6 +32,7 @@ public:
 	void ProcessNetworkEvent(const ENetEvent& evnt);
 
 	void GenerateNewMaze();
+	void UpdateAvatarServerPosition();
 
 protected:
 	void SendPacketToServer(const Packet& packet);
@@ -50,6 +51,7 @@ protected:
 	GameObject* startNode;
 	GameObject* endNode;
 	GameObject* avatar;
+	int avatarIdx;
 
 	int mazeSize;
 	float mazeDensity;
@@ -58,4 +60,6 @@ protected:
 
 	bool drawPath;
 	std::vector<int> finalPath;
+
+	bool moveAvatar;
 };

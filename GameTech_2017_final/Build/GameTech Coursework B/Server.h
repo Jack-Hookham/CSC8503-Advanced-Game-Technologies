@@ -20,6 +20,7 @@ struct Client
 		, endIdx(0)
 		, avatarIdx(0)
 		, avatarPosition(Vector2())
+		, moveAvatar(false)
 	{
 	}
 
@@ -30,6 +31,8 @@ struct Client
 	int avatarIdx;
 
 	Vector2 avatarPosition;
+
+	bool moveAvatar;
 };
 
 class Server
@@ -49,6 +52,7 @@ private:
 	void SendPacketToClient(ENetPeer* peer, const Packet& packet);
 	std::string FindNode(const GraphNode* node);
 	void GenerateMazeDataPacket(const std::string packetData, const char delim, const enet_uint16 clientID);
+	void UpdateAvatars(const float dt);
 
 	Client* clients[MAX_CLIENTS];
 
@@ -64,5 +68,7 @@ private:
 	//Store another packet containing the current maze size and density so that when one client updates the params
 	//they are updated for all clients
 	Packet* mazeParamsPacket;
+
+	float accumTime = 0.0f;
 };
 

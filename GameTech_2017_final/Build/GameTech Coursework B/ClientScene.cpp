@@ -17,6 +17,8 @@ ClientScene::ClientScene(const std::string& friendly_name)
 	, mazeScalarf(1.0f)
 	, mazeScalarMat4(Matrix4())
 	, drawPath(false)
+	, moveAvatar(false)
+	, avatarIdx(0)
 {
 }
 
@@ -228,6 +230,14 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				//Generate the maze from the packet data received from the client
 				//Generate a maze with density 0
 				mazeGenerator->Generate(mazeSize, 0.0f);
+
+				//When a new maze is generated the server needs to update the avatars position to the client's 
+				//time seeded start position
+				//The start and end positions are updated on the server by RequestPath(), but this doesn't update
+				//the avatar position
+				avatarIdx = mazeGenerator->GetStartIdx();
+				UpdateAvatarServerPosition();
+
 				//Populate the wall data with the data from the server
 				GraphEdge* allEdges = mazeGenerator->GetAllEdgesArr();
 				uint base_offset = mazeSize * (mazeSize - 1);
@@ -298,7 +308,7 @@ void ClientScene::GenerateNewMaze()
 	mazeScalarMat4 = Matrix4::Scale(Vector3(5.0f, 5.0f / float(mazeSize), 5.0f)) * Matrix4::Translation(Vector3(-0.5f, 0.0f, -0.5f));
 
 	mazeRenderer = new MazeRenderer(mazeGenerator, wallMesh);
-	 mazeRenderer->Render()->SetTransform(Matrix4::Translation(pos_maze) * mazeScalarMat4);
+	mazeRenderer->Render()->SetTransform(Matrix4::Translation(pos_maze) * mazeScalarMat4);
 	this->AddGameObject(mazeRenderer);
 
 	//Create Ground (..we still have some common ground to work off)
@@ -358,6 +368,14 @@ void ClientScene::GenerateNewMaze()
 	RequestPath();
 }
 
+void ClientScene::UpdateAvatarServerPosition()
+{
+	Packet avatarPacket(PacketType::PACKET_UPDATE_AVATAR);
+	std::string data = to_string(avatarIdx);
+	avatarPacket.SetData(data);
+	SendPacketToServer(avatarPacket);
+}
+
 void ClientScene::SendPacketToServer(const Packet& packet)
 {
 	std::ostringstream oss;
@@ -378,9 +396,16 @@ void ClientScene::HandleKeyboardInputs()
 		SendPacketToServer(paramsPacket);
 	}
 
-	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_H) && mazeGenerator->GetStartNode())
+	//Toggle the drawing of the path
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_H))
 	{
 		drawPath = !drawPath;
+	}
+
+	//Move the avatar
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_J))
+	{
+		moveAvatar = !moveAvatar;
 	}
 
 	//End node movement (CTRL + Arrow key)
@@ -490,12 +515,6 @@ void ClientScene::UpdateStartPosition()
 	);
 
 	startNode->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
-
-	//Tell the server about the new start position
-	Packet positionPacket(PACKET_MOVE_START);
-	std::string positionString = to_string(start->_pos.x) + " " + to_string(start->_pos.y);
-	positionPacket.SetData(positionString);
-	SendPacketToServer(positionPacket);
 }
 
 void ClientScene::UpdateEndPosition()
@@ -516,14 +535,9 @@ void ClientScene::UpdateEndPosition()
 	);
 
 	endNode->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
-
-	//Tell the server about the new end position
-	Packet positionPacket(PACKET_MOVE_END);
-	std::string positionString = to_string(end->_pos.x) + " " + to_string(end->_pos.y);
-	positionPacket.SetData(positionString);
-	SendPacketToServer(positionPacket);
 }
 
+//Update the start and end points server side and request a path between them
 void ClientScene::RequestPath()
 {
 	Packet pathRequestPacket(PACKET_PATH_REQUEST);

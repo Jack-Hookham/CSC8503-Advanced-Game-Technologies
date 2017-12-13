@@ -8,6 +8,7 @@ Server::Server()
 	, mazeDataPacket(NULL)
 	, mazeParamsPacket(NULL)
 	, clients{NULL}
+	, accumTime(0.0f)
 {
 }
 
@@ -143,13 +144,22 @@ void Server::RunServer()
 							}
 
 							//Set the new path start and end indicies from the client on the server
-							mazeGenerator->SetStartIdx(std::stoi(packetTokens[0]));
-							mazeGenerator->SetEndIdx(std::stoi(packetTokens[1]));
+							//mazeGenerator->SetStartIdx(std::stoi(packetTokens[0]));
+							//mazeGenerator->SetEndIdx(std::stoi(packetTokens[1]));
 
-							std::cout << "\t Server generating path between Start (" << mazeGenerator->GetStartNode()->_pos.x << ", " << mazeGenerator->GetStartNode()->_pos.y <<
-								") and End (" << mazeGenerator->GetEndNode()->_pos.x << ", " << mazeGenerator->GetEndNode()->_pos.y << ").\n";
+							int startIdx = std::stoi(packetTokens[0]);
+							int endIdx = std::stoi(packetTokens[1]);
 
-							searchAStar->FindBestPath(mazeGenerator->GetStartNode(), mazeGenerator->GetEndNode());
+							//Update the start and end positions on the server
+							clients[clientID]->startIdx = startIdx;
+							clients[clientID]->endIdx = endIdx;
+
+							std::cout << "\t Server generating path between Start (" << mazeGenerator->GetAllNodesArr()[startIdx]._pos.x <<
+								", " << mazeGenerator->GetAllNodesArr()[startIdx]._pos.y << ") and End (" <<
+								mazeGenerator->GetAllNodesArr()[endIdx]._pos.x << ", " <<
+								mazeGenerator->GetAllNodesArr()[endIdx]._pos.y << ").\n";
+
+							searchAStar->FindBestPath(&mazeGenerator->GetAllNodesArr()[startIdx], &mazeGenerator->GetAllNodesArr()[endIdx]);
 							const std::list<const GraphNode*> finalPath = searchAStar->GetFinalPath();
 
 							Packet pathPacket(PACKET_PATH);
@@ -173,6 +183,19 @@ void Server::RunServer()
 
 							break;
 						}
+						case PacketType::PACKET_UPDATE_AVATAR:
+						{
+							//Update the current client's avatar index
+							if (CommonUtils::isInteger(packetData))
+							{
+								clients[clientID]->avatarIdx = std::stoi(packetData);
+							}
+							else
+							{
+								std::cout << "Couldn't update avatar index. Data wasn't an integer.\n";
+							}
+							break;
+						}
 
 						default:
 						{
@@ -188,11 +211,14 @@ void Server::RunServer()
 				}
 				case ENET_EVENT_TYPE_DISCONNECT:
 				{
+					SAFE_DELETE(clients[evnt.peer->incomingPeerID]);
 					printf("- Client %d has disconnected.\n", evnt.peer->incomingPeerID);
 					break;
 				}
 			}
 		});
+
+		UpdateAvatars(dt);
 
 		Sleep(0);
 	}
@@ -304,6 +330,27 @@ void Server::GenerateMazeDataPacket(const std::string packetData, const char del
 			else
 			{
 				mazeDataPacket->Data()[base_offset + (x * (mazeSize - 1) + y)] = '0';
+			}
+		}
+	}
+}
+
+void Server::UpdateAvatars(const float dt)
+{
+	accumTime += dt;
+	for (int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if (clients[i])
+		{
+			if (clients[i]->moveAvatar)
+			{
+				
+			}
+
+			if (accumTime > 1.0f / 30.0f)
+			{
+				//Send client packet
+				accumTime = 0.0f;
 			}
 		}
 	}
