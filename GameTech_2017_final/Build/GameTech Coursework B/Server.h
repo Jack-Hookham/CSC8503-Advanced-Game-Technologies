@@ -10,6 +10,27 @@
 #include "Packet.h"
 
 #define UPDATE_TIMESTEP (1.0f / 30.0f) //send 30 position updates per second
+#define MAX_CLIENTS 32
+
+struct Client
+{
+	Client::Client(ENetPeer* peer)
+		: peer(peer)
+		, startIdx(0)
+		, endIdx(0)
+		, avatarIdx(0)
+		, avatarPosition(Vector2())
+	{
+	}
+
+	ENetPeer* peer;
+
+	int startIdx;
+	int endIdx;
+	int avatarIdx;
+
+	Vector2 avatarPosition;
+};
 
 class Server
 {
@@ -23,12 +44,13 @@ public:
 	inline bool Initialize(uint16_t port, size_t maxPeers) { return networkBase.Initialize(port, maxPeers); }
 	inline void Release() { networkBase.Release(); }
 
-
 private:
 	void SendPacketToClients(const Packet& packet);
 	void SendPacketToClient(ENetPeer* peer, const Packet& packet);
 	std::string FindNode(const GraphNode* node);
 	void GenerateMazeDataPacket(const std::string packetData, const char delim, const enet_uint16 clientID);
+
+	Client* clients[MAX_CLIENTS];
 
 	GameTimer timer;
 	NetworkBase networkBase;

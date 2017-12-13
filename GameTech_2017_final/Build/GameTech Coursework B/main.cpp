@@ -132,7 +132,7 @@ int main(int arcg, char** argv)
 
 	//Initialize Server on Port 1234, with a possible 32 clients connected at any time
 	//If it fails to initialise then this is a client
-	if (!server->Initialize(SERVER_PORT, 32))
+	if (!server->Initialize(SERVER_PORT, MAX_CLIENTS))
 	{
 		fprintf(stderr, "An error occurred while trying to create an ENet server host.\n");
 		myType = CLIENT;

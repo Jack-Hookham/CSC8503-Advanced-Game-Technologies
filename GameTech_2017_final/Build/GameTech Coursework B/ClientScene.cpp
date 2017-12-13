@@ -331,10 +331,17 @@ void ClientScene::GenerateNewMaze()
 		mazeScalarf * 2.0f
 	);
 
+	Vector3 avatarSize = Vector3(
+		mazeScalarf * 1.5f,
+		1.5f,
+		mazeScalarf * 1.5f
+	);
+
 	avatar = new GameObject("avatar", new RenderNode(wallMesh, Vector4(0.0f, 0.0f, 1.0f, 1.0f)), NULL);
+	avatar->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
+	this->AddGameObject(avatar);
 
-
-	startNode = new GameObject("startnode", new RenderNode(wallMesh, Vector4(0.0f, 1.0f, 0.0f, 0.7f)), NULL);
+	startNode = new GameObject("startnode", new RenderNode(wallMesh, Vector4(0.0f, 1.0f, 0.0f, 0.4f)), NULL);
 	startNode->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
 	this->AddGameObject(startNode);
 
@@ -343,7 +350,7 @@ void ClientScene::GenerateNewMaze()
 		0.0f,
 		end->_pos.y * 3.0f
 	) * mazeScalarf;
-	endNode = new GameObject("endnode", new RenderNode(wallMesh, Vector4(1.0f, 0.0f, 0.0f, 0.7f)), NULL);
+	endNode = new GameObject("endnode", new RenderNode(wallMesh, Vector4(1.0f, 0.0f, 0.0f, 0.4f)), NULL);
 	endNode->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
 	this->AddGameObject(endNode);
 
