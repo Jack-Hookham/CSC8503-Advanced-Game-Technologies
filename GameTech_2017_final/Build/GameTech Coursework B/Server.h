@@ -31,8 +31,9 @@ struct Client
 	int avatarIdx;
 
 	Vector2 avatarPosition;
-
 	bool moveAvatar;
+
+	std::vector<int> pathIndices;
 };
 
 class Server
@@ -50,7 +51,7 @@ public:
 private:
 	void SendPacketToClients(const Packet& packet);
 	void SendPacketToClient(ENetPeer* peer, const Packet& packet);
-	std::string FindNode(const GraphNode* node);
+	const int FindIdx(const GraphNode* node);
 	void GenerateMazeDataPacket(const std::string packetData, const char delim, const enet_uint16 clientID);
 	void UpdateAvatars(const float dt);
 
@@ -70,5 +71,6 @@ private:
 	Packet* mazeParamsPacket;
 
 	float accumTime = 0.0f;
+	float avatarSpeed = 1.0f;
 };
 

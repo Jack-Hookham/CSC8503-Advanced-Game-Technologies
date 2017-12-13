@@ -81,7 +81,6 @@ void MazeGenerator::Generate(int grid_size, float maze_density)
 				if (lookup[i])
 					on->_neighbours.push_back(lookup[i]);
 			}
-
 		}
 	}
 

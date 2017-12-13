@@ -165,19 +165,19 @@ void Server::RunServer()
 							Packet pathPacket(PACKET_PATH);
 
 							//Add the final path nodes to the packet data
-
-							std::vector<std::string> pathIndiciesVec;
-
-
+							std::vector<std::string> pathIndiciesStrings;
+							//Also update the final path node indices for the current client
+							clients[clientID]->pathIndices.clear();
 
 							for (auto it = finalPath.begin(); it != finalPath.end(); ++it)
 							{
-								//pathIndiciesVec.push_back((*it)->GetIndex());
-								pathIndiciesVec.push_back(FindNode(*it));
+								int idx = FindIdx(*it);
+								pathIndiciesStrings.push_back(to_string(idx) + " ");
+								clients[clientID]->pathIndices.push_back(idx);
 							}
 
 							std::string pathIndiciesString;
-							pathIndiciesString = std::accumulate(std::begin(pathIndiciesVec), std::end(pathIndiciesVec), pathIndiciesString);
+							pathIndiciesString = std::accumulate(std::begin(pathIndiciesStrings), std::end(pathIndiciesStrings), pathIndiciesString);
 							pathPacket.SetData(pathIndiciesString);
 							SendPacketToClient(peer, pathPacket);
 
@@ -244,7 +244,7 @@ void Server::SendPacketToClient(ENetPeer* peer, const Packet& packet)
 	enet_peer_send(peer, 0, enetPacket);
 }
 
-std::string Server::FindNode(const GraphNode* node)
+const int Server::FindIdx(const GraphNode* node)
 {
 	Vector3 posToFind = node->_pos;
 
@@ -252,10 +252,11 @@ std::string Server::FindNode(const GraphNode* node)
 	{
 		if (mazeGenerator->GetAllNodesArr()[j]._pos == posToFind)
 		{
-			return to_string(j) + " ";
+			//return to_string(j) + " ";
+			return j;
 		}
 	}
-	return "-1 ";
+	return -1;
 }
 
 void Server::GenerateMazeDataPacket(const std::string packetData, const char delim, const enet_uint16 clientID)
