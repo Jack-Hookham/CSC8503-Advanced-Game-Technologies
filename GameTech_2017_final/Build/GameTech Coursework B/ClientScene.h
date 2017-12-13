@@ -16,6 +16,8 @@
 #include "MazeGenerator.h"
 #include "MazeRenderer.h"
 
+#define MAX_MAZE_SIZE 25
+
 const Vector3 pos_maze = Vector3(0.0f, 0.0f, 0.0f);
 
 class ClientScene : public Scene
@@ -47,6 +49,7 @@ protected:
 
 	GameObject* startNode;
 	GameObject* endNode;
+	GameObject* avatar;
 
 	int mazeSize;
 	float mazeDensity;

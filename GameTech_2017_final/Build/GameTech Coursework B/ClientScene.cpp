@@ -11,6 +11,7 @@ ClientScene::ClientScene(const std::string& friendly_name)
 	, wallMesh(NULL)
 	, startNode(NULL)
 	, endNode(NULL)
+	, avatar(NULL)
 	, mazeSize(16)
 	, mazeDensity(1.0f)
 	, mazeScalarf(1.0f)
@@ -60,6 +61,10 @@ void ClientScene::OnInitializeScene()
 		Vector4(0.2f, 0.5f, 1.0f, 1.0f),
 		false,
 		CommonMeshes::MeshType::DEFAULT_CUBE));
+
+	//Seed the start and end positions with the current time so that each client
+	//uses a different seed
+	srand(time(0));
 }
 
 void ClientScene::OnCleanupScene()
@@ -326,16 +331,19 @@ void ClientScene::GenerateNewMaze()
 		mazeScalarf * 2.0f
 	);
 
-	startNode = new GameObject("startnode", new RenderNode(wallMesh, Vector4(0.0f, 1.0f, 0.0f, 1.0f)), NULL);
+	avatar = new GameObject("avatar", new RenderNode(wallMesh, Vector4(0.0f, 0.0f, 1.0f, 1.0f)), NULL);
+
+
+	startNode = new GameObject("startnode", new RenderNode(wallMesh, Vector4(0.0f, 1.0f, 0.0f, 0.7f)), NULL);
 	startNode->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
 	this->AddGameObject(startNode);
 
 	cellpos = Vector3(
 		end->_pos.x * 3.0f,
-		1.0f,
+		0.0f,
 		end->_pos.y * 3.0f
 	) * mazeScalarf;
-	endNode = new GameObject("endnode", new RenderNode(wallMesh, Vector4(1.0f, 0.0f, 0.0f, 1.0f)), NULL);
+	endNode = new GameObject("endnode", new RenderNode(wallMesh, Vector4(1.0f, 0.0f, 0.0f, 0.7f)), NULL);
 	endNode->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
 	this->AddGameObject(endNode);
 
@@ -438,7 +446,7 @@ void ClientScene::HandleKeyboardInputs()
 
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_1))
 	{
-		mazeSize++;
+		mazeSize = min(mazeSize + 1, MAX_MAZE_SIZE);
 	}
 
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_2))
