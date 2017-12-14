@@ -798,7 +798,7 @@ void ClientScene::DrawPath(const std::vector<int>& finalPath, float lineWidth)
 				0.1f,
 				(mazeGenerator->GetAllNodesArr()[finalPath[i + 1]]._pos.y + 0.5f) * grid_scalar);
 
-			NCLDebug::DrawThickLine(start, end, lineWidth, CommonUtils::GenColor(0.0f + i * col_factor));
+			NCLDebug::DrawThickLine(start, end, lineWidth, CommonUtils::GenColor(i * col_factor));
 		}
 	}
 }

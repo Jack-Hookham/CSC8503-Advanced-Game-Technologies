@@ -219,11 +219,6 @@ void Server::RunServer()
 								mazeGenerator->GetAllNodesArr()[endIdx]._pos.x << ", " <<
 								mazeGenerator->GetAllNodesArr()[endIdx]._pos.y << ").\n";
 
-							//Reset the avatar vars for the start node
-							clients[clientID]->avatarPnode->SetPosition(Vector3(mazeGenerator->GetAllNodesArr()[startIdx]._pos.x, 0.0f, mazeGenerator->GetAllNodesArr()[startIdx]._pos.y));
-							clients[clientID]->sendUpdateTime = 0.0f;
-							clients[clientID]->pathTime = 0.0f;
-
 							//Calculate A* path without string pulling
 							searchAStar->FindBestPath(&mazeGenerator->GetAllNodesArr()[startIdx], &mazeGenerator->GetAllNodesArr()[endIdx]);
 							std::list<const GraphNode*> finalPath = searchAStar->GetFinalPath();
@@ -259,6 +254,32 @@ void Server::RunServer()
 							pathIndiciesString = std::accumulate(std::begin(pathIndiciesStrings), std::end(pathIndiciesStrings), pathIndiciesString);
 							pathPacket.SetData(pathIndiciesString);
 							SendPacketToClient(peer, pathPacket);
+
+							//Reset the avatar vars for the start node
+
+							GraphNode* currentNode = &mazeGenerator->GetAllNodesArr()[clients[clientID]->startIdx];
+							GraphNode* nextNode;
+							if (clients[clientID]->pathIdx < clients[clientID]->pathIndices.size() - 1)
+							{
+								nextNode = &mazeGenerator->GetAllNodesArr()[clients[clientID]->pathIndices[clients[clientID]->pathIdx + 1]];
+							}
+							else
+							{
+								nextNode = currentNode;
+							}
+
+							Vector3 direction = Vector3();
+							direction.x = nextNode->_pos.x - currentNode->_pos.x;
+							direction.z = nextNode->_pos.y - currentNode->_pos.y;
+
+							//clients[clientID]->avatarPnode->SetLinearVelocity(direction * AVATAR_SPEED);
+
+							float xPos = mazeGenerator->GetAllNodesArr()[startIdx]._pos.x + direction.x * clients[clientID]->pathTime * 1.0f / AVATAR_SPEED;
+							float yPos = mazeGenerator->GetAllNodesArr()[startIdx]._pos.y + direction.z * clients[clientID]->pathTime * 1.0f / AVATAR_SPEED;
+
+							clients[clientID]->avatarPnode->SetPosition(Vector3(xPos, 0.0f, yPos));
+							//clients[clientID]->sendUpdateTime = 0.0f;
+							//clients[clientID]->pathTime = 0.0f;
 
 							break;
 						}
