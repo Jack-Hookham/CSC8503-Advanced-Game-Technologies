@@ -10,7 +10,6 @@
 #include "Packet.h"
 
 #define UPDATE_TIMESTEP (1.0f / 30.0f) //send 30 position updates per second
-#define MAX_CLIENTS 32
 #define AVATAR_SPEED 1.0f
 
 struct Client

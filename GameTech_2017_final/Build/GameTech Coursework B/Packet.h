@@ -2,6 +2,8 @@
 
 #include <ncltech\NetworkBase.h>
 
+#define MAX_CLIENTS 32
+
 //Start at 1
 //0 used for bad packet checks
 enum PacketType
@@ -15,7 +17,8 @@ enum PacketType
 	PACKET_UPDATE_AVATAR_IDX,
 	PACKET_UPDATE_AVATAR_POS,
 	PACKET_IS_MOVE,
-	PACKET_PARAMS_REQUEST
+	PACKET_PARAMS_REQUEST,
+	PACKET_CLIENT_ID
 };
 
 enum MoveDirection

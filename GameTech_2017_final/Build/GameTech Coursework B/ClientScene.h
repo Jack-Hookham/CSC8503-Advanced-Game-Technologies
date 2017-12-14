@@ -51,8 +51,9 @@ protected:
 
 	GameObject* startNode;
 	GameObject* endNode;
-	GameObject* avatar;
-	RenderNode* avatarRender;
+	GameObject* clientGameObj;
+	RenderNode* clientRnodes[MAX_CLIENTS];		//Store render nodes for all clients
+	int clientID;								//Store this client's ID
 	int avatarIdx;
 
 	int mazeSize;
@@ -76,4 +77,5 @@ protected:
 	std::vector<int> finalPath;
 
 	bool moveAvatar;
+
 };

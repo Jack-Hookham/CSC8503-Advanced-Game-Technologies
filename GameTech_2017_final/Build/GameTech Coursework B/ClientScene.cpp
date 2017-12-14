@@ -11,8 +11,9 @@ ClientScene::ClientScene(const std::string& friendly_name)
 	, wallMesh(NULL)
 	, startNode(NULL)
 	, endNode(NULL)
-	, avatar(NULL)
-	, avatarRender(NULL)
+	, clientGameObj(NULL)
+	, clientID(-1)
+	, clientRnodes{NULL}
 	, mazeSize(16)
 	, mazeDensity(1.0f)
 	, mazeScalarf(1.0f)
@@ -86,7 +87,15 @@ void ClientScene::OnCleanupScene()
 	SAFE_DELETE(wallMesh);
 	SAFE_DELETE(mazeGenerator);
 	mazeRenderer = NULL;
-	SAFE_DELETE(avatarRender);
+
+	//Delete all of the other client's avatar render nodes
+	for (int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if (i != clientID)
+		{
+			SAFE_DELETE(clientRnodes[i]);
+		}
+	}
 }
 
 void ClientScene::OnUpdateScene(float dt)
@@ -180,18 +189,18 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 
 		switch(packetType)
 		{
-			case PACKET_BAD:
+			case PacketType::PACKET_BAD:
 			{
 				std::cout << "\t Failed to read packet from Server. Unknown packet type.\n";
 				break;
 			}
-			case PACKET_MESSAGE:
+			case PacketType::PACKET_MESSAGE:
 			{
 				//Print the message
 				std::cout << "\t Server broadcast: " << packetData << "\n";
 				break;
 			}
-			case PACKET_MAZE_PARAMS:
+			case PacketType::PACKET_MAZE_PARAMS:
 			{
 				//Update the clients parameters
 				//Split the data into its (hopefully) 2 ints
@@ -217,7 +226,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 
 				break;
 			}
-			case PACKET_MAZE_DATA:
+			case PacketType::PACKET_MAZE_DATA:
 			{
 				const uint dataLength = mazeSize * (mazeSize - 1) * 2;
 				//Ensure that data string isn't longer than the required length
@@ -269,7 +278,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				delete[] isWall;
 				break;
 			}
-			case PACKET_PATH:
+			case PacketType::PACKET_PATH:
 			{
 				std::cout << "\t Updating path packet with nodes: " << packetData << ".\n";
 
@@ -288,7 +297,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 
 				break;
 			}
-			case PACKET_UPDATE_AVATAR_POS:
+			case PacketType::PACKET_UPDATE_AVATAR_POS:
 			{
 				//Update the client's avatar position
 				//Split the data into its (hopefully) 2 floats
@@ -321,7 +330,10 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 						mazeScalarf * 1.5f
 					);
 
-					avatarRender->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
+					if (clientID >= 0)
+					{
+						clientRnodes[clientID]->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
+					}
 				}
 				else
 				{
@@ -330,9 +342,15 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				}
 				break;
 			}
-			case PACKET_PARAMS_REQUEST:
+			case PacketType::PACKET_PARAMS_REQUEST:
 			{
 				SendMazeParamsPacket();
+				break;
+			}
+			case PacketType::PACKET_CLIENT_ID:
+			{
+				clientID = std::stoi(packetData);
+				break;
 			}
 			default:
 			{
@@ -358,16 +376,22 @@ void ClientScene::GenerateNewMaze()
 	moveAvatar = false;
 
 	//if the avatar obj's RenderNode was set to NULL when the maze was generated
-	//then the avatarRender RenderNode won't be deleted deleted so delete it here
-	if (avatar)
+	//then the avatarRender RenderNode won't be deleted so delete it here
+	if (clientGameObj)
 	{
-		if (avatar->HasRender())
+		if (clientGameObj->HasRender())
 		{
-			avatarRender = NULL;
+			if (clientID >= 0)
+			{
+				clientRnodes[clientID] = NULL;
+			}
 		}
 		else
 		{
-			SAFE_DELETE(avatarRender);
+			if (clientID >= 0)
+			{
+				SAFE_DELETE(clientRnodes[clientID]);
+			}
 		}
 	}
 	this->DeleteAllGameObjects(); //Cleanup old mazes
@@ -417,10 +441,14 @@ void ClientScene::GenerateNewMaze()
 		mazeScalarf * 1.5f
 	);
 
-	avatarRender = new RenderNode(wallMesh, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
-	avatar = new GameObject("avatar", NULL, NULL);
-	avatarRender->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
-	this->AddGameObject(avatar);
+	if (clientID >= 0)
+	{
+		clientRnodes[clientID] = new RenderNode(wallMesh, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+		clientRnodes[clientID]->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
+	}
+
+	clientGameObj = new GameObject("avatar", NULL, NULL);
+	this->AddGameObject(clientGameObj);
 
 	startNode = new GameObject("startnode", new RenderNode(wallMesh, Vector4(0.0f, 1.0f, 0.0f, 0.4f)), NULL);
 	startNode->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
@@ -476,7 +504,7 @@ void ClientScene::HandleKeyboardInputs()
 	{
 		moveAvatar = true;
 		avatarIdx = mazeGenerator->GetStartIdx();
-		avatar->SetRender(avatarRender);
+		clientGameObj->SetRender(clientRnodes[clientID]);
 
 		//Send the new move bool to the server
 		Packet isMovePacket(PacketType::PACKET_IS_MOVE);

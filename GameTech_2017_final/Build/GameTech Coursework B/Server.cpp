@@ -53,6 +53,12 @@ void Server::RunServer()
 				{
 					std::cout << ("- New Client Connected\n");
 					clients[evnt.peer->incomingPeerID] = new Client(evnt.peer);
+					//Tell the new client what its ID is
+					Packet idPacket(PacketType::PACKET_CLIENT_ID);
+					idPacket.SetData(to_string(evnt.peer->incomingPeerID));
+					SendPacketToClient(evnt.peer, idPacket);
+
+					//Add the client's physics node to the physics engine
 					PhysicsEngine::Instance()->AddPhysicsObject(clients[evnt.peer->incomingPeerID]->avatarPnode); 
 
 					//If there is a maze then send it to the client
