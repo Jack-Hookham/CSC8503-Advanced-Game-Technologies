@@ -12,6 +12,7 @@ ClientScene::ClientScene(const std::string& friendly_name)
 	, startNode(NULL)
 	, endNode(NULL)
 	, avatar(NULL)
+	, avatarRender(NULL)
 	, mazeSize(16)
 	, mazeDensity(1.0f)
 	, mazeScalarf(1.0f)
@@ -84,6 +85,7 @@ void ClientScene::OnCleanupScene()
 	SAFE_DELETE(wallMesh);
 	SAFE_DELETE(mazeGenerator);
 	mazeRenderer = NULL;
+	SAFE_DELETE(avatarRender);
 }
 
 void ClientScene::OnUpdateScene(float dt)
@@ -123,10 +125,76 @@ void ClientScene::OnUpdateScene(float dt)
 
 	HandleKeyboardInputs();
 
-	if (mazeRenderer && mazeGenerator && drawPath)
+	if (mazeRenderer && mazeGenerator)
 	{
-		DrawPath(finalPath, 2.5f / float(mazeSize));
+		if (drawPath)
+		{
+			DrawPath(finalPath, 2.5f / float(mazeSize));
+		}
+		//GraphNode* start = mazeGenerator->GetStartNode();
+		GraphNode avatarNode = mazeGenerator->GetAllNodesArr()[avatarIdx];
+		//Draw the avatar at correct position
+		Vector3 cellpos = Vector3(
+			avatarNode._pos.x * 3.0f,
+			0.0f,
+			avatarNode._pos.y * 3.0f
+		) * mazeScalarf;
+		Vector3 cellsize = Vector3(
+			mazeScalarf * 2.0f,
+			1.0f,
+			mazeScalarf * 2.0f
+		);
+		Vector3 avatarSize = Vector3(
+			mazeScalarf * 1.5f,
+			1.5f,
+			mazeScalarf * 1.5f
+		);
+
+		avatarRender->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
+
+		//GraphNode* start = mazeGenerator->GetStartNode();
+		//GraphNode* end = mazeGenerator->GetEndNode();
+
+		//uint flatMazeSize = mazeSize * 3 - 1;
+		//mazeScalarf = 1.0f / (float)flatMazeSize;
+
+		//Vector3 cellpos = Vector3(
+		//	start->_pos.x * 3.0f,
+		//	0.0f,
+		//	start->_pos.y * 3.0f
+		//) * mazeScalarf;
+		//Vector3 cellsize = Vector3(
+		//	mazeScalarf * 2.0f,
+		//	1.0f,
+		//	mazeScalarf * 2.0f
+		//);
+
+		//Vector3 avatarSize = Vector3(
+		//	mazeScalarf * 1.5f,
+		//	1.5f,
+		//	mazeScalarf * 1.5f
+		//);
+
+		//avatarRender = new RenderNode(wallMesh, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+		//avatar = new GameObject("avatar", NULL, NULL);
+		//avatarRender->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
+		//this->AddGameObject(avatar);
+
+		//startNode = new GameObject("startnode", new RenderNode(wallMesh, Vector4(0.0f, 1.0f, 0.0f, 0.4f)), NULL);
+		//startNode->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
+		//this->AddGameObject(startNode);
+
+		//cellpos = Vector3(
+		//	end->_pos.x * 3.0f,
+		//	0.0f,
+		//	end->_pos.y * 3.0f
+		//) * mazeScalarf;
+		//endNode = new GameObject("endnode", new RenderNode(wallMesh, Vector4(1.0f, 0.0f, 0.0f, 0.4f)), NULL);
+		//endNode->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
+		//this->AddGameObject(endNode);
 	}
+
+	
 }
 
 void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
@@ -280,6 +348,19 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 
 				break;
 			}
+			case PACKET_UPDATE_AVATAR_IDX:
+			{
+				//Update the client's avatar index
+				if (CommonUtils::isInteger(packetData))
+				{
+					avatarIdx = std::stoi(packetData);
+				}
+				else
+				{
+					std::cout << "\t Couldn't update avatar index. Data wasn't an integer.\n";
+				}
+				break;
+			}
 			default:
 			{
 				std::cout << "\t Failed to read packet from Server. Unknown packet type.\n";
@@ -301,7 +382,23 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 
 void ClientScene::GenerateNewMaze()
 {
+	moveAvatar = false;
+
+	//if the avatar obj's RenderNode was set to NULL when the maze was generated
+	//then the avatarRender RenderNode won't be deleted deleted so delete it here
+	if (avatar)
+	{
+		if (avatar->HasRender())
+		{
+			avatarRender = NULL;
+		}
+		else
+		{
+			SAFE_DELETE(avatarRender);
+		}
+	}
 	this->DeleteAllGameObjects(); //Cleanup old mazes
+
 
 	//The maze is returned in a [0,0,0] - [1,1,1] cube (with edge walls outside) regardless of maze size,
 	// so we need to scale it to whatever size we want
@@ -347,8 +444,9 @@ void ClientScene::GenerateNewMaze()
 		mazeScalarf * 1.5f
 	);
 
-	avatar = new GameObject("avatar", new RenderNode(wallMesh, Vector4(0.0f, 0.0f, 1.0f, 1.0f)), NULL);
-	avatar->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
+	avatarRender = new RenderNode(wallMesh, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+	avatar = new GameObject("avatar", NULL, NULL);
+	avatarRender->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
 	this->AddGameObject(avatar);
 
 	startNode = new GameObject("startnode", new RenderNode(wallMesh, Vector4(0.0f, 1.0f, 0.0f, 0.4f)), NULL);
@@ -370,7 +468,7 @@ void ClientScene::GenerateNewMaze()
 
 void ClientScene::UpdateAvatarServerPosition()
 {
-	Packet avatarPacket(PacketType::PACKET_UPDATE_AVATAR);
+	Packet avatarPacket(PacketType::PACKET_UPDATE_AVATAR_IDX);
 	std::string data = to_string(avatarIdx);
 	avatarPacket.SetData(data);
 	SendPacketToServer(avatarPacket);
@@ -402,10 +500,28 @@ void ClientScene::HandleKeyboardInputs()
 		drawPath = !drawPath;
 	}
 
-	//Move the avatar
+	//Spawn and move avatar
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_J))
 	{
+		moveAvatar = true;
+		avatarIdx = mazeGenerator->GetStartIdx();
+		avatar->SetRender(avatarRender);
+
+		//Send the new move bool to the server
+		Packet isMovePacket(PacketType::PACKET_IS_MOVE);
+		isMovePacket.SetData(to_string(moveAvatar));
+		SendPacketToServer(isMovePacket);
+	}
+
+	//Move the avatar
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_K))
+	{
 		moveAvatar = !moveAvatar;
+
+		//Send the new move bool to the server
+		Packet isMovePacket(PacketType::PACKET_IS_MOVE);
+		isMovePacket.SetData(to_string(moveAvatar));
+		SendPacketToServer(isMovePacket);
 	}
 
 	//End node movement (CTRL + Arrow key)

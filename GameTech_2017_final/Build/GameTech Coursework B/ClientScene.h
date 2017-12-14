@@ -51,6 +51,7 @@ protected:
 	GameObject* startNode;
 	GameObject* endNode;
 	GameObject* avatar;
+	RenderNode* avatarRender;
 	int avatarIdx;
 
 	int mazeSize;

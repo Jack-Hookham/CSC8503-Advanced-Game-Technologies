@@ -19,21 +19,25 @@ struct Client
 		, startIdx(0)
 		, endIdx(0)
 		, avatarIdx(0)
+		, pathIdx(0)
 		, avatarPosition(Vector2())
 		, moveAvatar(false)
+		, accumTime(0.0f)
 	{
 	}
 
 	ENetPeer* peer;
 
-	int startIdx;
-	int endIdx;
-	int avatarIdx;
+	int startIdx;	//Start index into allNodes
+	int endIdx;		//End index into allNodes
+	int avatarIdx;	//Avatar index into allNodes
+	int pathIdx;	//Avatar index into path indices
 
 	Vector2 avatarPosition;
 	bool moveAvatar;
 
 	std::vector<int> pathIndices;
+	float accumTime;
 };
 
 class Server

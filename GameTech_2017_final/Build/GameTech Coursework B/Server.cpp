@@ -35,6 +35,8 @@ void Server::RunServer()
 	{
 		float dt = timer.GetTimedMS() * 0.001f;
 
+		UpdateAvatars(dt);
+
 		//Handle All Incoming Packets and Send any enqued packets
 		networkBase.ServiceNetwork(dt, [&](const ENetEvent& evnt)
 		{
@@ -183,7 +185,7 @@ void Server::RunServer()
 
 							break;
 						}
-						case PacketType::PACKET_UPDATE_AVATAR:
+						case PacketType::PACKET_UPDATE_AVATAR_IDX:
 						{
 							//Update the current client's avatar index
 							if (CommonUtils::isInteger(packetData))
@@ -192,9 +194,20 @@ void Server::RunServer()
 							}
 							else
 							{
-								std::cout << "Couldn't update avatar index. Data wasn't an integer.\n";
+								std::cout << "Couldn't update avatar index for Client " << clientID << ". Data wasn't an integer.\n";
 							}
 							break;
+						}
+						case PacketType::PACKET_IS_MOVE:
+						{
+							if (CommonUtils::isInteger(packetData))
+							{
+								std::istringstream(packetData) >> clients[clientID]->moveAvatar;
+							}
+							else
+							{
+								std::cout << "Couldn't update movement bool for Client " << clientID << ". Data wasn't an integer.\n";
+							}
 						}
 
 						default:
@@ -217,8 +230,6 @@ void Server::RunServer()
 				}
 			}
 		});
-
-		UpdateAvatars(dt);
 
 		Sleep(0);
 	}
@@ -343,14 +354,25 @@ void Server::UpdateAvatars(const float dt)
 	{
 		if (clients[i])
 		{
+			clients[i]->accumTime += dt;
 			if (clients[i]->moveAvatar)
 			{
-				
+				if (clients[i]->accumTime > 1.0f / 2.0f)
+				{
+					clients[i]->pathIdx++;
+					clients[i]->avatarIdx = clients[i]->pathIndices[clients[i]->pathIdx];
+					//Send client packet
+					clients[i]->accumTime = 0.0f;
+				}
 			}
 
 			if (accumTime > 1.0f / 30.0f)
 			{
-				//Send client packet
+				//Send client position index
+				Packet avatarPacket(PacketType::PACKET_UPDATE_AVATAR_IDX);
+				std::string data = to_string(clients[i]->avatarIdx);
+				avatarPacket.SetData(data);
+				SendPacketToClient(clients[i]->peer, avatarPacket);
 				accumTime = 0.0f;
 			}
 		}
