@@ -25,6 +25,7 @@ struct Client
 		, pathTime(0.0f)
 		, sendUpdateTime(0.0f)
 		, avatarPnode(new PhysicsNode())
+		, useStringPulling(false)
 	{
 	}
 
@@ -50,6 +51,8 @@ struct Client
 	//And a timer to determine whether it needs to send the updated position to the client
 	//Currently every 1 / 30 second
 	float sendUpdateTime;
+
+	bool useStringPulling;
 };
 
 class Server

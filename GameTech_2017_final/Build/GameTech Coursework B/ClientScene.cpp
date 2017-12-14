@@ -24,6 +24,7 @@ ClientScene::ClientScene(const std::string& friendly_name)
 	, isMove(false)
 	, wantToMove(false)
 	, avatarIdx(0)
+	, useStringPulling(false)
 {
 }
 
@@ -140,7 +141,8 @@ void ClientScene::OnUpdateScene(float dt)
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   [G] To generate a new maze", mazeSize);
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Grid Size : %2d ([1]/[2] to change)", mazeSize);
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Density : %2.0f percent ([3]/[4] to change)", mazeDensity * 100.f);
-	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Draw Path :  %s [H] to toggle)", wantToDrawPath ? "On" : "Off");
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Draw Path : %s [H] to toggle)", wantToDrawPath ? "On" : "Off");
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   String Pulling : %s [L] to toggle)", useStringPulling ? "On" : "Off");
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "");
 
 	NCLDebug::AddStatusEntry(Vector4(status_color), "--- Debug ---");
@@ -602,6 +604,15 @@ void ClientScene::HandleKeyboardInputs()
 		UpdateIsMove(wantToMove);
 	}
 
+	//Toggle string pulling
+	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_L))
+	{
+		useStringPulling = !useStringPulling;
+		Packet stringPullingPacket(PacketType::PACKET_USE_STRING_PULLING);
+		stringPullingPacket.SetData(to_string((int)useStringPulling));
+		SendPacketToServer(stringPullingPacket);
+	}
+
 	//End node movement (CTRL + Arrow key)
 	if (Window::GetKeyboard()->KeyHeld(KEYBOARD_CONTROL))
 	{
@@ -770,7 +781,7 @@ void ClientScene::DrawPath(const std::vector<int>& finalPath, float lineWidth)
 	if (finalPath.size() > 0)
 	{
 		float grid_scalar = 1.0f / (float)mazeGenerator->GetSize();
-		float col_factor = 0.2f / (float)finalPath.size();
+		float col_factor = 1.0f / (float)finalPath.size();
 
 		Matrix4 transform = mazeRenderer->Render()->GetWorldTransform();
 		mazeGenerator->GetAllNodesArr();
@@ -787,7 +798,7 @@ void ClientScene::DrawPath(const std::vector<int>& finalPath, float lineWidth)
 				0.1f,
 				(mazeGenerator->GetAllNodesArr()[finalPath[i + 1]]._pos.y + 0.5f) * grid_scalar);
 
-			NCLDebug::DrawThickLine(start, end, lineWidth, CommonUtils::GenColor(0.8f + i * col_factor));
+			NCLDebug::DrawThickLine(start, end, lineWidth, CommonUtils::GenColor(0.0f + i * col_factor));
 		}
 	}
 }

@@ -22,7 +22,8 @@ enum PacketType
 	PACKET_CLIENT_CONNECT,
 	PACKET_CLIENT_DISCONNECT,
 	PACKET_A_STAR_NODES,
-	PACKET_STRING_PULLING_NODES
+	PACKET_STRING_PULLING_NODES,
+	PACKET_USE_STRING_PULLING
 };
 
 //A packet contains a type so that it can be identified and processed correctly

@@ -46,7 +46,6 @@ protected:
 	int aStarNodes;
 	int stringPullingNodes;
 
-
 	NetworkBase network;
 	ENetPeer*	serverConnection;
 	MazeGenerator* mazeGenerator;
@@ -87,4 +86,6 @@ protected:
 	//if a node is moved then stop moving while we wait for the new path
 	bool isMove;
 	bool wantToMove;
+
+	bool useStringPulling;
 };
