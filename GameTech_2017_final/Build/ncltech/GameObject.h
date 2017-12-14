@@ -92,6 +92,7 @@ public:
 	inline bool  HasRender() const						{ return (renderNode != NULL); }
 	inline const RenderNode*	Render() const			{ return renderNode; }
 	inline		 RenderNode*	Render()				{ return renderNode; }
+	inline		 void			SetRenderNode(RenderNode* node) { renderNode = node; }
 
 	inline void  SetRender(RenderNode* node)
 	{

@@ -75,6 +75,29 @@ void ClientScene::OnInitializeScene()
 
 void ClientScene::OnCleanupScene()
 {
+	//delete all render nodes if they aren't set to be deleted by DeleteAllGameObjects
+	//if the avatar obj's RenderNode is set to NULL then the avatarRender RenderNode 
+	//won't be deleted by DeleteAllGameObjects so delete it here
+	for (int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if (clientGameObjs[i])
+		{
+			if (clientGameObjs[i]->HasRender())
+			{
+				if (clientID >= 0)
+				{
+					clientRnodes[i] = NULL;
+				}
+			}
+			else
+			{
+				if (clientID >= 0)
+				{
+					SAFE_DELETE(clientRnodes[i]);
+				}
+			}
+		}
+	}
 	Scene::OnCleanupScene();
 
 				//Send one final packet telling the server we are disconnecting
@@ -85,18 +108,9 @@ void ClientScene::OnCleanupScene()
 	//Release network and all associated data/peer connections
 	network.Release();
 	serverConnection = NULL;
-	SAFE_DELETE(wallMesh);
-	SAFE_DELETE(mazeGenerator);
-	mazeRenderer = NULL;
-
-	//Delete all of the other client's avatar render nodes
-	for (int i = 0; i < MAX_CLIENTS; ++i)
-	{
-		if (i != clientID)
-		{
-			SAFE_DELETE(clientRnodes[i]);
-		}
-	}
+	//SAFE_DELETE(wallMesh);
+	//SAFE_DELETE(mazeGenerator);
+	//mazeRenderer = NULL;
 }
 
 void ClientScene::OnUpdateScene(float dt)
@@ -368,12 +382,6 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				clientID = std::stoi(packetData);
 				break;
 			}
-			//case PacketType::PACKET_EXISTS_ID:
-			//{
-			//	int id = std::stoi(packetData);
-
-			//	break;
-			//}
 			case PacketType::PACKET_CLIENT_CONNECT:
 			{
 				int id = std::stoi(packetData);
@@ -386,7 +394,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 			case PacketType::PACKET_CLIENT_DISCONNECT:
 			{
 				int id = std::stoi(packetData);
-				clientGameObjs[id]->SetRender(NULL);
+				clientGameObjs[id]->SetRenderNode(NULL);
 				break;
 			}
 			default:
@@ -435,7 +443,7 @@ void ClientScene::GenerateNewMaze()
 			}
 		}
 	}
-	this->DeleteAllGameObjects(); //Cleanup old mazes
+	this->DeleteAllGameObjects(); //Cleanup objects
 
 
 	//The maze is returned in a [0,0,0] - [1,1,1] cube (with edge walls outside) regardless of maze size,
@@ -473,12 +481,12 @@ void ClientScene::GenerateNewMaze()
 	//then set up game objects and render nodes arrays
 	if (clientID >= 0)
 	{
-		Vector3 avatarPos = Vector3(-10.0f * 3.0f, 0.0f, 0.0f * 3.0f) * mazeScalarf;
 		//Create the game object for each client
 		//This clients render node is added to the game object when the avatar is told to follow its path
 		//Other client render nodes are added to their game objects when they are connected and told to follow their path
 		for (int i = 0; i < MAX_CLIENTS; ++i)
 		{
+			Vector3 avatarPos = Vector3((-10.0f + i % 4) * 3.0f, 0.0f, (0.0f + i / 4) * 3.0f) * mazeScalarf;
 			if (i == clientID)
 			{
 				clientRnodes[i] = new RenderNode(wallMesh, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
