@@ -11,6 +11,7 @@
 
 #define UPDATE_TIMESTEP (1.0f / 30.0f) //send 30 position updates per second
 #define MAX_CLIENTS 32
+#define AVATAR_SPEED 1.0f
 
 struct Client
 {
@@ -21,7 +22,7 @@ struct Client
 		, avatarIdx(0)
 		, pathIdx(0)
 		, avatarPosition(Vector2())
-		, moveAvatar(false)
+		, isMove(false)
 		, pathTime(0.0f)
 		, sendUpdateTime(0.0f)
 		, avatarPnode(new PhysicsNode())
@@ -41,7 +42,7 @@ struct Client
 	int pathIdx;	//Avatar index into path indices
 
 	Vector2 avatarPosition;
-	bool moveAvatar;
+	bool isMove;
 	PhysicsNode* avatarPnode;
 
 	std::vector<int> pathIndices;
@@ -86,8 +87,5 @@ private:
 	//Store another packet containing the current maze size and density so that when one client updates the params
 	//they are updated for all clients
 	Packet* mazeParamsPacket;
-
-	//float accumTime = 0.0f;
-	float avatarSpeed;
 };
 

@@ -41,6 +41,7 @@ protected:
 	void UpdateEndPosition();
 	void RequestPath();
 	void DrawPath(const std::vector<int>& finalPath, const float lineWidth);
+	void SendMazeParamsPacket();
 
 	NetworkBase network;
 	ENetPeer*	serverConnection;
@@ -59,7 +60,19 @@ protected:
 	float mazeScalarf;
 	Matrix4 mazeScalarMat4 = Matrix4();
 
+	//Having two draw path bools means that when a new maze is generated the actual
+	//draw path bool is turned off but wantToDrawPath can be left as it was
+	//Then when a path packet is received drawPath is set to wantToDrawPath
+	//The actual drawing of the path is determined by drawPath
+	//I did this because when generating a new maze the time between receiving the
+	//maze data and the new path data meant that the maze data and path data were 
+	//out of sync temporarily so a squiggle was drawn
+	
+	//Whether the path is actually drawn
 	bool drawPath;
+	//Whether the client wants to draw the path
+	bool wantToDrawPath;
+
 	std::vector<int> finalPath;
 
 	bool moveAvatar;

@@ -18,6 +18,7 @@ ClientScene::ClientScene(const std::string& friendly_name)
 	, mazeScalarf(1.0f)
 	, mazeScalarMat4(Matrix4())
 	, drawPath(false)
+	, wantToDrawPath(false)
 	, moveAvatar(false)
 	, avatarIdx(0)
 {
@@ -112,7 +113,7 @@ void ClientScene::OnUpdateScene(float dt)
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   [G] To generate a new maze", mazeSize);
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Grid Size : %2d ([1]/[2] to change)", mazeSize);
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Density : %2.0f percent ([3]/[4] to change)", mazeDensity * 100.f);
-	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Draw Path :  %s [H] to toggle)", drawPath ? "On" : "Off");
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Draw Path :  %s [H] to toggle)", wantToDrawPath ? "On" : "Off");
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "");
 
 	NCLDebug::AddStatusEntry(Vector4(status_color), "--- Debug ---");
@@ -131,70 +132,7 @@ void ClientScene::OnUpdateScene(float dt)
 		{
 			DrawPath(finalPath, 2.5f / float(mazeSize));
 		}
-		//GraphNode* start = mazeGenerator->GetStartNode();
-		//GraphNode avatarNode = mazeGenerator->GetAllNodesArr()[avatarIdx];
-		//Draw the avatar at correct position
-		//Vector3 cellpos = Vector3(
-		//	avatarNode._pos.x * 3.0f,
-		//	0.0f,
-		//	avatarNode._pos.y * 3.0f
-		//) * mazeScalarf;
-		//Vector3 cellsize = Vector3(
-		//	mazeScalarf * 2.0f,
-		//	1.0f,
-		//	mazeScalarf * 2.0f
-		//);
-		//Vector3 avatarSize = Vector3(
-		//	mazeScalarf * 1.5f,
-		//	1.5f,
-		//	mazeScalarf * 1.5f
-		//);
-
-		//avatarRender->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
-
-		//GraphNode* start = mazeGenerator->GetStartNode();
-		//GraphNode* end = mazeGenerator->GetEndNode();
-
-		//uint flatMazeSize = mazeSize * 3 - 1;
-		//mazeScalarf = 1.0f / (float)flatMazeSize;
-
-		//Vector3 cellpos = Vector3(
-		//	start->_pos.x * 3.0f,
-		//	0.0f,
-		//	start->_pos.y * 3.0f
-		//) * mazeScalarf;
-		//Vector3 cellsize = Vector3(
-		//	mazeScalarf * 2.0f,
-		//	1.0f,
-		//	mazeScalarf * 2.0f
-		//);
-
-		//Vector3 avatarSize = Vector3(
-		//	mazeScalarf * 1.5f,
-		//	1.5f,
-		//	mazeScalarf * 1.5f
-		//);
-
-		//avatarRender = new RenderNode(wallMesh, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
-		//avatar = new GameObject("avatar", NULL, NULL);
-		//avatarRender->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
-		//this->AddGameObject(avatar);
-
-		//startNode = new GameObject("startnode", new RenderNode(wallMesh, Vector4(0.0f, 1.0f, 0.0f, 0.4f)), NULL);
-		//startNode->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
-		//this->AddGameObject(startNode);
-
-		//cellpos = Vector3(
-		//	end->_pos.x * 3.0f,
-		//	0.0f,
-		//	end->_pos.y * 3.0f
-		//) * mazeScalarf;
-		//endNode = new GameObject("endnode", new RenderNode(wallMesh, Vector4(1.0f, 0.0f, 0.0f, 0.4f)), NULL);
-		//endNode->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
-		//this->AddGameObject(endNode);
 	}
-
-	
 }
 
 void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
@@ -346,6 +284,8 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 					finalPath.push_back(pathVal);
 				}
 
+				drawPath = wantToDrawPath;
+
 				break;
 			}
 			case PACKET_UPDATE_AVATAR_POS:
@@ -389,6 +329,10 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 					return;
 				}
 				break;
+			}
+			case PACKET_PARAMS_REQUEST:
+			{
+				SendMazeParamsPacket();
 			}
 			default:
 			{
@@ -517,16 +461,14 @@ void ClientScene::HandleKeyboardInputs()
 {
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_G))
 	{
-		Packet paramsPacket(PACKET_MAZE_PARAMS);
-		std::string data = std::to_string(mazeSize) + std::string(" ") + std::to_string(mazeDensity);
-		paramsPacket.SetData(data);
-		SendPacketToServer(paramsPacket);
+		SendMazeParamsPacket();
 	}
 
 	//Toggle the drawing of the path
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_H))
 	{
-		drawPath = !drawPath;
+		wantToDrawPath = !wantToDrawPath;
+		drawPath = wantToDrawPath;
 	}
 
 	//Spawn and move avatar
@@ -717,4 +659,15 @@ void ClientScene::DrawPath(const std::vector<int>& finalPath, float lineWidth)
 			NCLDebug::DrawThickLine(start, end, lineWidth, CommonUtils::GenColor(0.8f + i * col_factor));
 		}
 	}
+}
+
+void ClientScene::SendMazeParamsPacket()
+{
+	//Stop drawing the path until a path packet is received
+	drawPath = false;
+
+	Packet paramsPacket(PACKET_MAZE_PARAMS);
+	std::string data = std::to_string(mazeSize) + std::string(" ") + std::to_string(mazeDensity);
+	paramsPacket.SetData(data);
+	SendPacketToServer(paramsPacket);
 }
