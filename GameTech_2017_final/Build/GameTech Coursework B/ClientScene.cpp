@@ -465,27 +465,15 @@ void ClientScene::GenerateNewMaze()
 	uint flatMazeSize = mazeSize * 3 - 1;
 	mazeScalarf = 1.0f / (float)flatMazeSize;
 
-	Vector3 cellpos = Vector3(
-		start->_pos.x * 3.0f,
-		0.0f,
-		start->_pos.y * 3.0f
-	) * mazeScalarf;
-	Vector3 cellsize = Vector3(
-		mazeScalarf * 2.0f,
-		1.0f,
-		mazeScalarf * 2.0f
-	);
-
-	Vector3 avatarSize = Vector3(
-		mazeScalarf * 1.5f,
-		1.5f,
-		mazeScalarf * 1.5f
-	);
+	Vector3 cellpos = Vector3(start->_pos.x * 3.0f, 0.0f, start->_pos.y * 3.0f) * mazeScalarf;
+	Vector3 cellsize = Vector3(mazeScalarf * 2.0f, 1.0f, mazeScalarf * 2.0f);
+	Vector3 avatarSize = Vector3(mazeScalarf * 1.5f, 1.5f, mazeScalarf * 1.5f);
 
 	//if the client knows its ID (which it always should by the time a maze is generated)
 	//then set up game objects and render nodes arrays
 	if (clientID >= 0)
 	{
+		Vector3 avatarPos = Vector3(-10.0f * 3.0f, 0.0f, 0.0f * 3.0f) * mazeScalarf;
 		//Create the game object for each client
 		//This clients render node is added to the game object when the avatar is told to follow its path
 		//Other client render nodes are added to their game objects when they are connected and told to follow their path
@@ -494,13 +482,15 @@ void ClientScene::GenerateNewMaze()
 			if (i == clientID)
 			{
 				clientRnodes[i] = new RenderNode(wallMesh, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
-				clientRnodes[i]->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
+				clientRnodes[i]->SetTransform(mazeScalarMat4 * Matrix4::Translation(avatarPos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
+				clientGameObjs[i] = new GameObject("avatar " + std::to_string(i), clientRnodes[i], NULL);
 			}
 			else
 			{
 				clientRnodes[i] = new RenderNode(wallMesh, Vector4(1.0f, 1.0f, 0.2f, 1.0f));
+				clientRnodes[i]->SetTransform(mazeScalarMat4 * Matrix4::Translation(avatarPos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
+				clientGameObjs[i] = new GameObject("avatar " + std::to_string(i), NULL, NULL);
 			}
-			clientGameObjs[i] = new GameObject("avatar " + std::to_string(i), NULL, NULL);
 			this->AddGameObject(clientGameObjs[i]);
 		}
 	}
