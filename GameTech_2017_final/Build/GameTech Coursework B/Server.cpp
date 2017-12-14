@@ -51,29 +51,39 @@ void Server::RunServer()
 			{
 				case ENET_EVENT_TYPE_CONNECT:
 				{
+					int clientID = evnt.peer->incomingPeerID;
+
 					std::cout << ("- New Client Connected\n");
-					clients[evnt.peer->incomingPeerID] = new Client(evnt.peer);
+					clients[clientID] = new Client(evnt.peer);
 					//Tell the new client what its ID is
 					Packet idPacket(PacketType::PACKET_CLIENT_ID);
-					idPacket.SetData(to_string(evnt.peer->incomingPeerID));
+					idPacket.SetData(to_string(clientID));
 					SendPacketToClient(evnt.peer, idPacket);
 
 					//Send a packet to all clients telling them that a new client connected
 					Packet clientConnectPacket(PacketType::PACKET_CLIENT_CONNECT);
-					clientConnectPacket.SetData(to_string(evnt.peer->incomingPeerID));
+					clientConnectPacket.SetData(to_string(clientID));
 					SendPacketToClients(clientConnectPacket);
 
 					//Add the client's physics node to the physics engine
-					PhysicsEngine::Instance()->AddPhysicsObject(clients[evnt.peer->incomingPeerID]->avatarPnode); 
+					PhysicsEngine::Instance()->AddPhysicsObject(clients[clientID]->avatarPnode);
 
 					//If there is a maze then send it to the client
 					if (mazeGenerator && mazeDataPacket && mazeParamsPacket)
 					{
-						if (mazeDataPacket->GetPacketType() == PacketType::PACKET_MAZE_DATA)
+						std::cout << "\t Sending maze data to Client " << clientID << ".\n";
+						SendPacketToClient(evnt.peer, *mazeParamsPacket);
+						SendPacketToClient(evnt.peer, *mazeDataPacket);
+
+						//Send a packet to this client telling it about other clients
+						for (int i = 0; i < MAX_CLIENTS; ++i)
 						{
-							std::cout << "\t Sending maze data to Client " << evnt.peer->incomingPeerID << ".\n";
-							SendPacketToClient(evnt.peer, *mazeParamsPacket);
-							SendPacketToClient(evnt.peer, *mazeDataPacket);
+							if (i != clientID && clients[i])
+							{
+								Packet clientPacket(PacketType::PACKET_CLIENT_CONNECT);
+								clientPacket.SetData(to_string(i));
+								SendPacketToClient(evnt.peer, clientPacket);
+							}
 						}
 					}
 					//if there is no maze then request maze parameters from the client
@@ -184,9 +194,6 @@ void Server::RunServer()
 							}
 
 							//Set the new path start and end indicies from the client on the server
-							//mazeGenerator->SetStartIdx(std::stoi(packetTokens[0]));
-							//mazeGenerator->SetEndIdx(std::stoi(packetTokens[1]));
-
 							int startIdx = std::stoi(packetTokens[0]);
 							int endIdx = std::stoi(packetTokens[1]);
 

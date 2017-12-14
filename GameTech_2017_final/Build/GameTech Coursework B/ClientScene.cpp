@@ -368,6 +368,12 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				clientID = std::stoi(packetData);
 				break;
 			}
+			//case PacketType::PACKET_EXISTS_ID:
+			//{
+			//	int id = std::stoi(packetData);
+
+			//	break;
+			//}
 			case PacketType::PACKET_CLIENT_CONNECT:
 			{
 				int id = std::stoi(packetData);
