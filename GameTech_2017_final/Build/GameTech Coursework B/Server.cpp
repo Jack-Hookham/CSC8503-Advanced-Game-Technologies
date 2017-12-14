@@ -29,6 +29,8 @@ Server::~Server()
 
 void Server::RunServer()
 {
+	//Initialise the PhysicsEngine
+	PhysicsEngine::Instance();
 	mazeGenerator = new MazeGenerator();
 
 	while (true)
@@ -49,6 +51,7 @@ void Server::RunServer()
 				{
 					std::cout << ("- New Client Connected\n");
 					clients[evnt.peer->incomingPeerID] = new Client(evnt.peer);
+					PhysicsEngine::Instance()->AddPhysicsObject(clients[evnt.peer->incomingPeerID]->avatarPnode); 
 
 					//If there is a maze then send it to the client
 					if (mazeGenerator && mazeDataPacket && mazeParamsPacket)
@@ -185,12 +188,16 @@ void Server::RunServer()
 
 							break;
 						}
+						//Update the avatar index on the server (happens when the client generates its start and end positions)
 						case PacketType::PACKET_UPDATE_AVATAR_IDX:
 						{
 							//Update the current client's avatar index
 							if (CommonUtils::isInteger(packetData))
 							{
-								clients[clientID]->avatarIdx = std::stoi(packetData);
+								//Update the avatar's index into the allNodes array and the avatar physics node position
+								int idx = std::stoi(packetData);
+								clients[clientID]->avatarIdx = idx;
+								clients[clientID]->avatarPnode->SetPosition(Vector3(mazeGenerator->GetAllNodesArr()[idx]._pos.x, 0.0f, mazeGenerator->GetAllNodesArr()[idx]._pos.y));
 							}
 							else
 							{
@@ -198,6 +205,7 @@ void Server::RunServer()
 							}
 							break;
 						}
+						//Update whether or not the client's avatar should move
 						case PacketType::PACKET_IS_MOVE:
 						{
 							if (CommonUtils::isInteger(packetData))
@@ -217,13 +225,14 @@ void Server::RunServer()
 						}
 					}
 
-					SearchAStar*		search_as;
+					SearchAStar* search_as;
 
 					enet_packet_destroy(evnt.packet);
 					break;
 				}
 				case ENET_EVENT_TYPE_DISCONNECT:
 				{
+					PhysicsEngine::Instance()->RemovePhysicsObject(clients[evnt.peer->incomingPeerID]->avatarPnode);
 					SAFE_DELETE(clients[evnt.peer->incomingPeerID]);
 					printf("- Client %d has disconnected.\n", evnt.peer->incomingPeerID);
 					break;
@@ -263,7 +272,7 @@ const int Server::FindIdx(const GraphNode* node)
 	{
 		if (mazeGenerator->GetAllNodesArr()[j]._pos == posToFind)
 		{
-			//return to_string(j) + " ";
+			//return std::to_string(j) + " ";
 			return j;
 		}
 	}
@@ -305,7 +314,7 @@ void Server::GenerateMazeDataPacket(const std::string packetData, const char del
 	mazeGenerator->Generate(mazeSize, mazeDensity);
 
 	mazeParamsPacket = new Packet(PACKET_MAZE_PARAMS);
-	std::string data = to_string(mazeSize) + std::string(" ") + to_string(mazeDensity);
+	std::string data = std::to_string(mazeSize) + std::string(" ") + std::to_string(mazeDensity);
 	mazeParamsPacket->SetData(data);
 
 	GraphEdge* allEdges = mazeGenerator->GetAllEdgesArr();
@@ -349,32 +358,61 @@ void Server::GenerateMazeDataPacket(const std::string packetData, const char del
 
 void Server::UpdateAvatars(const float dt)
 {
+	//Update the client physics nodes
+	PhysicsEngine::Instance()->Update(dt);
+
 	accumTime += dt;
 	for (int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		if (clients[i])
+		//if the client is connected and the client's movement bool is set then perform
+		//movement logic/calculations
+		if (clients[i] && clients[i]->moveAvatar)
 		{
 			clients[i]->accumTime += dt;
-			if (clients[i]->moveAvatar)
+			UpdateAvatarVelocity(clients[i]);
+
+			//Update the 
+			if (clients[i]->accumTime > 1.0f / avatarSpeed)
 			{
-				if (clients[i]->accumTime > 1.0f / 2.0f)
+				if (clients[i]->pathIdx < clients[i]->pathIndices.size() - 1)
 				{
 					clients[i]->pathIdx++;
-					clients[i]->avatarIdx = clients[i]->pathIndices[clients[i]->pathIdx];
-					//Send client packet
-					clients[i]->accumTime = 0.0f;
 				}
+				clients[i]->avatarIdx = clients[i]->pathIndices[clients[i]->pathIdx];
+				clients[i]->accumTime = 0.0f;
 			}
 
+			//Send client position updates every 1/30th of a second
 			if (accumTime > 1.0f / 30.0f)
 			{
-				//Send client position index
-				Packet avatarPacket(PacketType::PACKET_UPDATE_AVATAR_IDX);
-				std::string data = to_string(clients[i]->avatarIdx);
-				avatarPacket.SetData(data);
-				SendPacketToClient(clients[i]->peer, avatarPacket);
+				//Send client's physics node position to the client
+				Packet avatarPosPacket(PacketType::PACKET_UPDATE_AVATAR_POS);
+				std::string data = std::to_string(clients[i]->avatarPnode->GetPosition().x) + " " +
+					std::to_string(clients[i]->avatarPnode->GetPosition().z);
+				avatarPosPacket.SetData(data);
+				SendPacketToClient(clients[i]->peer, avatarPosPacket);
 				accumTime = 0.0f;
 			}
 		}
 	}
+}
+
+void Server::UpdateAvatarVelocity(Client* client)
+{
+	GraphNode* currentNode = &mazeGenerator->GetAllNodesArr()[client->avatarIdx]; 
+	GraphNode* nextNode;
+	if (client->pathIdx < client->pathIndices.size() - 1)
+	{
+		nextNode = &mazeGenerator->GetAllNodesArr()[client->pathIndices[client->pathIdx + 1]];
+	}
+	else
+	{
+		nextNode = currentNode;
+	}
+
+	Vector3 direction = Vector3();
+	direction.x = nextNode->_pos.x - currentNode->_pos.x;
+	direction.z = nextNode->_pos.y - currentNode->_pos.y;
+
+	client->avatarPnode->SetLinearVelocity(direction * avatarSpeed);
 }

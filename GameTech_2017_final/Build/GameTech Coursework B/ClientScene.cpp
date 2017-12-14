@@ -132,25 +132,25 @@ void ClientScene::OnUpdateScene(float dt)
 			DrawPath(finalPath, 2.5f / float(mazeSize));
 		}
 		//GraphNode* start = mazeGenerator->GetStartNode();
-		GraphNode avatarNode = mazeGenerator->GetAllNodesArr()[avatarIdx];
+		//GraphNode avatarNode = mazeGenerator->GetAllNodesArr()[avatarIdx];
 		//Draw the avatar at correct position
-		Vector3 cellpos = Vector3(
-			avatarNode._pos.x * 3.0f,
-			0.0f,
-			avatarNode._pos.y * 3.0f
-		) * mazeScalarf;
-		Vector3 cellsize = Vector3(
-			mazeScalarf * 2.0f,
-			1.0f,
-			mazeScalarf * 2.0f
-		);
-		Vector3 avatarSize = Vector3(
-			mazeScalarf * 1.5f,
-			1.5f,
-			mazeScalarf * 1.5f
-		);
+		//Vector3 cellpos = Vector3(
+		//	avatarNode._pos.x * 3.0f,
+		//	0.0f,
+		//	avatarNode._pos.y * 3.0f
+		//) * mazeScalarf;
+		//Vector3 cellsize = Vector3(
+		//	mazeScalarf * 2.0f,
+		//	1.0f,
+		//	mazeScalarf * 2.0f
+		//);
+		//Vector3 avatarSize = Vector3(
+		//	mazeScalarf * 1.5f,
+		//	1.5f,
+		//	mazeScalarf * 1.5f
+		//);
 
-		avatarRender->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
+		//avatarRender->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
 
 		//GraphNode* start = mazeGenerator->GetStartNode();
 		//GraphNode* end = mazeGenerator->GetEndNode();
@@ -348,16 +348,45 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 
 				break;
 			}
-			case PACKET_UPDATE_AVATAR_IDX:
+			case PACKET_UPDATE_AVATAR_POS:
 			{
-				//Update the client's avatar index
-				if (CommonUtils::isInteger(packetData))
+				//Update the client's avatar position
+				//Split the data into its (hopefully) 2 floats
+				std::vector<std::string> packetTokens;
+				std::stringstream ss(packetData);
+				string token;
+				while (getline(ss, token, delim))
 				{
-					avatarIdx = std::stoi(packetData);
+					packetTokens.push_back(token);
+				}
+
+				if (CommonUtils::isFloat(packetTokens[0]) && CommonUtils::isFloat(packetTokens[1]))
+				{
+					float posX = std::atof(packetTokens[0].c_str());
+					float posY = std::atof(packetTokens[1].c_str());
+
+					Vector3 cellpos = Vector3(
+						posX * 3.0f,
+						0.0f,
+						posY * 3.0f
+					) * mazeScalarf;
+					Vector3 cellsize = Vector3(
+						mazeScalarf * 2.0f,
+						1.0f,
+						mazeScalarf * 2.0f
+					);
+					Vector3 avatarSize = Vector3(
+						mazeScalarf * 1.5f,
+						1.5f,
+						mazeScalarf * 1.5f
+					);
+
+					avatarRender->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
 				}
 				else
 				{
-					std::cout << "\t Couldn't update avatar index. Data wasn't an integer.\n";
+					std::cout << "\t Failed to process updated avatar position from server.\n";
+					return;
 				}
 				break;
 			}
@@ -469,7 +498,7 @@ void ClientScene::GenerateNewMaze()
 void ClientScene::UpdateAvatarServerPosition()
 {
 	Packet avatarPacket(PacketType::PACKET_UPDATE_AVATAR_IDX);
-	std::string data = to_string(avatarIdx);
+	std::string data = std::to_string(avatarIdx);
 	avatarPacket.SetData(data);
 	SendPacketToServer(avatarPacket);
 }
@@ -489,7 +518,7 @@ void ClientScene::HandleKeyboardInputs()
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_G))
 	{
 		Packet paramsPacket(PACKET_MAZE_PARAMS);
-		std::string data = to_string(mazeSize) + std::string(" ") + to_string(mazeDensity);
+		std::string data = std::to_string(mazeSize) + std::string(" ") + std::to_string(mazeDensity);
 		paramsPacket.SetData(data);
 		SendPacketToServer(paramsPacket);
 	}
@@ -657,7 +686,7 @@ void ClientScene::UpdateEndPosition()
 void ClientScene::RequestPath()
 {
 	Packet pathRequestPacket(PACKET_PATH_REQUEST);
-	std::string data = to_string(mazeGenerator->GetStartIdx()) + " " +
+	std::string data = std::to_string(mazeGenerator->GetStartIdx()) + " " +
 		to_string(mazeGenerator->GetEndIdx());
 	pathRequestPacket.SetData(data);
 	SendPacketToServer(pathRequestPacket);

@@ -22,8 +22,14 @@ struct Client
 		, pathIdx(0)
 		, avatarPosition(Vector2())
 		, moveAvatar(false)
-		, accumTime(0.0f)
+		, accumTime(0.0f)		
+		, avatarPnode(new PhysicsNode())
 	{
+	}
+
+	Client::~Client()
+	{
+		SAFE_DELETE(avatarPnode);
 	}
 
 	ENetPeer* peer;
@@ -35,9 +41,12 @@ struct Client
 
 	Vector2 avatarPosition;
 	bool moveAvatar;
+	PhysicsNode* avatarPnode;
 
 	std::vector<int> pathIndices;
-	float accumTime;
+	//Each client has its own timer to calculate when it needs to update its current path index
+	//
+	float accumTime;		
 };
 
 class Server
@@ -58,6 +67,7 @@ private:
 	const int FindIdx(const GraphNode* node);
 	void GenerateMazeDataPacket(const std::string packetData, const char delim, const enet_uint16 clientID);
 	void UpdateAvatars(const float dt);
+	void UpdateAvatarVelocity(Client* client);
 
 	Client* clients[MAX_CLIENTS];
 
@@ -75,6 +85,6 @@ private:
 	Packet* mazeParamsPacket;
 
 	float accumTime = 0.0f;
-	float avatarSpeed = 1.0f;
+	float avatarSpeed = 3.0f;
 };
 
