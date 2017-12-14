@@ -53,6 +53,37 @@ public:
 	SearchAlgorithm() {	}
 	virtual ~SearchAlgorithm() {}
 
+	void StringPulling()
+	{
+		if (finalPath.size() > 2)
+		{
+			std::vector<const GraphNode*> tempPath;
+			tempPath.push_back(*(finalPath.begin()));
+			auto prev = finalPath.begin();
+			++prev;
+			auto next = prev;
+			++next;
+
+			for (auto it = finalPath.begin(); it != finalPath.end() && next != finalPath.end();)
+			{
+				Vector3 posI = (*it)->_pos;
+				Vector3 posNext = (*next)->_pos;
+				Vector3 dir = posI - posNext;
+				if (!IsOrthogonal(dir))
+				{
+					tempPath.push_back(*prev);
+					it = prev;
+				}
+				else
+				{
+					++prev;
+					++next;
+				}
+			}
+			finalPath.clear();
+			finalPath.assign(tempPath.begin(), tempPath.end());
+		}
+	}
 
 	//Returns true/false on whether or not a path could be found
 	virtual bool FindBestPath(const GraphNode* start, const GraphNode* goal) = 0;
@@ -71,6 +102,15 @@ protected:
 			finalPath.push_front(current);
 			current = map.at(current);
 		}
+	}
+
+
+
+	bool IsOrthogonal(Vector3 dir)
+	{
+		float dot = Vector3::Dot(dir.Normalise(), Vector3(1, 0, 0));
+
+		return dot == 1 || dot == 0 || dot == -1;
 	}
 
 protected:

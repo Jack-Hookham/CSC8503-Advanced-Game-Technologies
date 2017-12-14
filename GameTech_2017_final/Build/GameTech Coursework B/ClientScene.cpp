@@ -13,7 +13,7 @@ ClientScene::ClientScene(const std::string& friendly_name)
 	, endNode(NULL)
 	, clientGameObjs{NULL}
 	, clientID(-1)
-	, clientsConnected(1)
+	, clientsConnected(0)
 	, clientRnodes{NULL}
 	, mazeSize(16)
 	, mazeDensity(1.0f)
@@ -40,7 +40,7 @@ void ClientScene::OnInitializeScene()
 
 	wallMesh->SetTexture(whitetex);
 
-	GraphicsPipeline::Instance()->GetCamera()->SetPosition(Vector3(0.0f, 15.0f, 0.0f));
+	GraphicsPipeline::Instance()->GetCamera()->SetPosition(Vector3(0.0f, 8.0f, 1.5f));
 	GraphicsPipeline::Instance()->GetCamera()->SetPitch(-80.0f);
 	GraphicsPipeline::Instance()->GetCamera()->SetYaw(0.0f);
 
@@ -151,6 +151,8 @@ void ClientScene::OnUpdateScene(float dt)
 	NCLDebug::AddStatusEntry(Vector4(status_color), "   Start Index: %d", mazeGenerator->GetStartIdx());
 	NCLDebug::AddStatusEntry(Vector4(status_color), "   End Index: %d", mazeGenerator->GetEndIdx());
 	NCLDebug::AddStatusEntry(Vector4(status_color), "   Avatar Index: %d", avatarIdx);
+	NCLDebug::AddStatusEntry(Vector4(status_color), "   A* nodes: %d", aStarNodes);
+	NCLDebug::AddStatusEntry(Vector4(status_color), "   String pulling nodes: %d", stringPullingNodes);
 
 	HandleKeyboardInputs();
 
@@ -163,17 +165,17 @@ void ClientScene::OnUpdateScene(float dt)
 	}
 
 	//Update the number of connected clients
-	//if (mazeRenderer && mazeGenerator)
-	//{
-	//	clientsConnected = 0;
-	//	for (int i = 0; i < MAX_CLIENTS; ++i)
-	//	{
-	//		if (clientGameObjs[i]->Render())
-	//		{
-	//			clientsConnected++;
-	//		}
-	//	}
-	//}
+	if (mazeRenderer && mazeGenerator)
+	{
+		clientsConnected = 0;
+		for (int i = 0; i < MAX_CLIENTS; ++i)
+		{
+			if (clientGameObjs[i]->Render())
+			{
+				clientsConnected++;
+			}
+		}
+	}
 }
 
 void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
@@ -405,8 +407,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				int id = std::stoi(packetData);
 				if (id != clientID)
 				{
-					clientGameObjs[id]->SetRender(clientRnodes[id]); 
-					clientsConnected++;
+					clientGameObjs[id]->SetRender(clientRnodes[id]);
 				}
 				break;
 			}
@@ -417,8 +418,17 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 					{
 						GraphicsPipeline::Instance()->RemoveRenderNode(clientGameObjs[id]->Render());
 						clientGameObjs[id]->SetRenderNode(NULL);
-						clientsConnected--;
 					}
+				break;
+			}
+			case PacketType::PACKET_A_STAR_NODES:
+			{
+				aStarNodes = std::stoi(packetData);
+				break;
+			}
+			case PacketType::PACKET_STRING_PULLING_NODES:
+			{
+				stringPullingNodes = std::stoi(packetData);
 				break;
 			}
 			default:
@@ -643,31 +653,43 @@ void ClientScene::HandleKeyboardInputs()
 	{
 		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_UP) && mazeGenerator->GetStartIdx() > mazeSize - 1)
 		{
+			UpdateIsMove(false);
 			//Update the start node position on the generator
 			mazeGenerator->SetStartIdx(mazeGenerator->GetStartIdx() - mazeSize);
 			//This is then used to update the GameObject's position
 			UpdateStartPosition();
+			avatarIdx = mazeGenerator->GetStartIdx();
+			UpdateAvatarServerPosition();
 			RequestPath();
 		}
 
 		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_DOWN) && mazeGenerator->GetStartIdx() < mazeSize * (mazeSize - 1))
 		{
+			UpdateIsMove(false);
 			mazeGenerator->SetStartIdx(mazeGenerator->GetStartIdx() + mazeSize);
 			UpdateStartPosition();
+			avatarIdx = mazeGenerator->GetStartIdx();
+			UpdateAvatarServerPosition();
 			RequestPath();
 		}
 
 		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_RIGHT) && mazeGenerator->GetStartIdx() % mazeSize != mazeSize - 1)
 		{
+			UpdateIsMove(false);
 			mazeGenerator->SetStartIdx(mazeGenerator->GetStartIdx() + 1);
 			UpdateStartPosition();
+			avatarIdx = mazeGenerator->GetStartIdx();
+			UpdateAvatarServerPosition();
 			RequestPath();
 		}
 
 		if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_LEFT) && mazeGenerator->GetStartIdx() % mazeSize != 0)
 		{
+			UpdateIsMove(false);
 			mazeGenerator->SetStartIdx(mazeGenerator->GetStartIdx() - 1);
 			UpdateStartPosition();
+			avatarIdx = mazeGenerator->GetStartIdx();
+			UpdateAvatarServerPosition();
 			RequestPath();
 		}
 	}
@@ -779,4 +801,13 @@ void ClientScene::SendMazeParamsPacket()
 	std::string data = std::to_string(mazeSize) + std::string(" ") + std::to_string(mazeDensity);
 	paramsPacket.SetData(data);
 	SendPacketToServer(paramsPacket);
+}
+
+void ClientScene::UpdateIsMove(const bool move)
+{
+	isMove = move;
+	//Send the new move bool to the server
+	Packet isMovePacket(PacketType::PACKET_IS_MOVE);
+	isMovePacket.SetData(to_string(isMove));
+	SendPacketToServer(isMovePacket);
 }

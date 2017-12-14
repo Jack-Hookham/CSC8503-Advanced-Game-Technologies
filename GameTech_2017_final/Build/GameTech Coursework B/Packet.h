@@ -20,7 +20,9 @@ enum PacketType
 	PACKET_PARAMS_REQUEST,
 	PACKET_CLIENT_ID,
 	PACKET_CLIENT_CONNECT,
-	PACKET_CLIENT_DISCONNECT
+	PACKET_CLIENT_DISCONNECT,
+	PACKET_A_STAR_NODES,
+	PACKET_STRING_PULLING_NODES
 };
 
 //A packet contains a type so that it can be identified and processed correctly

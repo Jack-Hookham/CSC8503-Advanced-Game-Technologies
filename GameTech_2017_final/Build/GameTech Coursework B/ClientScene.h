@@ -31,9 +31,6 @@ public:
 
 	void ProcessNetworkEvent(const ENetEvent& evnt);
 
-	void GenerateNewMaze();
-	void UpdateAvatarServerPosition();
-
 protected:
 	void SendPacketToServer(const Packet& packet);
 	void HandleKeyboardInputs();
@@ -42,6 +39,13 @@ protected:
 	void RequestPath();
 	void DrawPath(const std::vector<int>& finalPath, const float lineWidth);
 	void SendMazeParamsPacket();
+	void UpdateIsMove(const bool move);	//Update movement bool and send it to the server
+	void UpdateAvatarServerPosition();
+	void GenerateNewMaze();
+
+	int aStarNodes;
+	int stringPullingNodes;
+
 
 	NetworkBase network;
 	ENetPeer*	serverConnection;
@@ -83,14 +87,4 @@ protected:
 	//if a node is moved then stop moving while we wait for the new path
 	bool isMove;
 	bool wantToMove;
-
-	//Update movement bool and send it to the server
-	void UpdateIsMove(const bool move)
-	{
-		isMove = move;
-		//Send the new move bool to the server
-		Packet isMovePacket(PacketType::PACKET_IS_MOVE);
-		isMovePacket.SetData(to_string(isMove));
-		SendPacketToServer(isMovePacket);
-	}
 };

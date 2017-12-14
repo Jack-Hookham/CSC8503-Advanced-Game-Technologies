@@ -208,7 +208,6 @@ void MazeRenderer::Generate_BuildRenderNodes()
 			float(w._ye - w._ys)
 		);
 
-
 		start = start * scalar;
 		Vector3 end = start + size * scalar;
 		end.y = 0.75f;
@@ -219,7 +218,6 @@ void MazeRenderer::Generate_BuildRenderNodes()
 		cube = new RenderNode(mesh, wall_color);
 		cube->SetTransform(Matrix4::Translation(centre) * Matrix4::Scale(halfDims));
 		root->AddChild(cube);
-
 	}
 
 	//Add bounding edge walls to the maze

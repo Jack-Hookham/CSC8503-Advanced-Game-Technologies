@@ -219,8 +219,27 @@ void Server::RunServer()
 								mazeGenerator->GetAllNodesArr()[endIdx]._pos.x << ", " <<
 								mazeGenerator->GetAllNodesArr()[endIdx]._pos.y << ").\n";
 
+							//Reset the avatar vars for the start node
+							clients[clientID]->avatarPnode->SetPosition(Vector3(mazeGenerator->GetAllNodesArr()[startIdx]._pos.x, 0.0f, mazeGenerator->GetAllNodesArr()[startIdx]._pos.y));
+							clients[clientID]->sendUpdateTime = 0.0f;
+							clients[clientID]->pathTime = 0.0f;
+
+							//Calculate A* path without string pulling
 							searchAStar->FindBestPath(&mazeGenerator->GetAllNodesArr()[startIdx], &mazeGenerator->GetAllNodesArr()[endIdx]);
-							const std::list<const GraphNode*> finalPath = searchAStar->GetFinalPath();
+							std::list<const GraphNode*> finalPath = searchAStar->GetFinalPath();
+
+							//Send the number of nodes produced by A* to the client so that it can be displayed for comparison
+							Packet aStarPacket(PACKET_A_STAR_NODES);
+							aStarPacket.SetData(to_string(finalPath.size()));
+							SendPacketToClient(clients[clientID]->peer, aStarPacket);
+							
+							//Update the final path with string pulling to remove nodes between other nodes in LoS
+							//searchAStar->StringPulling();
+							finalPath = searchAStar->GetFinalPath();
+
+							Packet stringPullPacket(PACKET_STRING_PULLING_NODES);
+							stringPullPacket.SetData(to_string(finalPath.size()));
+							SendPacketToClient(clients[clientID]->peer, stringPullPacket);
 
 							Packet pathPacket(PACKET_PATH);
 

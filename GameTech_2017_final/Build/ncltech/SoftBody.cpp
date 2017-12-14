@@ -187,15 +187,6 @@ Mesh* SoftBody::GenerateMesh()
 			m->vertices[vertexIndex + 3] = (GetRight(x, y)->GetPosition() - m_position) * invNodeRadius;
 			m->vertices[vertexIndex + 4] = (GetRightUp(x, y)->GetPosition() - m_position) * invNodeRadius;
 			m->vertices[vertexIndex + 5] = (GetUp(x, y)->GetPosition() - m_position) * invNodeRadius;
-
-			//m->textureCoords[vertexIndex] = Vector2(0.0f, 0.0f);
-			//m->textureCoords[vertexIndex + 1] = Vector2(0.0f, 1.0f);
-			//m->textureCoords[vertexIndex + 2] = Vector2(1.0f, 0.0f);
-
-			//m->textureCoords[vertexIndex + 3] = Vector2(0.0f, 1.0f);
-			//m->textureCoords[vertexIndex + 4] = Vector2(1.0f, 1.0f);
-			//m->textureCoords[vertexIndex + 5] = Vector2(1.0f, 0.0f);
-
 			
 			m->textureCoords[vertexIndex] = Vector2(x * texConstX, 1 - (y * texConstY));
 			m->textureCoords[vertexIndex + 1] = Vector2((x + 1) * texConstX, 1 - (y * texConstY));
