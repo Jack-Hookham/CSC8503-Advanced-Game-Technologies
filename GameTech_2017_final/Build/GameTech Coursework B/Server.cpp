@@ -8,7 +8,7 @@ Server::Server()
 	, mazeDataPacket(NULL)
 	, mazeParamsPacket(NULL)
 	, clients{NULL}
-	, accumTime(0.0f)
+	, avatarSpeed(1.0f)
 {
 }
 
@@ -36,7 +36,10 @@ void Server::RunServer()
 	while (true)
 	{
 		float dt = timer.GetTimedMS() * 0.001f;
+		//accumTime += dt;
 
+		//Update the client physics nodes
+		PhysicsEngine::Instance()->Update(dt);
 		UpdateAvatars(dt);
 
 		//Handle All Incoming Packets and Send any enqued packets
@@ -358,32 +361,29 @@ void Server::GenerateMazeDataPacket(const std::string packetData, const char del
 
 void Server::UpdateAvatars(const float dt)
 {
-	//Update the client physics nodes
-	PhysicsEngine::Instance()->Update(dt);
-
-	accumTime += dt;
 	for (int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		//if the client is connected and the client's movement bool is set then perform
 		//movement logic/calculations
 		if (clients[i] && clients[i]->moveAvatar)
 		{
-			clients[i]->accumTime += dt;
+			clients[i]->pathTime += dt;
+			clients[i]->sendUpdateTime += dt;
 			UpdateAvatarVelocity(clients[i]);
 
 			//Update the 
-			if (clients[i]->accumTime > 1.0f / avatarSpeed)
+			if (clients[i]->pathTime > 1.0f / avatarSpeed)
 			{
 				if (clients[i]->pathIdx < clients[i]->pathIndices.size() - 1)
 				{
 					clients[i]->pathIdx++;
 				}
 				clients[i]->avatarIdx = clients[i]->pathIndices[clients[i]->pathIdx];
-				clients[i]->accumTime = 0.0f;
+				clients[i]->pathTime = 0.0f;
 			}
 
 			//Send client position updates every 1/30th of a second
-			if (accumTime > 1.0f / 30.0f)
+			if (clients[i]->sendUpdateTime > 1.0f / 30.0f)
 			{
 				//Send client's physics node position to the client
 				Packet avatarPosPacket(PacketType::PACKET_UPDATE_AVATAR_POS);
@@ -391,7 +391,7 @@ void Server::UpdateAvatars(const float dt)
 					std::to_string(clients[i]->avatarPnode->GetPosition().z);
 				avatarPosPacket.SetData(data);
 				SendPacketToClient(clients[i]->peer, avatarPosPacket);
-				accumTime = 0.0f;
+				clients[i]->sendUpdateTime = 0.0f;
 			}
 		}
 	}

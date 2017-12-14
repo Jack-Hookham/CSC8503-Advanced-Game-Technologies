@@ -22,7 +22,8 @@ struct Client
 		, pathIdx(0)
 		, avatarPosition(Vector2())
 		, moveAvatar(false)
-		, accumTime(0.0f)		
+		, pathTime(0.0f)
+		, sendUpdateTime(0.0f)
 		, avatarPnode(new PhysicsNode())
 	{
 	}
@@ -45,8 +46,10 @@ struct Client
 
 	std::vector<int> pathIndices;
 	//Each client has its own timer to calculate when it needs to update its current path index
-	//
-	float accumTime;		
+	float pathTime;	
+	//And a timer to determine whether it needs to send the updated position to the client
+	//Currently every 1 / 30 second
+	float sendUpdateTime;
 };
 
 class Server
@@ -84,7 +87,7 @@ private:
 	//they are updated for all clients
 	Packet* mazeParamsPacket;
 
-	float accumTime = 0.0f;
-	float avatarSpeed = 3.0f;
+	//float accumTime = 0.0f;
+	float avatarSpeed;
 };
 
