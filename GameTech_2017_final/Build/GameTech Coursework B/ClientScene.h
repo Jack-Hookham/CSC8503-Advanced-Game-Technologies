@@ -70,15 +70,27 @@ protected:
 	//I did this because when generating a new maze the time between receiving the
 	//maze data and the new path data meant that the maze data and path data were 
 	//out of sync temporarily so a squiggle was drawn
-	
+
 	//Whether the path is actually drawn
 	bool drawPath;
 	//Whether the client wants to draw the path
 	bool wantToDrawPath;
 
 	std::vector<int> finalPath;
+	int pathIndex;
 
-	bool moveAvatar;
+	//Same as drawing
+	//if a node is moved then stop moving while we wait for the new path
+	bool isMove;
+	bool wantToMove;
 
-
+	//Update movement bool and send it to the server
+	void UpdateIsMove(const bool move)
+	{
+		isMove = move;
+		//Send the new move bool to the server
+		Packet isMovePacket(PacketType::PACKET_IS_MOVE);
+		isMovePacket.SetData(to_string(isMove));
+		SendPacketToServer(isMovePacket);
+	}
 };

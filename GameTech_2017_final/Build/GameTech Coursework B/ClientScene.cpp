@@ -13,7 +13,7 @@ ClientScene::ClientScene(const std::string& friendly_name)
 	, endNode(NULL)
 	, clientGameObjs{NULL}
 	, clientID(-1)
-	, clientsConnected(0)
+	, clientsConnected(1)
 	, clientRnodes{NULL}
 	, mazeSize(16)
 	, mazeDensity(1.0f)
@@ -21,7 +21,8 @@ ClientScene::ClientScene(const std::string& friendly_name)
 	, mazeScalarMat4(Matrix4())
 	, drawPath(false)
 	, wantToDrawPath(false)
-	, moveAvatar(false)
+	, isMove(false)
+	, wantToMove(false)
 	, avatarIdx(0)
 {
 }
@@ -108,9 +109,9 @@ void ClientScene::OnCleanupScene()
 	//Release network and all associated data/peer connections
 	network.Release();
 	serverConnection = NULL;
-	//SAFE_DELETE(wallMesh);
-	//SAFE_DELETE(mazeGenerator);
-	//mazeRenderer = NULL;
+	SAFE_DELETE(wallMesh);
+	SAFE_DELETE(mazeGenerator);
+	mazeRenderer = NULL;
 }
 
 void ClientScene::OnUpdateScene(float dt)
@@ -149,6 +150,7 @@ void ClientScene::OnUpdateScene(float dt)
 	NCLDebug::AddStatusEntry(status_color, s);
 	NCLDebug::AddStatusEntry(Vector4(status_color), "   Start Index: %d", mazeGenerator->GetStartIdx());
 	NCLDebug::AddStatusEntry(Vector4(status_color), "   End Index: %d", mazeGenerator->GetEndIdx());
+	NCLDebug::AddStatusEntry(Vector4(status_color), "   Avatar Index: %d", avatarIdx);
 
 	HandleKeyboardInputs();
 
@@ -161,17 +163,17 @@ void ClientScene::OnUpdateScene(float dt)
 	}
 
 	//Update the number of connected clients
-	if (mazeRenderer && mazeGenerator)
-	{
-		clientsConnected = 0;
-		for (int i = 0; i < MAX_CLIENTS; ++i)
-		{
-			if (clientGameObjs[i]->Render())
-			{
-				clientsConnected++;
-			}
-		}
-	}
+	//if (mazeRenderer && mazeGenerator)
+	//{
+	//	clientsConnected = 0;
+	//	for (int i = 0; i < MAX_CLIENTS; ++i)
+	//	{
+	//		if (clientGameObjs[i]->Render())
+	//		{
+	//			clientsConnected++;
+	//		}
+	//	}
+	//}
 }
 
 void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
@@ -187,7 +189,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 
 			//Send a 'hello' packet
 			Packet msgPacket(PACKET_MESSAGE);
-			msgPacket.SetData(std::string("Hellooo!"));
+			msgPacket.SetData(std::string("Hello"));
 			SendPacketToServer(msgPacket);
 		}
 	}
@@ -220,7 +222,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 		{
 			case PacketType::PACKET_BAD:
 			{
-				std::cout << "\t Failed to read packet from Server. Unknown packet type.\n";
+				std::cout << "\t Failed to read packet from Server. Unknown packet type " << packetType << ".\n";
 				break;
 			}
 			case PacketType::PACKET_MESSAGE:
@@ -323,6 +325,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				}
 
 				drawPath = wantToDrawPath;
+				UpdateIsMove(wantToMove);
 
 				break;
 			}
@@ -372,6 +375,21 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				}
 				break;
 			}
+			case PacketType::PACKET_UPDATE_AVATAR_IDX:
+			{
+				//Update the client's avatar index
+				if (CommonUtils::isInteger(packetData))
+				{
+					//Update the avatar's index into the allNodes array and the avatar physics node position
+					int idx = std::stoi(packetData);
+					avatarIdx = idx;
+				}
+				else
+				{
+					std::cout << "Couldn't update avatar index. Data wasn't an integer.\n";
+				}
+				break;
+			}
 			case PacketType::PACKET_PARAMS_REQUEST:
 			{
 				SendMazeParamsPacket();
@@ -387,19 +405,25 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				int id = std::stoi(packetData);
 				if (id != clientID)
 				{
-					clientGameObjs[id]->SetRender(clientRnodes[id]);
+					clientGameObjs[id]->SetRender(clientRnodes[id]); 
+					clientsConnected++;
 				}
 				break;
 			}
 			case PacketType::PACKET_CLIENT_DISCONNECT:
 			{
 				int id = std::stoi(packetData);
-				clientGameObjs[id]->SetRenderNode(NULL);
+					if (id != clientID)
+					{
+						GraphicsPipeline::Instance()->RemoveRenderNode(clientGameObjs[id]->Render());
+						clientGameObjs[id]->SetRenderNode(NULL);
+						clientsConnected--;
+					}
 				break;
 			}
 			default:
 			{
-				std::cout << "\t Failed to read packet from Server. Unknown packet type.\n";
+				std::cout << "\t Failed to read packet from Server. Unknown packet type " << packetType << ".\n";
 				break;
 			}
 		}
@@ -418,7 +442,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 
 void ClientScene::GenerateNewMaze()
 {
-	moveAvatar = false;
+	UpdateIsMove(false);
 
 	//delete all render nodes if they aren't set to be deleted by DeleteAllGameObjects
 	//if the avatar obj's RenderNode was set to NULL when the maze was generated
@@ -481,12 +505,12 @@ void ClientScene::GenerateNewMaze()
 	//then set up game objects and render nodes arrays
 	if (clientID >= 0)
 	{
-		//Create the game object for each client
+		//clientsConnectedreate the game object for each client
 		//This clients render node is added to the game object when the avatar is told to follow its path
 		//Other client render nodes are added to their game objects when they are connected and told to follow their path
 		for (int i = 0; i < MAX_CLIENTS; ++i)
 		{
-			Vector3 avatarPos = Vector3((-10.0f + i % 4) * 3.0f, 0.0f, (0.0f + i / 4) * 3.0f) * mazeScalarf;
+			Vector3 avatarPos = Vector3((-5.0f + i % 4) * 3.0f, 0.0f, (0.0f + i / 4) * 3.0f) * mazeScalarf;
 			if (i == clientID)
 			{
 				clientRnodes[i] = new RenderNode(wallMesh, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
@@ -555,25 +579,17 @@ void ClientScene::HandleKeyboardInputs()
 	//Spawn and move avatar
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_J))
 	{
-		moveAvatar = true;
+		wantToMove = true;
+		UpdateIsMove(wantToMove);
 		avatarIdx = mazeGenerator->GetStartIdx();
 		clientGameObjs[clientID]->SetRender(clientRnodes[clientID]);
-
-		//Send the new move bool to the server
-		Packet isMovePacket(PacketType::PACKET_IS_MOVE);
-		isMovePacket.SetData(to_string(moveAvatar));
-		SendPacketToServer(isMovePacket);
 	}
 
 	//Move the avatar
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_K))
 	{
-		moveAvatar = !moveAvatar;
-
-		//Send the new move bool to the server
-		Packet isMovePacket(PacketType::PACKET_IS_MOVE);
-		isMovePacket.SetData(to_string(moveAvatar));
-		SendPacketToServer(isMovePacket);
+		wantToMove = !wantToMove;
+		UpdateIsMove(wantToMove);
 	}
 
 	//End node movement (CTRL + Arrow key)
@@ -583,29 +599,41 @@ void ClientScene::HandleKeyboardInputs()
 		{
 			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_UP) && mazeGenerator->GetEndIdx() > mazeSize - 1)
 			{
+				UpdateIsMove(false);
 				mazeGenerator->SetEndIdx(mazeGenerator->GetEndIdx() - mazeSize);
 				UpdateEndPosition();
+				mazeGenerator->SetStartIdx(avatarIdx);
+				UpdateStartPosition();
 				RequestPath();
 			}
 
 			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_DOWN) && mazeGenerator->GetEndIdx() < mazeSize * (mazeSize - 1))
 			{
+				UpdateIsMove(false);
 				mazeGenerator->SetEndIdx(mazeGenerator->GetEndIdx() + mazeSize);
 				UpdateEndPosition();
+				mazeGenerator->SetStartIdx(avatarIdx);
+				UpdateStartPosition();
 				RequestPath();
 			}
 
 			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_RIGHT) && mazeGenerator->GetEndIdx() % mazeSize != mazeSize - 1)
 			{
+				UpdateIsMove(false);
 				mazeGenerator->SetEndIdx(mazeGenerator->GetEndIdx() + 1);
 				UpdateEndPosition();
+				mazeGenerator->SetStartIdx(avatarIdx);
+				UpdateStartPosition();
 				RequestPath();
 			}
 
 			if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_LEFT) && mazeGenerator->GetEndIdx() % mazeSize != 0)
 			{
+				UpdateIsMove(false);
 				mazeGenerator->SetEndIdx(mazeGenerator->GetEndIdx() - 1);
 				UpdateEndPosition();
+				mazeGenerator->SetStartIdx(avatarIdx);
+				UpdateStartPosition();
 				RequestPath();
 			}
 		}

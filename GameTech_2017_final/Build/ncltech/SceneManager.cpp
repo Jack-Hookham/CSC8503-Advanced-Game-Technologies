@@ -16,7 +16,7 @@ SceneManager::~SceneManager()
 	m_SceneIdx = 0;
 	for (Scene* scene : m_vpAllScenes)
 	{
-		if (scene != scene)
+		//if (scene != scene)		why was this here?
 		{
 			scene->OnCleanupScene();
 			delete scene;

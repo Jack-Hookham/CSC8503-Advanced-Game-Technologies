@@ -75,10 +75,10 @@ void Server::RunServer()
 						SendPacketToClient(evnt.peer, *mazeParamsPacket);
 						SendPacketToClient(evnt.peer, *mazeDataPacket);
 
-						//Send a packet to this client telling it about other clients
+						//Tell the client about the other clients
 						for (int i = 0; i < MAX_CLIENTS; ++i)
 						{
-							if (i != clientID && clients[i])
+							if (clients[i])
 							{
 								Packet clientPacket(PacketType::PACKET_CLIENT_CONNECT);
 								clientPacket.SetData(to_string(i));
@@ -159,6 +159,17 @@ void Server::RunServer()
 								SendPacketToClients(*mazeDataPacket);
 							}
 
+							//Tell all clients about each other
+							for (int i = 0; i < MAX_CLIENTS; ++i)
+							{
+								if (clients[i])
+								{
+									Packet clientPacket(PacketType::PACKET_CLIENT_CONNECT);
+									clientPacket.SetData(to_string(i));
+									SendPacketToClients(clientPacket);
+								}
+							}
+
 							break;
 						}
 						case PacketType::PACKET_MAZE_DATA:
@@ -169,6 +180,8 @@ void Server::RunServer()
 						}
 						case PacketType::PACKET_PATH_REQUEST:
 						{
+							clients[clientID]->pathIdx = 0;
+
 							//Split the data into its (hopefully) 2 ints
 							std::vector<std::string> packetTokens;
 							std::stringstream ss(packetData);
@@ -448,6 +461,11 @@ void Server::UpdateAvatars(const float dt)
 					SendPacketToClients(avatarPosPacket);
 					//Set new update time to remainder of update time / update time step
 					clients[i]->sendUpdateTime = std::fmod(clients[i]->sendUpdateTime, UPDATE_TIMESTEP);
+
+					//Send the each client's avatar position to them
+					Packet avatarIndexPacket(PacketType::PACKET_UPDATE_AVATAR_IDX);
+					avatarIndexPacket.SetData(std::to_string(clients[i]->avatarIdx));
+					SendPacketToClient(clients[i]->peer, avatarIndexPacket);
 				}
 			}
 		}
