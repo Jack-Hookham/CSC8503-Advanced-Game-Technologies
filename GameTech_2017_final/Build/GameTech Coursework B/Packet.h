@@ -18,15 +18,9 @@ enum PacketType
 	PACKET_UPDATE_AVATAR_POS,
 	PACKET_IS_MOVE,
 	PACKET_PARAMS_REQUEST,
-	PACKET_CLIENT_ID
-};
-
-enum MoveDirection
-{
-	MOVEMENT_UP,
-	MOVEMENT_LEFT,
-	MOVENENT_DOWN,
-	MOVEMENT_RIGHT
+	PACKET_CLIENT_ID,
+	PACKET_CLIENT_CONNECT,
+	PACKET_CLIENT_DISCONNECT
 };
 
 //A packet contains a type so that it can be identified and processed correctly

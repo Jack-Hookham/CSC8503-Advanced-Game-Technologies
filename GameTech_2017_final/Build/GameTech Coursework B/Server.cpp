@@ -58,6 +58,11 @@ void Server::RunServer()
 					idPacket.SetData(to_string(evnt.peer->incomingPeerID));
 					SendPacketToClient(evnt.peer, idPacket);
 
+					//Send a packet to all clients telling them that a new client connected
+					Packet clientConnectPacket(PacketType::PACKET_CLIENT_CONNECT);
+					clientConnectPacket.SetData(to_string(evnt.peer->incomingPeerID));
+					SendPacketToClients(clientConnectPacket);
+
 					//Add the client's physics node to the physics engine
 					PhysicsEngine::Instance()->AddPhysicsObject(clients[evnt.peer->incomingPeerID]->avatarPnode); 
 
@@ -262,6 +267,11 @@ void Server::RunServer()
 				}
 				case ENET_EVENT_TYPE_DISCONNECT:
 				{
+					//Send a packet to all clients telling them that the client disconnected
+					Packet clientDisonnectPacket(PacketType::PACKET_CLIENT_DISCONNECT);
+					clientDisonnectPacket.SetData(to_string(evnt.peer->incomingPeerID));
+					SendPacketToClients(clientDisonnectPacket);
+
 					PhysicsEngine::Instance()->RemovePhysicsObject(clients[evnt.peer->incomingPeerID]->avatarPnode);
 					SAFE_DELETE(clients[evnt.peer->incomingPeerID]);
 					printf("- Client %d has disconnected.\n", evnt.peer->incomingPeerID);
@@ -282,6 +292,7 @@ void Server::SendPacketToClients(const Packet& packet)
 
 	ENetPacket* enetPacket = enet_packet_create(packetWhole, strlen(packetWhole) + 1, 0);
 	enet_host_broadcast(networkBase.m_pNetwork, 0, enetPacket);
+	enet_host_flush(networkBase.m_pNetwork);
 }
 
 void Server::SendPacketToClient(ENetPeer* peer, const Packet& packet)
@@ -292,6 +303,7 @@ void Server::SendPacketToClient(ENetPeer* peer, const Packet& packet)
 
 	ENetPacket* enetPacket = enet_packet_create(packetWhole, strlen(packetWhole) + 1, 0);
 	enet_peer_send(peer, 0, enetPacket);
+	enet_host_flush(networkBase.m_pNetwork);
 }
 
 const int Server::FindIdx(const GraphNode* node)
@@ -407,6 +419,12 @@ void Server::UpdateAvatars(const float dt)
 					{
 						clients[i]->pathIdx += (int)(clients[i]->pathTime * 1.0f / AVATAR_SPEED);
 					}
+					//Prevent the path index from going out of range
+					if (clients[i]->pathIdx > clients[i]->pathIndices.size() - 1)
+					{
+						clients[i]->pathIdx = clients[i]->pathIndices.size() - 1;
+					}
+
 					clients[i]->avatarIdx = clients[i]->pathIndices[clients[i]->pathIdx];
 					clients[i]->pathTime = std::fmod(clients[i]->pathTime, 1.0f / AVATAR_SPEED);
 				}
@@ -414,13 +432,14 @@ void Server::UpdateAvatars(const float dt)
 				//Send client position updates every 1/30th of a second
 				if (clients[i]->sendUpdateTime > UPDATE_TIMESTEP)
 				{
-					//Send client's physics node position to the client
+					//Send client's physics node position to all clients
 					Packet avatarPosPacket(PacketType::PACKET_UPDATE_AVATAR_POS);
-					std::string data = std::to_string(clients[i]->avatarPnode->GetPosition().x) + " " +
+					std::string data = std::to_string(i) + " " +
+						std::to_string(clients[i]->avatarPnode->GetPosition().x) + " " +
 						std::to_string(clients[i]->avatarPnode->GetPosition().z);
 					avatarPosPacket.SetData(data);
-					SendPacketToClient(clients[i]->peer, avatarPosPacket);
-					//Set new update time to remainder of 
+					SendPacketToClients(avatarPosPacket);
+					//Set new update time to remainder of update time / update time step
 					clients[i]->sendUpdateTime = std::fmod(clients[i]->sendUpdateTime, UPDATE_TIMESTEP);
 				}
 			}

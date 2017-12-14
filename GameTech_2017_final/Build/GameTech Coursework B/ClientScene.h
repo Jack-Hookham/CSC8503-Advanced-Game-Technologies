@@ -16,7 +16,7 @@
 #include "MazeGenerator.h"
 #include "MazeRenderer.h"
 
-#define MAX_MAZE_SIZE 25
+#define MAX_MAZE_SIZE 50
 
 const Vector3 pos_maze = Vector3(0.0f, 0.0f, 0.0f);
 
@@ -51,10 +51,12 @@ protected:
 
 	GameObject* startNode;
 	GameObject* endNode;
-	GameObject* clientGameObj;
+	//GameObject* clientGameObj;
+	GameObject* clientGameObjs[MAX_CLIENTS];
 	RenderNode* clientRnodes[MAX_CLIENTS];		//Store render nodes for all clients
 	int clientID;								//Store this client's ID
 	int avatarIdx;
+	int clientsConnected;						//Includes self
 
 	int mazeSize;
 	float mazeDensity;
@@ -77,5 +79,6 @@ protected:
 	std::vector<int> finalPath;
 
 	bool moveAvatar;
+
 
 };

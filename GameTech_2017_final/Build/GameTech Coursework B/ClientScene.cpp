@@ -11,8 +11,9 @@ ClientScene::ClientScene(const std::string& friendly_name)
 	, wallMesh(NULL)
 	, startNode(NULL)
 	, endNode(NULL)
-	, clientGameObj(NULL)
+	, clientGameObjs{NULL}
 	, clientID(-1)
+	, clientsConnected(0)
 	, clientRnodes{NULL}
 	, mazeSize(16)
 	, mazeDensity(1.0f)
@@ -115,6 +116,8 @@ void ClientScene::OnUpdateScene(float dt)
 	uint8_t ip3 = (serverConnection->address.host >> 16) & 0xFF;
 	uint8_t ip4 = (serverConnection->address.host >> 24) & 0xFF;
 
+	NCLDebug::AddStatusEntry(status_color, "Client ID: %d", clientID);
+	NCLDebug::AddStatusEntry(status_color, "Clients Connected: %d", clientsConnected);
 	NCLDebug::AddStatusEntry(status_color, "Network Traffic");
 	NCLDebug::AddStatusEntry(status_color, "    Incoming: %5.2fKbps", network.m_IncomingKb);
 	NCLDebug::AddStatusEntry(status_color, "    Outgoing: %5.2fKbps", network.m_OutgoingKb);		
@@ -142,6 +145,19 @@ void ClientScene::OnUpdateScene(float dt)
 			DrawPath(finalPath, 2.5f / float(mazeSize));
 		}
 	}
+
+	//Update the number of connected clients
+	if (mazeRenderer && mazeGenerator)
+	{
+		clientsConnected = 0;
+		for (int i = 0; i < MAX_CLIENTS; ++i)
+		{
+			if (clientGameObjs[i]->Render())
+			{
+				clientsConnected++;
+			}
+		}
+	}
 }
 
 void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
@@ -162,7 +178,6 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 		}
 	}
 	break;
-
 
 	//Server has sent us a new packet
 	case ENET_EVENT_TYPE_RECEIVE:
@@ -309,10 +324,11 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 					packetTokens.push_back(token);
 				}
 
-				if (CommonUtils::isFloat(packetTokens[0]) && CommonUtils::isFloat(packetTokens[1]))
+				if (CommonUtils::isInteger(packetTokens[0]) && CommonUtils::isFloat(packetTokens[1]) && CommonUtils::isFloat(packetTokens[2]))
 				{
-					float posX = std::atof(packetTokens[0].c_str());
-					float posY = std::atof(packetTokens[1].c_str());
+					int updateID = std::stoi(packetTokens[0]);			//ID of the client to be updated
+					float posX = std::atof(packetTokens[1].c_str());
+					float posY = std::atof(packetTokens[2].c_str());
 
 					Vector3 cellpos = Vector3(
 						posX * 3.0f,
@@ -330,9 +346,9 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 						mazeScalarf * 1.5f
 					);
 
-					if (clientID >= 0)
+					if (clientRnodes[updateID])
 					{
-						clientRnodes[clientID]->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
+						clientRnodes[updateID]->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
 					}
 				}
 				else
@@ -350,6 +366,21 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 			case PacketType::PACKET_CLIENT_ID:
 			{
 				clientID = std::stoi(packetData);
+				break;
+			}
+			case PacketType::PACKET_CLIENT_CONNECT:
+			{
+				int id = std::stoi(packetData);
+				if (id != clientID)
+				{
+					clientGameObjs[id]->SetRender(clientRnodes[id]);
+				}
+				break;
+			}
+			case PacketType::PACKET_CLIENT_DISCONNECT:
+			{
+				int id = std::stoi(packetData);
+				clientGameObjs[id]->SetRender(NULL);
 				break;
 			}
 			default:
@@ -375,22 +406,26 @@ void ClientScene::GenerateNewMaze()
 {
 	moveAvatar = false;
 
+	//delete all render nodes if they aren't set to be deleted by DeleteAllGameObjects
 	//if the avatar obj's RenderNode was set to NULL when the maze was generated
-	//then the avatarRender RenderNode won't be deleted so delete it here
-	if (clientGameObj)
+	//then the avatarRender RenderNode won't be deleted by DeleteAllGameObjects so delete it here
+	for (int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		if (clientGameObj->HasRender())
+		if (clientGameObjs[i])
 		{
-			if (clientID >= 0)
+			if (clientGameObjs[i]->HasRender())
 			{
-				clientRnodes[clientID] = NULL;
+				if (clientID >= 0)
+				{
+					clientRnodes[i] = NULL;
+				}
 			}
-		}
-		else
-		{
-			if (clientID >= 0)
+			else
 			{
-				SAFE_DELETE(clientRnodes[clientID]);
+				if (clientID >= 0)
+				{
+					SAFE_DELETE(clientRnodes[i]);
+				}
 			}
 		}
 	}
@@ -441,14 +476,28 @@ void ClientScene::GenerateNewMaze()
 		mazeScalarf * 1.5f
 	);
 
+	//if the client knows its ID (which it always should by the time a maze is generated)
+	//then set up game objects and render nodes arrays
 	if (clientID >= 0)
 	{
-		clientRnodes[clientID] = new RenderNode(wallMesh, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
-		clientRnodes[clientID]->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
+		//Create the game object for each client
+		//This clients render node is added to the game object when the avatar is told to follow its path
+		//Other client render nodes are added to their game objects when they are connected and told to follow their path
+		for (int i = 0; i < MAX_CLIENTS; ++i)
+		{
+			if (i == clientID)
+			{
+				clientRnodes[i] = new RenderNode(wallMesh, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+				clientRnodes[i]->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
+			}
+			else
+			{
+				clientRnodes[i] = new RenderNode(wallMesh, Vector4(1.0f, 1.0f, 0.2f, 1.0f));
+			}
+			clientGameObjs[i] = new GameObject("avatar " + std::to_string(i), NULL, NULL);
+			this->AddGameObject(clientGameObjs[i]);
+		}
 	}
-
-	clientGameObj = new GameObject("avatar", NULL, NULL);
-	this->AddGameObject(clientGameObj);
 
 	startNode = new GameObject("startnode", new RenderNode(wallMesh, Vector4(0.0f, 1.0f, 0.0f, 0.4f)), NULL);
 	startNode->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
@@ -504,7 +553,7 @@ void ClientScene::HandleKeyboardInputs()
 	{
 		moveAvatar = true;
 		avatarIdx = mazeGenerator->GetStartIdx();
-		clientGameObj->SetRender(clientRnodes[clientID]);
+		clientGameObjs[clientID]->SetRender(clientRnodes[clientID]);
 
 		//Send the new move bool to the server
 		Packet isMovePacket(PacketType::PACKET_IS_MOVE);
