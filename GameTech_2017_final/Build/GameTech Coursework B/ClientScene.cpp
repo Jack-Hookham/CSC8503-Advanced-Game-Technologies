@@ -11,10 +11,10 @@ ClientScene::ClientScene(const std::string& friendly_name)
 	, wallMesh(NULL)
 	, startNode(NULL)
 	, endNode(NULL)
-	, clientGameObjs{NULL}
+	, clientGameObjs{ NULL }
 	, clientID(-1)
 	, clientsConnected(0)
-	, clientRnodes{NULL}
+	, clientRnodes{ NULL }
 	, mazeSize(16)
 	, mazeDensity(1.0f)
 	, mazeScalarf(1.0f)
@@ -25,6 +25,8 @@ ClientScene::ClientScene(const std::string& friendly_name)
 	, wantToMove(false)
 	, avatarIdx(0)
 	, useStringPulling(false)
+	, avatarSize(Vector3())
+	, cellsize(Vector3())
 {
 }
 
@@ -154,7 +156,7 @@ void ClientScene::OnUpdateScene(float dt)
 	NCLDebug::AddStatusEntry(Vector4(status_color), "   End Index: %d", mazeGenerator->GetEndIdx());
 	NCLDebug::AddStatusEntry(Vector4(status_color), "   Avatar Index: %d", avatarIdx);
 	NCLDebug::AddStatusEntry(Vector4(status_color), "   A* nodes: %d", aStarNodes);
-	NCLDebug::AddStatusEntry(Vector4(status_color), "   String pulling nodes: %d", stringPullingNodes);
+	NCLDebug::AddStatusEntry(Vector4(status_color), "   String pulling nodes: %s", useStringPulling ? std::to_string(stringPullingNodes).c_str() : "N/A");
 
 	HandleKeyboardInputs();
 
@@ -162,7 +164,14 @@ void ClientScene::OnUpdateScene(float dt)
 	{
 		if (drawPath)
 		{
-			DrawPath(finalPath, 2.5f / float(mazeSize));
+			if (useStringPulling)
+			{
+				DrawPath(finalPathSP, 2.5f / float(mazeSize));
+			}
+			else
+			{
+				DrawPath(finalPathAS, 2.5f / float(mazeSize));
+			}
 		}
 	}
 
@@ -266,7 +275,6 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				const uint dataLength = mazeSize * (mazeSize - 1) * 2;
 				//Ensure that data string isn't longer than the required length
 				packetData.resize(dataLength);
-				//std::cout << "Packet type: " << packetType << ", Packet data: " << packetData << "\n";
 
 				//Process maze data packet, generate and render maze
 				bool* isWall = new bool[dataLength];
@@ -313,19 +321,36 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				delete[] isWall;
 				break;
 			}
-			case PacketType::PACKET_PATH:
+			case PacketType::PACKET_PATH_AS:
 			{
-				std::cout << "\t Updating path packet with nodes: " << packetData << ".\n";
+				std::cout << "\t Updating A* path with nodes: " << packetData << ".\n";
 
 				//Update the path to be rendered
 				//Clear the current path
-				finalPath.clear();
+				finalPathAS.clear();
 				//Convert packet string data to indecies of the all nodes array
 				std::istringstream iss(packetData);
 				int pathVal;
 				while (iss >> pathVal)
 				{
-					finalPath.push_back(pathVal);
+					finalPathAS.push_back(pathVal);
+				}
+
+				break;
+			}
+			case PacketType::PACKET_PATH_SP:
+			{
+				std::cout << "\t Updating string pulling path with nodes: " << packetData << ".\n";
+
+				//Update the path to be rendered
+				//Clear the current path
+				finalPathSP.clear();
+				//Convert packet string data to indecies of the all nodes array
+				std::istringstream iss(packetData);
+				int pathVal;
+				while (iss >> pathVal)
+				{
+					finalPathSP.push_back(pathVal);
 				}
 
 				drawPath = wantToDrawPath;
@@ -416,11 +441,11 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 			case PacketType::PACKET_CLIENT_DISCONNECT:
 			{
 				int id = std::stoi(packetData);
-					if (id != clientID)
-					{
-						GraphicsPipeline::Instance()->RemoveRenderNode(clientGameObjs[id]->Render());
-						clientGameObjs[id]->SetRenderNode(NULL);
-					}
+				if (id != clientID)
+				{
+					GraphicsPipeline::Instance()->RemoveRenderNode(clientGameObjs[id]->Render());
+					clientGameObjs[id]->SetRenderNode(NULL);
+				}
 				break;
 			}
 			case PacketType::PACKET_A_STAR_NODES:
@@ -509,9 +534,10 @@ void ClientScene::GenerateNewMaze()
 	uint flatMazeSize = mazeSize * 3 - 1;
 	mazeScalarf = 1.0f / (float)flatMazeSize;
 
+	avatarSize = Vector3(mazeScalarf * 1.5f, 1.5f, mazeScalarf * 1.5f);
+	cellsize = Vector3(mazeScalarf * 2.0f, 1.0f, mazeScalarf * 2.0f);
+
 	Vector3 cellpos = Vector3(start->_pos.x * 3.0f, 0.0f, start->_pos.y * 3.0f) * mazeScalarf;
-	Vector3 cellsize = Vector3(mazeScalarf * 2.0f, 1.0f, mazeScalarf * 2.0f);
-	Vector3 avatarSize = Vector3(mazeScalarf * 1.5f, 1.5f, mazeScalarf * 1.5f);
 
 	//if the client knows its ID (which it always should by the time a maze is generated)
 	//then set up game objects and render nodes arrays
@@ -543,11 +569,8 @@ void ClientScene::GenerateNewMaze()
 	startNode->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
 	this->AddGameObject(startNode);
 
-	cellpos = Vector3(
-		end->_pos.x * 3.0f,
-		0.0f,
-		end->_pos.y * 3.0f
-	) * mazeScalarf;
+	cellpos = Vector3(end->_pos.x * 3.0f, 0.0f, end->_pos.y * 3.0f) * mazeScalarf;
+
 	endNode = new GameObject("endnode", new RenderNode(wallMesh, Vector4(1.0f, 0.0f, 0.0f, 0.4f)), NULL);
 	endNode->Render()->SetTransform(mazeScalarMat4 * Matrix4::Translation(cellpos + cellsize * 0.5f) * Matrix4::Scale(cellsize * 0.5f));
 	this->AddGameObject(endNode);
@@ -611,6 +634,9 @@ void ClientScene::HandleKeyboardInputs()
 		Packet stringPullingPacket(PacketType::PACKET_USE_STRING_PULLING);
 		stringPullingPacket.SetData(to_string((int)useStringPulling));
 		SendPacketToServer(stringPullingPacket);
+
+		//Change the path with the new variable
+		//RequestPath();
 	}
 
 	//End node movement (CTRL + Arrow key)
@@ -798,7 +824,7 @@ void ClientScene::DrawPath(const std::vector<int>& finalPath, float lineWidth)
 				0.1f,
 				(mazeGenerator->GetAllNodesArr()[finalPath[i + 1]]._pos.y + 0.5f) * grid_scalar);
 
-			NCLDebug::DrawThickLine(start, end, lineWidth, CommonUtils::GenColor(i * col_factor));
+			NCLDebug::DrawThickLine(start, end, lineWidth, CommonUtils::GenColor(0.0f + i * col_factor));
 		}
 	}
 }

@@ -54,7 +54,6 @@ protected:
 
 	GameObject* startNode;
 	GameObject* endNode;
-	//GameObject* clientGameObj;
 	GameObject* clientGameObjs[MAX_CLIENTS];
 	RenderNode* clientRnodes[MAX_CLIENTS];		//Store render nodes for all clients
 	int clientID;								//Store this client's ID
@@ -79,7 +78,9 @@ protected:
 	//Whether the client wants to draw the path
 	bool wantToDrawPath;
 
-	std::vector<int> finalPath;
+	//Always store the A* path and the string pulling path so that they can be switched between
+	std::vector<int> finalPathAS;
+	std::vector<int> finalPathSP;
 	int pathIndex;
 
 	//Same as drawing
@@ -88,4 +89,7 @@ protected:
 	bool wantToMove;
 
 	bool useStringPulling;
+
+	Vector3 avatarSize;
+	Vector3 cellsize;
 };

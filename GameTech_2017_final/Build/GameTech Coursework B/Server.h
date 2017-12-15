@@ -45,7 +45,8 @@ struct Client
 	bool isMove;
 	PhysicsNode* avatarPnode;
 
-	std::vector<int> pathIndices;
+	std::vector<int> finalPathAS;
+	std::vector<int> finalPathSP;
 	//Each client has its own timer to calculate when it needs to update its current path index
 	float pathTime;	
 	//And a timer to determine whether it needs to send the updated position to the client

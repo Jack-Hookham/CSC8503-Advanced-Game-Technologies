@@ -55,10 +55,14 @@ public:
 
 	void StringPulling()
 	{
+		//No point string pulling if the path size is 2 or less
 		if (finalPath.size() > 2)
 		{
-			std::vector<const GraphNode*> tempPath;
-			tempPath.push_back(*(finalPath.begin()));
+			//Store the new path nodes so that they can be added back into the final path at the end
+			std::vector<const GraphNode*> newPath;
+
+			//Add the first node to the path
+			newPath.push_back(*(finalPath.begin()));
 			auto prev = finalPath.begin();
 			++prev;
 			auto next = prev;
@@ -71,7 +75,7 @@ public:
 				Vector3 dir = posI - posNext;
 				if (!IsOrthogonal(dir))
 				{
-					tempPath.push_back(*prev);
+					newPath.push_back(*prev);
 					it = prev;
 				}
 				else
@@ -80,8 +84,13 @@ public:
 					++next;
 				}
 			}
+
+			//Add the end position to the new path
+			newPath.push_back(*--finalPath.end());
+
+			//Update the final path with the new path
 			finalPath.clear();
-			finalPath.assign(tempPath.begin(), tempPath.end());
+			finalPath.assign(newPath.begin(), newPath.end());
 		}
 	}
 
@@ -103,8 +112,6 @@ protected:
 			current = map.at(current);
 		}
 	}
-
-
 
 	bool IsOrthogonal(Vector3 dir)
 	{

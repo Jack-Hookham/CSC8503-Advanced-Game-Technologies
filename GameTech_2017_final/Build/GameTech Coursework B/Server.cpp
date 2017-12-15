@@ -221,47 +221,65 @@ void Server::RunServer()
 
 							//Calculate A* path without string pulling
 							searchAStar->FindBestPath(&mazeGenerator->GetAllNodesArr()[startIdx], &mazeGenerator->GetAllNodesArr()[endIdx]);
-							std::list<const GraphNode*> finalPath = searchAStar->GetFinalPath();
+							const std::list<const GraphNode*> finalPathAS = searchAStar->GetFinalPath();
 
 							//Send the number of nodes produced by A* to the client so that it can be displayed for comparison
 							Packet aStarPacket(PACKET_A_STAR_NODES);
-							aStarPacket.SetData(to_string(finalPath.size()));
+							aStarPacket.SetData(to_string(finalPathAS.size()));
 							SendPacketToClient(clients[clientID]->peer, aStarPacket);
-							
-							//Update the final path with string pulling to remove nodes between other nodes in LoS
-							//searchAStar->StringPulling();
-							finalPath = searchAStar->GetFinalPath();
-
-							Packet stringPullPacket(PACKET_STRING_PULLING_NODES);
-							stringPullPacket.SetData(to_string(finalPath.size()));
-							SendPacketToClient(clients[clientID]->peer, stringPullPacket);
-
-							Packet pathPacket(PACKET_PATH);
 
 							//Add the final path nodes to the packet data
-							std::vector<std::string> pathIndiciesStrings;
+							std::vector<std::string> indiciesAS;
 							//Also update the final path node indices for the current client
-							clients[clientID]->pathIndices.clear();
+							clients[clientID]->finalPathAS.clear();
 
-							for (auto it = finalPath.begin(); it != finalPath.end(); ++it)
+							for (auto it = finalPathAS.begin(); it != finalPathAS.end(); ++it)
 							{
 								int idx = FindIdx(*it);
-								pathIndiciesStrings.push_back(to_string(idx) + " ");
-								clients[clientID]->pathIndices.push_back(idx);
+								indiciesAS.push_back(to_string(idx) + " ");
+								clients[clientID]->finalPathAS.push_back(idx);
 							}
 
-							std::string pathIndiciesString;
-							pathIndiciesString = std::accumulate(std::begin(pathIndiciesStrings), std::end(pathIndiciesStrings), pathIndiciesString);
-							pathPacket.SetData(pathIndiciesString);
-							SendPacketToClient(peer, pathPacket);
+							//Send the updated A* path indicies to the client for path drawing
+							Packet pathPacketAS(PACKET_PATH_AS);
+							std::string accumIndiciesAS;
+							accumIndiciesAS = std::accumulate(std::begin(indiciesAS), std::end(indiciesAS), accumIndiciesAS);
+							pathPacketAS.SetData(accumIndiciesAS);
+							SendPacketToClient(peer, pathPacketAS);
 
-							//Reset the avatar vars for the start node
+							//Update the final path with string pulling to remove nodes between other nodes in LoS
+							searchAStar->StringPulling();
 
+							const std::list<const GraphNode*> finalPathSP = searchAStar->GetFinalPath();
+
+							//Send the number of nodes produced by string pulling
+							Packet stringPullPacket(PACKET_STRING_PULLING_NODES);
+							stringPullPacket.SetData(to_string(finalPathSP.size()));
+							SendPacketToClient(clients[clientID]->peer, stringPullPacket);
+
+							std::vector<std::string> indiciesSP;
+							//Also update the final path node indices for the current client
+							clients[clientID]->finalPathSP.clear();
+
+							for (auto it = finalPathSP.begin(); it != finalPathSP.end(); ++it)
+							{
+								int idx = FindIdx(*it);
+								indiciesSP.push_back(to_string(idx) + " ");
+								clients[clientID]->finalPathSP.push_back(idx);
+							}
+
+							Packet pathPacketSP(PACKET_PATH_SP);
+							std::string accumIndiciesSP;
+							accumIndiciesSP = std::accumulate(std::begin(indiciesSP), std::end(indiciesSP), accumIndiciesSP);
+							pathPacketSP.SetData(accumIndiciesSP);
+							SendPacketToClient(peer, pathPacketSP);
+
+							//Update avatar position based on new path
 							GraphNode* currentNode = &mazeGenerator->GetAllNodesArr()[clients[clientID]->startIdx];
 							GraphNode* nextNode;
-							if (clients[clientID]->pathIdx < clients[clientID]->pathIndices.size() - 1)
+							if (clients[clientID]->pathIdx < clients[clientID]->finalPathAS.size() - 1)
 							{
-								nextNode = &mazeGenerator->GetAllNodesArr()[clients[clientID]->pathIndices[clients[clientID]->pathIdx + 1]];
+								nextNode = &mazeGenerator->GetAllNodesArr()[clients[clientID]->finalPathAS[clients[clientID]->pathIdx + 1]];
 							}
 							else
 							{
@@ -272,14 +290,11 @@ void Server::RunServer()
 							direction.x = nextNode->_pos.x - currentNode->_pos.x;
 							direction.z = nextNode->_pos.y - currentNode->_pos.y;
 
-							//clients[clientID]->avatarPnode->SetLinearVelocity(direction * AVATAR_SPEED);
-
+							//Set the position and multiply the direction by how far the avatar was previously into its transition between nodes
 							float xPos = mazeGenerator->GetAllNodesArr()[startIdx]._pos.x + direction.x * clients[clientID]->pathTime * 1.0f / AVATAR_SPEED;
 							float yPos = mazeGenerator->GetAllNodesArr()[startIdx]._pos.y + direction.z * clients[clientID]->pathTime * 1.0f / AVATAR_SPEED;
 
 							clients[clientID]->avatarPnode->SetPosition(Vector3(xPos, 0.0f, yPos));
-							//clients[clientID]->sendUpdateTime = 0.0f;
-							//clients[clientID]->pathTime = 0.0f;
 
 							break;
 						}
@@ -312,7 +327,17 @@ void Server::RunServer()
 								std::cout << "Couldn't update movement bool for Client " << clientID << ". Data wasn't an integer.\n";
 							}
 						}
-
+						case PacketType::PACKET_USE_STRING_PULLING:
+						{
+							if (CommonUtils::isInteger(packetData))
+							{
+								std::istringstream(packetData) >> clients[clientID]->useStringPulling;
+							}
+							else
+							{
+								std::cout << "Couldn't string pulling bool for Client " << clientID << ". Data wasn't an integer.\n";
+							}
+						}
 						default:
 						{
 							std::cout << "\t Failed to read packet from Client " << clientID << ". Unknown packet type " << packetType << ".\n";
@@ -475,17 +500,17 @@ void Server::UpdateAvatars(const float dt)
 				//Update the 
 				if (clients[i]->pathTime > 1.0f / AVATAR_SPEED)
 				{
-					if (clients[i]->pathIdx < clients[i]->pathIndices.size() - 1)
+					if (clients[i]->pathIdx < clients[i]->finalPathAS.size() - 1)
 					{
 						clients[i]->pathIdx += (int)(clients[i]->pathTime * 1.0f / AVATAR_SPEED);
 					}
 					//Prevent the path index from going out of range
-					if (clients[i]->pathIdx > clients[i]->pathIndices.size() - 1)
+					if (clients[i]->pathIdx > clients[i]->finalPathAS.size() - 1)
 					{
-						clients[i]->pathIdx = clients[i]->pathIndices.size() - 1;
+						clients[i]->pathIdx = clients[i]->finalPathAS.size() - 1;
 					}
 
-					clients[i]->avatarIdx = clients[i]->pathIndices[clients[i]->pathIdx];
+					clients[i]->avatarIdx = clients[i]->finalPathAS[clients[i]->pathIdx];
 					clients[i]->pathTime = std::fmod(clients[i]->pathTime, 1.0f / AVATAR_SPEED);
 				}
 
@@ -522,9 +547,9 @@ void Server::UpdateAvatarVelocity(Client* client)
 	{
 		GraphNode* currentNode = &mazeGenerator->GetAllNodesArr()[client->avatarIdx];
 		GraphNode* nextNode;
-		if (client->pathIdx < client->pathIndices.size() - 1)
+		if (client->pathIdx < client->finalPathAS.size() - 1)
 		{
-			nextNode = &mazeGenerator->GetAllNodesArr()[client->pathIndices[client->pathIdx + 1]];
+			nextNode = &mazeGenerator->GetAllNodesArr()[client->finalPathAS[client->pathIdx + 1]];
 		}
 		else
 		{
