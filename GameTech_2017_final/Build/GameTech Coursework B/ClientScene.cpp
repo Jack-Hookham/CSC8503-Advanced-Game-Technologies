@@ -138,15 +138,16 @@ void ClientScene::OnUpdateScene(float dt)
 	NCLDebug::AddStatusEntry(status_color, "Clients Connected: %d", clientsConnected);
 	NCLDebug::AddStatusEntry(status_color, "Network Traffic");
 	NCLDebug::AddStatusEntry(status_color, "    Incoming: %5.2fKbps", network.m_IncomingKb);
-	NCLDebug::AddStatusEntry(status_color, "    Outgoing: %5.2fKbps", network.m_OutgoingKb);		
+	NCLDebug::AddStatusEntry(status_color, "    Outgoing: %5.2fKbps", network.m_OutgoingKb);
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "");
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "--- Controls ---");
-	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   [G] To generate a new maze", mazeSize);
-	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Grid Size : %2d ([1]/[2] to change)", mazeSize);
-	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Density : %2.0f percent ([3]/[4] to change)", mazeDensity * 100.f);
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Generate New Maze [G]", mazeSize);
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Draw Path : %s [H] to toggle)", wantToDrawPath ? "On" : "Off");
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Spawn Avatar [J]");
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Move Avatar : %s [K] to toggle)", isMove ? "On" : "Off");
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   String Pulling : %s [L] to toggle)", useStringPulling ? "On" : "Off");
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Grid Size : %2d ([1]/[2] to change)", mazeSize);
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Density : %2.0f percent ([3]/[4] to change)", mazeDensity * 100.f);
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "");
 
 	NCLDebug::AddStatusEntry(Vector4(status_color), "--- Debug ---");
@@ -436,7 +437,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				int id = std::stoi(packetData);
 				if (id != clientID)
 				{
-					Vector3 avatarPos = Vector3((16.5f + id % 4) * 3.0f, 0.0f, (0.0f + id / 4) * 3.0f) * mazeScalarf;
+					Vector3 avatarPos = Vector3((16.5f + id % 4) * 3.0f, 0.0f, (-5.0f + id / 4) * 3.0f) * mazeScalarf;
 					clientRnodes[id]->SetTransform(mazeScalarMat4 * Matrix4::Translation(avatarPos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
 					clientGameObjs[id]->SetRender(clientRnodes[id]);
 				}
@@ -447,7 +448,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				int id = std::stoi(packetData);
 				if (id != clientID)
 				{
-					Vector3 avatarPos = Vector3((16.5f + id % 4) * 3.0f, 0.0f, (0.0f + id / 4) * 3.0f) * mazeScalarf;
+					Vector3 avatarPos = Vector3((16.5f + id % 4) * 3.0f, 0.0f, (-5.0f + id / 4) * 3.0f) * mazeScalarf;
 					clientRnodes[id]->SetTransform(mazeScalarMat4 * Matrix4::Translation(avatarPos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
 					GraphicsPipeline::Instance()->RemoveRenderNode(clientGameObjs[id]->Render());
 					clientGameObjs[id]->SetRenderNode(NULL);
@@ -527,8 +528,8 @@ void ClientScene::GenerateNewMaze()
 	//Create Ground (..we still have some common ground to work off)
 	GameObject* ground = CommonUtils::BuildCuboidObject(
 		"Ground",
-		Vector3(0.7f, -0.2f, 0.0f),
-		Vector3(3.3f, 0.2f, 2.6f),
+		Vector3(0.7f, -0.2f, -0.7f),
+		Vector3(3.3f, 0.2f, 3.3),
 		false,
 		0.0f,
 		false,
@@ -555,7 +556,7 @@ void ClientScene::GenerateNewMaze()
 		//Other client render nodes are added to their game objects when they are connected and told to follow their path
 		for (int i = 0; i < MAX_CLIENTS; ++i)
 		{
-			Vector3 avatarPos = Vector3((16.5f + i % 4) * 3.0f, 0.0f, (0.0f + i / 4) * 3.0f) * mazeScalarf;
+			Vector3 avatarPos = Vector3((16.5f + i % 4) * 3.0f, 0.0f, (-4.0f + i / 4) * 3.0f) * mazeScalarf;
 			if (i == clientID)
 			{
 				clientRnodes[i] = new RenderNode(wallMesh, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
@@ -811,13 +812,12 @@ void ClientScene::RequestPath()
 
 void ClientScene::DrawPath(const std::vector<int>& finalPath, float lineWidth)
 {
-	if (finalPath.size() > 0)
+	if (finalPath.size() > 0 && sizeof(mazeGenerator->GetAllNodesArr()) / sizeof(GraphNode*) <= finalPath.size())
 	{
 		float grid_scalar = 1.0f / (float)mazeGenerator->GetSize();
 		float col_factor = 1.0f / (float)finalPath.size();
 
 		Matrix4 transform = mazeRenderer->Render()->GetWorldTransform();
-		mazeGenerator->GetAllNodesArr();
 
 		for (int i = 0; i < finalPath.size() - 1; ++i)
 		{

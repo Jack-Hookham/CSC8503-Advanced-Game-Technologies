@@ -16,7 +16,7 @@
 #include "MazeGenerator.h"
 #include "MazeRenderer.h"
 
-#define MAX_MAZE_SIZE 50
+#define MAX_MAZE_SIZE 30
 
 const Vector3 pos_maze = Vector3(0.0f, 0.0f, 0.0f);
 

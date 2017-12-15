@@ -145,7 +145,7 @@
   <ItemGroup>
     <ClCompile Include="BallPoolScene.cpp" />
     <ClCompile Include="ConstraintsScene.cpp" />
-    <ClCompile Include="EmptyScene.cpp" />
+    <ClCompile Include="NewtonsCradleScene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SandboxScene.cpp" />
     <ClCompile Include="ScoreScene.cpp" />
@@ -157,7 +157,7 @@
     <ClInclude Include="CudaCollidingParticles.cuh" />
     <ClInclude Include="CudaCommon.cuh" />
     <ClInclude Include="CudaParticles.cuh" />
-    <ClInclude Include="EmptyScene.h" />
+    <ClInclude Include="NewtonsCradleScene.h" />
     <ClInclude Include="helper_math.h" />
     <ClInclude Include="PyramidScene.h" />
     <ClInclude Include="RenderNodeParticles.h" />

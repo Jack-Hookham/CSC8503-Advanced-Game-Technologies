@@ -2,11 +2,11 @@
 
 #include <ncltech\Scene.h>
 
-class ConstraintsScene : public Scene
+class NewtonsCradleScene : public Scene
 {
 public:
-	ConstraintsScene(const std::string& friendly_name);
-	virtual ~ConstraintsScene();
+	NewtonsCradleScene(const std::string& friendly_name);
+	virtual ~NewtonsCradleScene();
 
 	virtual void OnInitializeScene()	 override;
 	virtual void OnCleanupScene()		 override;

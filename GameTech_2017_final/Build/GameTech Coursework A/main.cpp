@@ -14,7 +14,7 @@
 #include "SandboxScene.h"
 #include "PyramidScene.h"
 #include "ScoreScene.h"
-#include "EmptyScene.h"
+#include "NewtonsCradleScene.h"
 #include "BallPoolScene.h"
 #include "ConstraintsScene.h"
 #include "SoftBodyScene.h"
@@ -23,6 +23,7 @@
 const Vector4 status_colour = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 const Vector4 status_colour_header = Vector4(0.8f, 0.9f, 1.0f, 1.0f);
 const Vector4 status_color_debug = Vector4(1.0f, 0.6f, 1.0f, 1.0f);
+const Vector4 status_color_performance = Vector4(1.0f, 0.6f, 0.6f, 1.0f);
 
 bool draw_debug = false;
 bool show_perf_metrics = false;
@@ -34,7 +35,7 @@ void Quit(bool error = false, const string &reason = "");
 void Initialize()
 {
 	//Initialise the Window
-	if (!Window::Initialise("Game Technologies - Real Time Physics and GPU computation", 1280, 800, false))
+	if (!Window::Initialise("Game Technologies - Real Time Physics and GPU computation", 1920, 1080, false))
 		Quit(true, "Window failed to initialise!");
 
 	//Initialise the PhysicsEngine
@@ -46,12 +47,13 @@ void Initialize()
 	SceneManager::Instance();	//Loads CommonMeshes in here (So everything after this can use them globally e.g. our scenes)
 
 	//Enqueue All Scenes
-	SceneManager::Instance()->EnqueueScene(new PyramidScene("GameTech #1 - Pyramid"));
-	SceneManager::Instance()->EnqueueScene(new SandboxScene("GameTech #2 - Pyramid"));
+	SceneManager::Instance()->EnqueueScene(new NewtonsCradleScene("GameTech #1 - Newton's Cradle"));
+	SceneManager::Instance()->EnqueueScene(new PyramidScene("GameTech #2 - Pyramid"));
+	SceneManager::Instance()->EnqueueScene(new SandboxScene("GameTech #3 - Sandbox"));
 	SceneManager::Instance()->EnqueueScene(new BallPoolScene("GameTech #4 - Ball Pool"));
-	SceneManager::Instance()->EnqueueScene(new Scene_CollisionHandling("GameTech #4 - Ball Pool GPU acceleration"));
-	SceneManager::Instance()->EnqueueScene(new ScoreScene("GameTech #5 - Projectile Game"));
-	SceneManager::Instance()->EnqueueScene(new SoftBodyScene("GameTech #6 - Soft Body"));
+	SceneManager::Instance()->EnqueueScene(new Scene_CollisionHandling("GameTech #5 - Ball Pool GPU acceleration"));
+	SceneManager::Instance()->EnqueueScene(new ScoreScene("GameTech #6 - Projectile Game"));
+	SceneManager::Instance()->EnqueueScene(new SoftBodyScene("GameTech #7 - Soft Body"));
 
 	GraphicsPipeline::Instance()->SetVsyncEnabled(true);
 }
@@ -135,13 +137,14 @@ void PrintStatusEntries()
 	NCLDebug::AddStatusEntry(status_colour, "");
 
 	//Print Performance Timers
-	NCLDebug::AddStatusEntry(status_colour, "--- FPS: %5.2f  Performance Info [H] ---", 1000.f / timer_total.GetAvg(), show_perf_metrics ? "less" : "more");
+	NCLDebug::AddStatusEntry(status_color_performance, "--- FPS: %5.2f  Performance Info [H] ---", 1000.f / timer_total.GetAvg(), show_perf_metrics ? "less" : "more");
 	if (show_perf_metrics)
 	{
-		timer_total.PrintOutputToStatusEntry(status_colour, " Total Time     :");
-		timer_update.PrintOutputToStatusEntry(status_colour, " Scene Update   :");
-		timer_physics.PrintOutputToStatusEntry(status_colour, " Physics Update :");
-		timer_render.PrintOutputToStatusEntry(status_colour, " Render Scene   :");
+		timer_total.PrintOutputToStatusEntry(status_color_performance, " Total Time     :");
+		timer_update.PrintOutputToStatusEntry(status_color_performance, " Scene Update   :");
+		timer_physics.PrintOutputToStatusEntry(status_color_performance, " Physics Update :");
+		PhysicsEngine::Instance()->PrintPerformanceTimers(status_color_performance);
+		timer_render.PrintOutputToStatusEntry(status_color_performance, " Render Scene   :");
 	}
 	NCLDebug::AddStatusEntry(status_colour, "");
 }

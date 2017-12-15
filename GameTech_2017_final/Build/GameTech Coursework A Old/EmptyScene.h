@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ncltech\Scene.h>
+#include <ncltech\CuboidCollisionShape.h>
 
 class EmptyScene : public Scene
 {

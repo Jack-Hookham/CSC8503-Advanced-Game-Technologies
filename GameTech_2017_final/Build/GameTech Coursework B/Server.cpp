@@ -326,6 +326,7 @@ void Server::RunServer()
 							{
 								std::cout << "Couldn't update movement bool for Client " << clientID << ". Data wasn't an integer.\n";
 							}
+							break;
 						}
 						case PacketType::PACKET_USE_STRING_PULLING:
 						{
@@ -337,6 +338,7 @@ void Server::RunServer()
 							{
 								std::cout << "Couldn't string pulling bool for Client " << clientID << ". Data wasn't an integer.\n";
 							}
+							break;
 						}
 						default:
 						{
