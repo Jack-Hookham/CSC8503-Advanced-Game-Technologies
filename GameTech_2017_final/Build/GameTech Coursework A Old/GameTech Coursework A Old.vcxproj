@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{E7355288-7C07-4690-B9BA-16370020B69A}</ProjectGuid>
+    <ProjectGuid>{17A91B42-A5E7-4F96-95F5-D81D84C6641E}</ProjectGuid>
     <RootNamespace>GameTechCoursework</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
     <ProjectName>GameTech Coursework A Old</ProjectName>

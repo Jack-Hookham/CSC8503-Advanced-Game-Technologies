@@ -90,10 +90,6 @@ void SoftBodyScene::OnCleanupScene()
 void SoftBodyScene::OnUpdateScene(float dt)
 {
 	m_AccumTime += dt;
-
-	// You can print text using 'printf' formatting
-	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.4f, 0.4f, 1.0f), "   - Left click to move");
-	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.4f, 0.4f, 1.0f), "   - Right click to rotate (They will be more spinnable after tutorial 2)");
 }
 
 void SoftBodyScene::InitTextures()

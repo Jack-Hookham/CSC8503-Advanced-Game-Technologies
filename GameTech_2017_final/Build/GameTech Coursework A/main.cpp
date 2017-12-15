@@ -46,11 +46,12 @@ void Initialize()
 	SceneManager::Instance();	//Loads CommonMeshes in here (So everything after this can use them globally e.g. our scenes)
 
 	//Enqueue All Scenes
-	SceneManager::Instance()->EnqueueScene(new SoftBodyScene("GameTech #2 - Soft Body"));
-	SceneManager::Instance()->EnqueueScene(new PyramidScene("GameTech #2 - Pyramid"));
-	SceneManager::Instance()->EnqueueScene(new ScoreScene("GameTech #3 - Projectile Game"));
+	SceneManager::Instance()->EnqueueScene(new PyramidScene("GameTech #1 - Pyramid"));
+	SceneManager::Instance()->EnqueueScene(new SandboxScene("GameTech #2 - Pyramid"));
 	SceneManager::Instance()->EnqueueScene(new BallPoolScene("GameTech #4 - Ball Pool"));
-	SceneManager::Instance()->EnqueueScene(new Scene_CollisionHandling("GameTech #5 - Ball Pool GPU acceleration"));
+	SceneManager::Instance()->EnqueueScene(new Scene_CollisionHandling("GameTech #4 - Ball Pool GPU acceleration"));
+	SceneManager::Instance()->EnqueueScene(new ScoreScene("GameTech #5 - Projectile Game"));
+	SceneManager::Instance()->EnqueueScene(new SoftBodyScene("GameTech #6 - Soft Body"));
 
 	GraphicsPipeline::Instance()->SetVsyncEnabled(true);
 }
@@ -102,51 +103,48 @@ void PrintStatusEntries()
 		SceneManager::Instance()->GetCurrentScene()->GetSceneName().c_str()
 	);
 
-	timer_total.PrintOutputToStatusEntry(status_colour, "Frame Time: ");
-
 	//Print Engine Options
-	NCLDebug::AddStatusEntry(status_colour_header, "NCLTech Settings");
-	NCLDebug::AddStatusEntry(status_colour, "     Physics Engine: %s (Press P to toggle)", PhysicsEngine::Instance()->IsPaused() ? "Paused  " : "Enabled ");
-	NCLDebug::AddStatusEntry(status_colour, "     Monitor V-Sync: %s (Press L to toggle)", GraphicsPipeline::Instance()->GetVsyncEnabled() ? "Enabled " : "Disabled");
-	NCLDebug::AddStatusEntry(status_colour, "     Camera Speed: %f [- +]", GraphicsPipeline::Instance()->GetCamera()->GetSpeed());
-	NCLDebug::AddStatusEntry(status_colour, "     Use Octree        : %s [U]", (PhysicsEngine::Instance()->UsingOctrees()) ? "Enabled " : "Disabled");
-	NCLDebug::AddStatusEntry(status_colour, "     Use SphereSphere  : %s [I]", (PhysicsEngine::Instance()->UsingSphereSphere()) ? "Enabled " : "Disabled");
-
-	NCLDebug::AddStatusEntry(Vector4(1.0f, 1.0f, 1.0f, 1.0f), "Sphere Sphere Checks    : %d", PhysicsEngine::Instance()->GetNumSphereSphereChecks());
-	NCLDebug::AddStatusEntry(Vector4(1.0f, 1.0f, 1.0f, 1.0f), "Broadphase pairs        : %d", PhysicsEngine::Instance()->GetBroadphaseColPairs().size());
-
-	std::ostringstream oss;
-	oss << std::fixed << std::setprecision(2) << GraphicsPipeline::Instance()->GetCamera()->GetPosition();
-	std::string s = "Camera Position: " + oss.str();
-	NCLDebug::AddStatusEntry(status_colour, s);
+	NCLDebug::AddStatusEntry(status_colour_header, "--- NCLTech Settings ---");
+	NCLDebug::AddStatusEntry(status_colour_header, "     Physics Engine: %s (Press P to toggle)", PhysicsEngine::Instance()->IsPaused() ? "Paused  " : "Enabled ");
+	NCLDebug::AddStatusEntry(status_colour_header, "     Monitor V-Sync: %s (Press L to toggle)", GraphicsPipeline::Instance()->GetVsyncEnabled() ? "Enabled " : "Disabled");
+	NCLDebug::AddStatusEntry(status_colour_header, "     Camera Speed: %f [- +]", GraphicsPipeline::Instance()->GetCamera()->GetSpeed());
 
 	//Print debug info
 	uint drawFlags = PhysicsEngine::Instance()->GetDebugDrawFlags();
+	NCLDebug::AddStatusEntry(status_color_debug, "");
 	NCLDebug::AddStatusEntry(status_color_debug, "--- Debug Info  [G] ---");
 	if (draw_debug)
 	{
-		NCLDebug::AddStatusEntry(status_color_debug, "Constraints       : %s [Z]", (drawFlags & DEBUGDRAW_FLAGS_CONSTRAINT) ? "Enabled " : "Disabled");
-		NCLDebug::AddStatusEntry(status_color_debug, "Collision Normals : %s [X]", (drawFlags & DEBUGDRAW_FLAGS_COLLISIONNORMALS) ? "Enabled " : "Disabled");
-		NCLDebug::AddStatusEntry(status_color_debug, "Collision Volumes : %s [C]", (drawFlags & DEBUGDRAW_FLAGS_COLLISIONVOLUMES) ? "Enabled " : "Disabled");
-		NCLDebug::AddStatusEntry(status_color_debug, "Manifolds         : %s [V]", (drawFlags & DEBUGDRAW_FLAGS_MANIFOLD) ? "Enabled " : "Disabled");
-		NCLDebug::AddStatusEntry(status_color_debug, "Draw Octree       : %s [O]", (drawFlags & DEBUGDRAW_FLAGS_OCTREE) ? "Enabled " : "Disabled");
-		NCLDebug::AddStatusEntry(status_color_debug, "Bounding Radius   : %s [B]", (drawFlags & DEBUGDRAW_FLAGS_BOUNDINGRADIUS) ? "Enabled " : "Disabled");
+		NCLDebug::AddStatusEntry(status_color_debug, " Constraints       : %s [Z]", (drawFlags & DEBUGDRAW_FLAGS_CONSTRAINT) ? "Enabled " : "Disabled");
+		NCLDebug::AddStatusEntry(status_color_debug, " Collision Normals : %s [X]", (drawFlags & DEBUGDRAW_FLAGS_COLLISIONNORMALS) ? "Enabled " : "Disabled");
+		NCLDebug::AddStatusEntry(status_color_debug, " Collision Volumes : %s [C]", (drawFlags & DEBUGDRAW_FLAGS_COLLISIONVOLUMES) ? "Enabled " : "Disabled");
+		NCLDebug::AddStatusEntry(status_color_debug, " Manifolds         : %s [V]", (drawFlags & DEBUGDRAW_FLAGS_MANIFOLD) ? "Enabled " : "Disabled");
+		NCLDebug::AddStatusEntry(status_color_debug, " Draw Octree       : %s [O]", (drawFlags & DEBUGDRAW_FLAGS_OCTREE) ? "Enabled " : "Disabled");
+		NCLDebug::AddStatusEntry(status_color_debug, " Bounding Radius   : %s [B]", (drawFlags & DEBUGDRAW_FLAGS_BOUNDINGRADIUS) ? "Enabled " : "Disabled");
+		NCLDebug::AddStatusEntry(status_color_debug, " Use Octree        : %s [U]", (PhysicsEngine::Instance()->UsingOctrees()) ? "Enabled " : "Disabled");
+		NCLDebug::AddStatusEntry(status_color_debug, " Use SphereSphere  : %s [I]", (PhysicsEngine::Instance()->UsingSphereSphere()) ? "Enabled " : "Disabled");
+		NCLDebug::AddStatusEntry(status_color_debug, "");
+		NCLDebug::AddStatusEntry(status_color_debug, " Sphere Sphere Checks    : %d", PhysicsEngine::Instance()->GetNumSphereSphereChecks());
+		NCLDebug::AddStatusEntry(status_color_debug, " Broadphase pairs        : %d", PhysicsEngine::Instance()->GetBroadphaseColPairs().size());
+		std::ostringstream oss;
+		oss << std::fixed << std::setprecision(2) << GraphicsPipeline::Instance()->GetCamera()->GetPosition();
+		std::string s = " Camera Position: " + oss.str();
+		NCLDebug::AddStatusEntry(status_color_debug, s);
 		NCLDebug::AddStatusEntry(status_color_debug, "");
 	}
 	NCLDebug::AddStatusEntry(status_colour, "");
 
 	//Print Performance Timers
-	NCLDebug::AddStatusEntry(status_colour, "FPS: %5.2f  (Press H for %s info)", 1000.f / timer_total.GetAvg(), show_perf_metrics ? "less" : "more");
+	NCLDebug::AddStatusEntry(status_colour, "--- FPS: %5.2f  Performance Info [H] ---", 1000.f / timer_total.GetAvg(), show_perf_metrics ? "less" : "more");
 	if (show_perf_metrics)
 	{
-		timer_total.PrintOutputToStatusEntry(status_colour, "          Total Time     :");
-		timer_update.PrintOutputToStatusEntry(status_colour, "          Scene Update   :");
-		timer_physics.PrintOutputToStatusEntry(status_colour, "          Physics Update :");
-		timer_render.PrintOutputToStatusEntry(status_colour, "          Render Scene   :");
+		timer_total.PrintOutputToStatusEntry(status_colour, " Total Time     :");
+		timer_update.PrintOutputToStatusEntry(status_colour, " Scene Update   :");
+		timer_physics.PrintOutputToStatusEntry(status_colour, " Physics Update :");
+		timer_render.PrintOutputToStatusEntry(status_colour, " Render Scene   :");
 	}
 	NCLDebug::AddStatusEntry(status_colour, "");
 }
-
 
 void HandleKeyboardInputs()
 {
@@ -197,11 +195,6 @@ void HandleKeyboardInputs()
 
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_I))
 		PhysicsEngine::Instance()->ToggleSphereSphere();
-
-	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_M))
-	{
-		GraphicsPipeline::Instance()->ResetCamera();
-	}
 
 	//Fire sphere
 	if (Window::GetKeyboard()->KeyTriggered(KEYBOARD_J))
@@ -277,28 +270,39 @@ int main()
 	//Create main game-loop
 	while (Window::GetWindow().UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE))
 	{
-		//Start Timing
 		float dt = Window::GetWindow().GetTimer()->GetTimedMS() * 0.001f;	//How many milliseconds since last update?
-		timer_total.UpdateRealElapsedTime(dt);
 
-		timer_total.BeginTimingSection();
+		timer_total.UpdateRealElapsedTime(dt);
+		timer_physics.UpdateRealElapsedTime(dt);
+		timer_update.UpdateRealElapsedTime(dt);
+		timer_render.UpdateRealElapsedTime(dt);
+
 		//Print Status Entries
 		PrintStatusEntries();
 
 		//Handle Keyboard Inputs
 		HandleKeyboardInputs();
 
+		//Start Timing
+		timer_total.BeginTimingSection();
+
 		//Update Scene
+		timer_update.BeginTimingSection();
 		SceneManager::Instance()->GetCurrentScene()->FireOnSceneUpdate(dt);
+		timer_update.EndTimingSection();
 
 		//Update Physics
+		timer_physics.BeginTimingSection();
 		PhysicsEngine::Instance()->Update(dt);
+		timer_physics.EndTimingSection();
 		PhysicsEngine::Instance()->DebugRender();
 
 		//Render Scene
-
+		timer_render.BeginTimingSection();
 		GraphicsPipeline::Instance()->UpdateScene(dt);
 		GraphicsPipeline::Instance()->RenderScene();
+		timer_render.EndTimingSection();
+
 		timer_total.EndTimingSection();
 	}
 

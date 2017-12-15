@@ -24,12 +24,22 @@ public:
 
 	}
 
-
 	virtual void OnInitializeScene() override
 	{
+		srand(time(0));
+
+		GraphicsPipeline::Instance()->GetCamera()->SetPosition(Vector3(-7.0f, 15.0f, 7.0f));
+		GraphicsPipeline::Instance()->GetCamera()->SetYaw(-45.0f);
+		GraphicsPipeline::Instance()->GetCamera()->SetPitch(-45.0f);
+
 		//<--- SCENE CREATION --->
 		//Create Ground
-		this->AddGameObject(BuildCuboidObject("Ground", Vector3(0.0f, -1.0f, 0.0f), Vector3(20.0f, 1.0f, 20.0f), true, 0.0f, true, false, Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
+		this->AddGameObject(BuildCuboidObject("Ground", Vector3(0.0f, -1.0f, 0.0f), Vector3(9.6f, 1.0f, 9.6f), true, 0.0f, true, false, Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
+		this->AddGameObject(BuildCuboidObject("Wall1", Vector3(10.6f, -1.0f, 0.0f), Vector3(1.0f, 10.6f, 10.6f), true, 0.0f, true, false, Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
+		this->AddGameObject(BuildCuboidObject("Wall2", Vector3(-10.6f, -1.0f, 0.0f), Vector3(1.0f, 10.6f, 10.6f), true, 0.0f, true, false, Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
+		this->AddGameObject(BuildCuboidObject("Wall3", Vector3(0.0f, -1.0f, 10.6f), Vector3(10.6f, 10.6f, 1.0f), true, 0.0f, true, false, Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
+		this->AddGameObject(BuildCuboidObject("Wall4", Vector3(0.0f, -1.0f, -10.6f), Vector3(10.6f, 10.6f, 1.0f), true, 0.0f, true, false, Vector4(0.2f, 0.5f, 1.0f, 1.0f)));
+
 		GameObject* sphere1 = BuildSphereObject("Sphere1",
 			Vector3(0.0f, 10.0f, 0.0f),
 			0.5f,
@@ -37,7 +47,7 @@ public:
 			1.0f,
 			true,
 			true,
-			Vector4(1.0f, 0.5f, 0.5f, 1.0f));
+			Vector4(CommonUtils::GenColor(RAND())));
 		this->AddGameObject(sphere1);
 		AddBallToCPUList(sphere1);
 
@@ -74,11 +84,6 @@ public:
 
 	virtual void OnUpdateScene(float dt) override
 	{
-		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "--- Info ---");
-		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "  Example broadphase using cuda thrust library. The thrust library");
-		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "  is the GPU equivalent of the C++ STL and makes things easier ");
-		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "  with vector's, sorting, iterators and array manipulation.");
-		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "");
 		NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "  No. Particles: %d", cudaParticleProg->GetNumParticles());
 
 		for (int i = 0; i < cpuBalls.size(); ++i)

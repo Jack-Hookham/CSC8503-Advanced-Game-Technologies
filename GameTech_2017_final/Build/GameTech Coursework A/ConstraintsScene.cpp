@@ -122,14 +122,4 @@ void ConstraintsScene::OnCleanupScene()
 void ConstraintsScene::OnUpdateScene(float dt)
 {
 	m_AccumTime += dt;
-
-	// You can add status entries to the top left from anywhere in the program
-	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.2f, 0.2f, 1.0f), "Welcome to the Game Tech Framework!");
-	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.4f, 0.4f, 1.0f), "   You can move the black car with the arrow keys");
-
-	// You can print text using 'printf' formatting
-	bool donkeys = false;
-	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.4f, 0.4f, 1.0f), "   The %s in this scene are dragable", donkeys ? "donkeys" : "cubes");
-	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.4f, 0.4f, 1.0f), "   - Left click to move");
-	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.4f, 0.4f, 1.0f), "   - Right click to rotate (They will be more spinnable after tutorial 2)");
 }
