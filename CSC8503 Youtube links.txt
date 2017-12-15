@@ -1,0 +1,10 @@
+Coursework A:
+https://youtu.be/xMizH8Th_UY
+
+Coursework B:
+https://youtu.be/6LFaKO6UtRg
+
+Coursework A must be run in 64 bit
+
+Coursework B must be run in 32 bit
+To run multiple instances of CW B right click the project, select Debug > Start new instance

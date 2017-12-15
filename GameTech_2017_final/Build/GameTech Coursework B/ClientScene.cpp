@@ -44,7 +44,7 @@ void ClientScene::OnInitializeScene()
 	wallMesh->SetTexture(whitetex);
 
 	GraphicsPipeline::Instance()->GetCamera()->SetPosition(Vector3(0.0f, 8.0f, 1.5f));
-	GraphicsPipeline::Instance()->GetCamera()->SetPitch(-80.0f);
+	GraphicsPipeline::Instance()->GetCamera()->SetPitch(-70.0f);
 	GraphicsPipeline::Instance()->GetCamera()->SetYaw(0.0f);
 
 	mazeGenerator = new MazeGenerator();
@@ -148,6 +148,8 @@ void ClientScene::OnUpdateScene(float dt)
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   String Pulling : %s [L] to toggle)", useStringPulling ? "On" : "Off");
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Grid Size : %2d ([1]/[2] to change)", mazeSize);
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Density : %2.0f percent ([3]/[4] to change)", mazeDensity * 100.f);
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Move Start Node [Arrow Keys]");
+	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "   Move End Node [CTRL + Arrow Keys]");
 	NCLDebug::AddStatusEntry(Vector4(1.0f, 0.9f, 0.8f, 1.0f), "");
 
 	NCLDebug::AddStatusEntry(Vector4(status_color), "--- Debug ---");
@@ -437,7 +439,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				int id = std::stoi(packetData);
 				if (id != clientID)
 				{
-					Vector3 avatarPos = Vector3((16.5f + id % 4) * 3.0f, 0.0f, (-5.0f + id / 4) * 3.0f) * mazeScalarf;
+					Vector3 avatarPos = Vector3((16.5f + id % 4) * 3.0f, 0.0f, (-4.0f + id / 4) * 3.0f) * mazeScalarf;
 					clientRnodes[id]->SetTransform(mazeScalarMat4 * Matrix4::Translation(avatarPos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
 					clientGameObjs[id]->SetRender(clientRnodes[id]);
 				}
@@ -448,7 +450,7 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				int id = std::stoi(packetData);
 				if (id != clientID)
 				{
-					Vector3 avatarPos = Vector3((16.5f + id % 4) * 3.0f, 0.0f, (-5.0f + id / 4) * 3.0f) * mazeScalarf;
+					Vector3 avatarPos = Vector3((16.5f + id % 4) * 3.0f, 0.0f, (-4.0f + id / 4) * 3.0f) * mazeScalarf;
 					clientRnodes[id]->SetTransform(mazeScalarMat4 * Matrix4::Translation(avatarPos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
 					GraphicsPipeline::Instance()->RemoveRenderNode(clientGameObjs[id]->Render());
 					clientGameObjs[id]->SetRenderNode(NULL);
