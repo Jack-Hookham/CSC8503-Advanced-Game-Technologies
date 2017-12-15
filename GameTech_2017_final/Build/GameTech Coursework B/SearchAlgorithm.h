@@ -63,35 +63,85 @@ public:
 
 			//Add the first node to the path
 			newPath.push_back(*(finalPath.begin()));
-			auto prev = finalPath.begin();
-			++prev;
-			auto next = prev;
-			++next;
 
-			for (auto it = finalPath.begin(); it != finalPath.end() && next != finalPath.end();)
+			//Set up previous node and next nodes
+			auto currentNode = std::next(finalPath.begin());
+			auto nextNode = std::next(currentNode);
+
+			//Iterate through all the nodes in the old final path
+			for (auto it = finalPath.begin(); it != finalPath.end() && nextNode != finalPath.end();)
 			{
-				Vector3 posI = (*it)->_pos;
-				Vector3 posNext = (*next)->_pos;
-				Vector3 dir = posI - posNext;
-				if (!IsOrthogonal(dir))
+				Vector3 direction = Vector3();
+				direction.x = (*it)->_pos.x - (*nextNode)->_pos.x;
+				direction.z = (*it)->_pos.y - (*nextNode)->_pos.y;
+
+				//The avatar only moves along the x and y axis (in maze space, this is translated to x and z in world space)
+				float dot = Vector3::Dot(direction.Normalise(), Vector3(1, 0, 0));
+				//https://stackoverflow.com/questions/15313808/how-to-check-if-float-is-a-whole-number
+				float x = std::fabs(dot - std::round(dot));
+				dot = std::fabs(dot - std::round(dot));
+				if (dot > 0.000001f)
 				{
-					newPath.push_back(*prev);
-					it = prev;
+					newPath.push_back(*currentNode);
+					it = currentNode;
 				}
 				else
 				{
-					++prev;
-					++next;
+					++currentNode;
+					++nextNode;
 				}
 			}
 
 			//Add the end position to the new path
-			newPath.push_back(*--finalPath.end());
+			newPath.push_back(*std::prev(finalPath.end()));
 
 			//Update the final path with the new path
 			finalPath.clear();
 			finalPath.assign(newPath.begin(), newPath.end());
 		}
+
+		////No point string pulling if the path size is 2 or less
+		//if (finalPath.size() > 2)
+		//{
+		//	//Store the new path nodes so that they can be added back into the final path at the end
+		//	std::vector<const GraphNode*> newPath;
+
+		//	//Add the first node to the path
+		//	newPath.push_back(*(finalPath.begin()));
+
+		//	//Set up previous node and next nodes
+		//	auto currentNode = ++finalPath.begin();
+		//	auto nextNode = ++currentNode;
+
+		//	//Iterate through 
+		//	for (auto it = finalPath.begin(); it != finalPath.end() && nextNode != finalPath.end();)
+		//	{
+		//		Vector3 direction = Vector3();
+		//		direction.x = (*nextNode)->_pos.x - (*currentNode)->_pos.x;
+		//		direction.z = (*nextNode)->_pos.y - (*currentNode)->_pos.y;
+
+		//		//The avatar only moves along the x and y axis (in maze space, this is translated to x and z in world space)
+		//		//Dot product of normalised direction and x axis should be 1, -1 or 0
+		//		float dot = Vector3::Dot(direction.Normalise(), Vector3(1, 0, 0));
+		//		dot = std::fabs(dot - std::round(dot));
+		//		if ((dot < 1.000001f && dot > 0.999999f) || (dot > 0.000001f))
+		//		{
+		//			newPath.push_back(*currentNode);
+		//			it = currentNode;
+		//		}
+		//		else
+		//		{
+		//			++currentNode;
+		//			++nextNode;
+		//		}
+		//	}
+
+		//	//Add the end position to the new path
+		//	newPath.push_back(*--finalPath.end());
+
+		//	//Update the final path with the new path
+		//	finalPath.clear();
+		//	finalPath.assign(newPath.begin(), newPath.end());
 	}
 
 	//Returns true/false on whether or not a path could be found
@@ -111,13 +161,6 @@ protected:
 			finalPath.push_front(current);
 			current = map.at(current);
 		}
-	}
-
-	bool IsOrthogonal(Vector3 dir)
-	{
-		float dot = Vector3::Dot(dir.Normalise(), Vector3(1, 0, 0));
-
-		return dot == 1 || dot == 0 || dot == -1;
 	}
 
 protected:
