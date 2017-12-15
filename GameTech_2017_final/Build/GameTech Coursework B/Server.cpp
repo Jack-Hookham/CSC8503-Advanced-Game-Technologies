@@ -358,6 +358,7 @@ void Server::RunServer()
 					SendPacketToClients(clientDisonnectPacket);
 
 					PhysicsEngine::Instance()->RemovePhysicsObject(clients[evnt.peer->incomingPeerID]->avatarPnode);
+					clients[evnt.peer->incomingPeerID]->avatarPnode = NULL;
 					SAFE_DELETE(clients[evnt.peer->incomingPeerID]);
 					printf("- Client %d has disconnected.\n", evnt.peer->incomingPeerID);
 					break;

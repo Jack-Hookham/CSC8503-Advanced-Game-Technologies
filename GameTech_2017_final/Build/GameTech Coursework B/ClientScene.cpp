@@ -434,6 +434,8 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				int id = std::stoi(packetData);
 				if (id != clientID)
 				{
+					Vector3 avatarPos = Vector3((16.5f + id % 4) * 3.0f, 0.0f, (0.0f + id / 4) * 3.0f) * mazeScalarf;
+					clientRnodes[id]->SetTransform(mazeScalarMat4 * Matrix4::Translation(avatarPos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
 					clientGameObjs[id]->SetRender(clientRnodes[id]);
 				}
 				break;
@@ -443,6 +445,8 @@ void ClientScene::ProcessNetworkEvent(const ENetEvent& evnt)
 				int id = std::stoi(packetData);
 				if (id != clientID)
 				{
+					Vector3 avatarPos = Vector3((16.5f + id % 4) * 3.0f, 0.0f, (0.0f + id / 4) * 3.0f) * mazeScalarf;
+					clientRnodes[id]->SetTransform(mazeScalarMat4 * Matrix4::Translation(avatarPos + cellsize * 0.5f) * Matrix4::Scale(avatarSize * 0.5f));
 					GraphicsPipeline::Instance()->RemoveRenderNode(clientGameObjs[id]->Render());
 					clientGameObjs[id]->SetRenderNode(NULL);
 				}
@@ -515,11 +519,14 @@ void ClientScene::GenerateNewMaze()
 	mazeRenderer->Render()->SetTransform(Matrix4::Translation(pos_maze) * mazeScalarMat4);
 	this->AddGameObject(mazeRenderer);
 
+	uint flatMazeSize = mazeSize * 3 - 1;
+	mazeScalarf = 1.0f / (float)flatMazeSize;
+
 	//Create Ground (..we still have some common ground to work off)
 	GameObject* ground = CommonUtils::BuildCuboidObject(
 		"Ground",
-		Vector3(0.0f, -1.0f, 0.0f),
-		Vector3(20.0f, 1.0f, 20.0f),
+		Vector3(0.7f, -0.2f, 0.0f),
+		Vector3(3.3f, 0.2f, 2.6f),
 		false,
 		0.0f,
 		false,
@@ -531,8 +538,6 @@ void ClientScene::GenerateNewMaze()
 	GraphNode* start = mazeGenerator->GetStartNode();
 	GraphNode* end = mazeGenerator->GetEndNode();
 
-	uint flatMazeSize = mazeSize * 3 - 1;
-	mazeScalarf = 1.0f / (float)flatMazeSize;
 
 	avatarSize = Vector3(mazeScalarf * 1.5f, 1.5f, mazeScalarf * 1.5f);
 	cellsize = Vector3(mazeScalarf * 2.0f, 1.0f, mazeScalarf * 2.0f);
@@ -548,7 +553,7 @@ void ClientScene::GenerateNewMaze()
 		//Other client render nodes are added to their game objects when they are connected and told to follow their path
 		for (int i = 0; i < MAX_CLIENTS; ++i)
 		{
-			Vector3 avatarPos = Vector3((-5.0f + i % 4) * 3.0f, 0.0f, (0.0f + i / 4) * 3.0f) * mazeScalarf;
+			Vector3 avatarPos = Vector3((16.5f + i % 4) * 3.0f, 0.0f, (0.0f + i / 4) * 3.0f) * mazeScalarf;
 			if (i == clientID)
 			{
 				clientRnodes[i] = new RenderNode(wallMesh, Vector4(0.0f, 0.0f, 1.0f, 1.0f));
