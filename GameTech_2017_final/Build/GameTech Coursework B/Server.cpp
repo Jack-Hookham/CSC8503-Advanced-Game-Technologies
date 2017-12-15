@@ -291,8 +291,8 @@ void Server::RunServer()
 							direction.z = nextNode->_pos.y - currentNode->_pos.y;
 
 							//Set the position and multiply the direction by how far the avatar was previously into its transition between nodes
-							float xPos = mazeGenerator->GetAllNodesArr()[startIdx]._pos.x + direction.x * clients[clientID]->pathTime * 1.0f / AVATAR_SPEED;
-							float yPos = mazeGenerator->GetAllNodesArr()[startIdx]._pos.y + direction.z * clients[clientID]->pathTime * 1.0f / AVATAR_SPEED;
+							float xPos = mazeGenerator->GetAllNodesArr()[startIdx]._pos.x + direction.x * clients[clientID]->pathTime * AVATAR_SPEED;
+							float yPos = mazeGenerator->GetAllNodesArr()[startIdx]._pos.y + direction.z * clients[clientID]->pathTime * AVATAR_SPEED;
 
 							clients[clientID]->avatarPnode->SetPosition(Vector3(xPos, 0.0f, yPos));
 
@@ -497,12 +497,12 @@ void Server::UpdateAvatars(const float dt)
 				clients[i]->pathTime += dt;
 				clients[i]->sendUpdateTime += dt;
 
-				//Update the 
+				//Update each client's avatar index
 				if (clients[i]->pathTime > 1.0f / AVATAR_SPEED)
 				{
 					if (clients[i]->pathIdx < clients[i]->finalPathAS.size() - 1)
 					{
-						clients[i]->pathIdx += (int)(clients[i]->pathTime * 1.0f / AVATAR_SPEED);
+						clients[i]->pathIdx += (int)(clients[i]->pathTime * AVATAR_SPEED);
 					}
 					//Prevent the path index from going out of range
 					if (clients[i]->pathIdx > clients[i]->finalPathAS.size() - 1)

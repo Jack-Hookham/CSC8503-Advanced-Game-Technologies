@@ -10,7 +10,7 @@
 #include "Packet.h"
 
 #define UPDATE_TIMESTEP (1.0f / 30.0f) //send 30 position updates per second
-#define AVATAR_SPEED 1.0f
+#define AVATAR_SPEED 2.0f
 
 struct Client
 {
